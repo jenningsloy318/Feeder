@@ -110,6 +110,7 @@ fun SettingsScreen(
     onNavigateUp: () -> Unit,
     onNavigateToSyncScreen: () -> Unit,
     onNavigateToTextSettingsScreen: () -> Unit,
+    onNavigateToTextSelectionMenuSettingsScreen: () -> Unit,
     settingsViewModel: SettingsViewModel,
     modifier: Modifier = Modifier,
 ) {
@@ -208,6 +209,7 @@ fun SettingsScreen(
             isOpenDrawerOnFab = viewState.isOpenDrawerOnFab,
             onOpenDrawerOnFab = settingsViewModel::setOpenDrawerOnFab,
             onTextSettings = onNavigateToTextSettingsScreen,
+            onTextSelectionMenuSettings = onNavigateToTextSelectionMenuSettingsScreen,
             currentFontSelection = viewState.font,
             onSendFeedback = {
                 activityLauncher.startActivity(
@@ -285,6 +287,7 @@ private fun SettingsScreenPreview() {
             isOpenDrawerOnFab = false,
             onOpenDrawerOnFab = {},
             onTextSettings = {},
+            onTextSelectionMenuSettings = {},
             currentFontSelection = FontSelection.SystemDefault,
             onSendFeedback = {},
             modifier = Modifier,
@@ -354,6 +357,7 @@ fun SettingsList(
     onOpenDrawerOnFab: (Boolean) -> Unit,
     currentFontSelection: FontSelection,
     onTextSettings: () -> Unit,
+    onTextSelectionMenuSettings: () -> Unit,
     onSendFeedback: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -466,6 +470,11 @@ fun SettingsList(
                 currentUiFontOption.name,
                 title = stringResource(R.string.text_settings),
                 onClick = onTextSettings,
+            )
+            ExternalSetting(
+                currentValue = "",
+                title = stringResource(R.string.text_selection_menu_settings),
+                onClick = onTextSelectionMenuSettings,
             )
         }
 

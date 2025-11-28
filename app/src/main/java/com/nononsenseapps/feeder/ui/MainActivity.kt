@@ -31,6 +31,7 @@ import com.nononsenseapps.feeder.ui.compose.navigation.FeedDestination
 import com.nononsenseapps.feeder.ui.compose.navigation.SearchFeedDestination
 import com.nononsenseapps.feeder.ui.compose.navigation.SettingsDestination
 import com.nononsenseapps.feeder.ui.compose.navigation.SyncScreenDestination
+import com.nononsenseapps.feeder.ui.compose.navigation.TextSelectionMenuSettingsDestination
 import com.nononsenseapps.feeder.ui.compose.navigation.TextSettingsDestination
 import com.nononsenseapps.feeder.ui.compose.utils.withAllProviders
 import com.nononsenseapps.feeder.util.updateLeakCanaryNotificationState
@@ -124,6 +125,8 @@ class MainActivity : DIAwareComponentActivity() {
             SyncScreenDestination.register(this, navController, navDrawerListState)
             // Add Fonts
             TextSettingsDestination.register(this, navController, navDrawerListState)
+            // Text Selection Menu Settings
+            TextSelectionMenuSettingsDestination.register(this, navController, navDrawerListState)
         }
 
         DisposableEffect(navController) {

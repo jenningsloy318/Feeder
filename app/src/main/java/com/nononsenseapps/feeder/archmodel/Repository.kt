@@ -339,6 +339,10 @@ class Repository(
 
     fun setOpenDrawerOnFab(value: Boolean) = settingsStore.setOpenDrawerOnFab(value)
 
+    val textMenuConfig = settingsStore.textMenuConfig
+
+    fun setTextMenuConfig(value: TextMenuConfig) = settingsStore.setTextMenuConfig(value)
+
     /**
      * Returns true if the latest sync timestamp is within the last 10 seconds
      */

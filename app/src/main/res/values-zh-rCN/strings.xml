@@ -284,4 +284,21 @@
     <string name="summarize_on_open">打开时总结</string>
     <string name="feed_search_suggestions_header">建议</string>
     <string name="openai_settings_info">兼容众多 AI 提供者，但非全部</string>
+    <!-- Text Selection Menu Settings -->
+    <string name="copy">复制</string>
+    <string name="paste">粘贴</string>
+    <string name="cut">剪切</string>
+    <string name="select_all">全选</string>
+    <string name="text_selection_menu">文本选择菜单</string>
+    <string name="text_selection_menu_settings">文本选择菜单设置</string>
+    <string name="text_selection_menu_description">配置选择文本时显示的菜单项</string>
+    <string name="configured_items_count">已配置 %d 个项目</string>
+    <string name="reset_to_defaults">恢复默认设置</string>
+    <string name="reset_text_menu_confirmation">将文本选择菜单恢复为默认设置？这将还原默认顺序并启用所有项目。</string>
+    <string name="reset">重置</string>
+    <string name="drag_to_reorder">拖动以重新排序</string>
+    <string name="item_enabled">项目已启用</string>
+    <string name="item_disabled">项目已禁用</string>
+    <string name="move_item">移动 %s</string>
+    <string name="text_processor">文本处理器</string>
 </resources>

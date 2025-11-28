@@ -261,4 +261,21 @@
     <string name="unable_to_load_models">無法載入模型。</string>
     <string name="no_models_were_found">沒有找到模型</string>
     <string name="list_of_available_models">可用模型清單</string>
+    <!-- Text Selection Menu Settings -->
+    <string name="copy">複製</string>
+    <string name="paste">貼上</string>
+    <string name="cut">剪下</string>
+    <string name="select_all">全選</string>
+    <string name="text_selection_menu">文字選取選單</string>
+    <string name="text_selection_menu_settings">文字選取選單設定</string>
+    <string name="text_selection_menu_description">配置選取文字時顯示的選單項目</string>
+    <string name="configured_items_count">已配置 %d 個項目</string>
+    <string name="reset_to_defaults">恢復預設設定</string>
+    <string name="reset_text_menu_confirmation">將文字選取選單恢復為預設設定？這將還原預設順序並啟用所有項目。</string>
+    <string name="reset">重設</string>
+    <string name="drag_to_reorder">拖曳以重新排序</string>
+    <string name="item_enabled">項目已啟用</string>
+    <string name="item_disabled">項目已停用</string>
+    <string name="move_item">移動 %s</string>
+    <string name="text_processor">文字處理器</string>
 </resources>

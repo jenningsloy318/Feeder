@@ -266,6 +266,9 @@ dependencies {
     // Markdown
     implementation(libs.jetbrains.markdown)
 
+    // Reorderable for drag-and-drop
+    implementation("sh.calvin.reorderable:reorderable:2.4.0")
+
     // Only for debug
     debugImplementation("com.squareup.leakcanary:leakcanary-android:3.0-alpha-8")
 

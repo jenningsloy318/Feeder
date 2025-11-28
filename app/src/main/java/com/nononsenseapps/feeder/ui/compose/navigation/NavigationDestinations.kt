@@ -31,6 +31,8 @@ import com.nononsenseapps.feeder.ui.compose.feed.FeedScreen
 import com.nononsenseapps.feeder.ui.compose.feedarticle.ArticleScreen
 import com.nononsenseapps.feeder.ui.compose.searchfeed.SearchFeedScreen
 import com.nononsenseapps.feeder.ui.compose.settings.SettingsScreen
+import com.nononsenseapps.feeder.ui.compose.settings.TextSelectionMenuSettingsScreen
+import com.nononsenseapps.feeder.ui.compose.settings.TextSelectionMenuSettingsViewModel
 import com.nononsenseapps.feeder.ui.compose.settings.TextSettingsScreen
 import com.nononsenseapps.feeder.ui.compose.settings.TextSettingsViewModel
 import com.nononsenseapps.feeder.ui.compose.sync.SyncScreen
@@ -212,6 +214,35 @@ data object TextSettingsDestination : NavigationDestination(
     }
 }
 
+data object TextSelectionMenuSettingsDestination : NavigationDestination(
+    path = "settings/textmenu",
+    navArguments = emptyList(),
+    deepLinks = emptyList(),
+) {
+    fun navigate(navController: NavController) {
+        navController.navigate(path) {
+            launchSingleTop = true
+        }
+    }
+
+    @Composable
+    override fun RegisterScreen(
+        navController: NavController,
+        backStackEntry: NavBackStackEntry,
+        navDrawerListState: LazyListState,
+    ) {
+        val textSelectionMenuSettingsViewModel: TextSelectionMenuSettingsViewModel =
+            backStackEntry.diAwareViewModel()
+
+        TextSelectionMenuSettingsScreen(
+            onNavigateUp = {
+                navController.popBackStack()
+            },
+            viewModel = textSelectionMenuSettingsViewModel,
+        )
+    }
+}
+
 data object AddFeedDestination : NavigationDestination(
     path = "add/feed",
     navArguments =
@@ -335,6 +366,9 @@ data object SettingsDestination : NavigationDestination(
             },
             onNavigateToTextSettingsScreen = {
                 TextSettingsDestination.navigate(navController)
+            },
+            onNavigateToTextSelectionMenuSettingsScreen = {
+                TextSelectionMenuSettingsDestination.navigate(navController)
             },
             settingsViewModel = backStackEntry.diAwareViewModel(),
         )

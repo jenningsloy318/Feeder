@@ -15,11 +15,16 @@ import android.view.MenuItem
 import android.view.View
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.platform.LocalTextToolbar
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.TextToolbar
 import androidx.compose.ui.platform.TextToolbarStatus
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.nononsenseapps.feeder.archmodel.MenuItemType
+import com.nononsenseapps.feeder.archmodel.Repository
+import com.nononsenseapps.feeder.archmodel.TextMenuConfig
 import com.nononsenseapps.feeder.util.ActivityLauncher
 import org.kodein.di.compose.LocalDI
 import org.kodein.di.instance
@@ -29,7 +34,17 @@ private const val LOG_TAG = "FEEDER_TEXTTOOL"
 @Composable
 fun WithFeederTextToolbar(content: @Composable () -> Unit) {
     val activityLauncher: ActivityLauncher by LocalDI.current.instance()
-    CompositionLocalProvider(LocalTextToolbar provides FeederTextToolbar(LocalView.current, activityLauncher)) {
+    val repository: Repository by LocalDI.current.instance()
+    val textMenuConfig by repository.textMenuConfig.collectAsStateWithLifecycle()
+
+    CompositionLocalProvider(
+        LocalTextToolbar provides
+            FeederTextToolbar(
+                view = LocalView.current,
+                activityLauncher = activityLauncher,
+                textMenuConfig = textMenuConfig,
+            ),
+    ) {
         content()
     }
 }
@@ -37,12 +52,14 @@ fun WithFeederTextToolbar(content: @Composable () -> Unit) {
 class FeederTextToolbar(
     private val view: View,
     activityLauncher: ActivityLauncher,
+    textMenuConfig: TextMenuConfig,
 ) : TextToolbar {
     private var actionMode: ActionMode? = null
     private val textActionModeCallback: FeederTextActionModeCallback =
         FeederTextActionModeCallback(
             context = view.context,
             activityLauncher = activityLauncher,
+            textMenuConfig = textMenuConfig,
             onActionModeDestroy = {
                 actionMode = null
             },
@@ -86,6 +103,7 @@ class FeederTextActionModeCallback(
     val onActionModeDestroy: (() -> Unit)? = null,
     var rect: Rect = Rect.Zero,
     val activityLauncher: ActivityLauncher,
+    val textMenuConfig: TextMenuConfig,
     var onCopyRequested: (() -> Unit)? = null,
     var onPasteRequested: (() -> Unit)? = null,
     var onCutRequested: (() -> Unit)? = null,
@@ -110,21 +128,21 @@ class FeederTextActionModeCallback(
         requireNotNull(menu)
         requireNotNull(mode)
 
-        onCopyRequested?.let {
-            addMenuItem(menu, MenuItemOption.Copy)
-        }
-        onPasteRequested?.let {
-            addMenuItem(menu, MenuItemOption.Paste)
-        }
-        onCutRequested?.let {
-            addMenuItem(menu, MenuItemOption.Cut)
-        }
-        onSelectAllRequested?.let {
-            addMenuItem(menu, MenuItemOption.SelectAll)
-        }
-        onCopyRequested?.let {
-            // Depends on copy/paste
-            addTextProcessors(menu)
+        // Add menu items in configured order, respecting enabled state
+        textMenuConfig.items.forEach { itemConfig ->
+            if (!itemConfig.enabled) return@forEach
+
+            when (itemConfig.type) {
+                MenuItemType.COPY -> onCopyRequested?.let { addMenuItem(menu, MenuItemOption.Copy) }
+                MenuItemType.PASTE -> onPasteRequested?.let { addMenuItem(menu, MenuItemOption.Paste) }
+                MenuItemType.CUT -> onCutRequested?.let { addMenuItem(menu, MenuItemOption.Cut) }
+                MenuItemType.SELECT_ALL -> onSelectAllRequested?.let { addMenuItem(menu, MenuItemOption.SelectAll) }
+                MenuItemType.TEXT_PROCESSOR ->
+                    onCopyRequested?.let {
+                        // Depends on copy/paste
+                        addTextProcessors(menu)
+                    }
+            }
         }
         return true
     }
@@ -221,13 +239,41 @@ class FeederTextActionModeCallback(
     }
 
     private fun updateMenuItems(menu: Menu) {
-        addOrRemoveMenuItem(menu, MenuItemOption.Copy, onCopyRequested)
-        addOrRemoveMenuItem(menu, MenuItemOption.Paste, onPasteRequested)
-        addOrRemoveMenuItem(menu, MenuItemOption.Cut, onCutRequested)
-        addOrRemoveMenuItem(menu, MenuItemOption.SelectAll, onSelectAllRequested)
-        onCopyRequested?.let {
-            // Depends on copy/paste
-            addTextProcessors(menu)
+        // Update menu items based on configured order and enabled state
+        textMenuConfig.items.forEach { itemConfig ->
+            when (itemConfig.type) {
+                MenuItemType.COPY ->
+                    addOrRemoveMenuItem(
+                        menu,
+                        MenuItemOption.Copy,
+                        if (itemConfig.enabled) onCopyRequested else null,
+                    )
+                MenuItemType.PASTE ->
+                    addOrRemoveMenuItem(
+                        menu,
+                        MenuItemOption.Paste,
+                        if (itemConfig.enabled) onPasteRequested else null,
+                    )
+                MenuItemType.CUT ->
+                    addOrRemoveMenuItem(
+                        menu,
+                        MenuItemOption.Cut,
+                        if (itemConfig.enabled) onCutRequested else null,
+                    )
+                MenuItemType.SELECT_ALL ->
+                    addOrRemoveMenuItem(
+                        menu,
+                        MenuItemOption.SelectAll,
+                        if (itemConfig.enabled) onSelectAllRequested else null,
+                    )
+                MenuItemType.TEXT_PROCESSOR ->
+                    if (itemConfig.enabled) {
+                        onCopyRequested?.let {
+                            // Depends on copy/paste
+                            addTextProcessors(menu)
+                        }
+                    }
+            }
         }
     }
 

@@ -23,6 +23,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.update
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
@@ -496,6 +498,26 @@ class SettingsStore(
         sp.edit().putBoolean(PREF_OPEN_DRAWER_ON_FAB, value).apply()
     }
 
+    private val _textMenuConfig =
+        MutableStateFlow(
+            try {
+                val jsonString = sp.getString(PREF_TEXT_MENU_CONFIG, null)
+                if (jsonString != null) {
+                    Json.decodeFromString<TextMenuConfig>(jsonString)
+                } else {
+                    TextMenuConfig()
+                }
+            } catch (_: Exception) {
+                TextMenuConfig()
+            },
+        )
+    val textMenuConfig = _textMenuConfig.asStateFlow()
+
+    fun setTextMenuConfig(value: TextMenuConfig) {
+        _textMenuConfig.value = value
+        sp.edit().putString(PREF_TEXT_MENU_CONFIG, Json.encodeToString(value)).apply()
+    }
+
     fun getAllSettings(): Map<String, String> {
         val all = sp.all ?: emptyMap()
 
@@ -593,6 +615,11 @@ const val PREF_LIST_SHOW_READING_TIME = "pref_show_reading_time"
 const val PREF_OPEN_DRAWER_ON_FAB = "pref_open_drawer_on_fab"
 
 /**
+ * Text Selection Menu Settings
+ */
+const val PREF_TEXT_MENU_CONFIG = "pref_text_menu_config"
+
+/**
  * Read Aloud Settings
  */
 const val PREF_READALOUD_USE_DETECT_LANGUAGE = "pref_readaloud_detect_lang"
@@ -652,6 +679,7 @@ enum class UserSettings(
     SETTING_OPEN_DRAWER_ON_FAB(key = PREF_OPEN_DRAWER_ON_FAB),
     SETTING_SHOW_TITLE_UNREAD_COUNT(key = PREF_SHOW_TITLE_UNREAD_COUNT),
     SETTING_MAX_ITEM_COUNT_PER_FEED(key = PREF_MAX_ITEM_COUNT_PER_FEED),
+    SETTING_TEXT_MENU_CONFIG(key = PREF_TEXT_MENU_CONFIG),
     SETTING_OPENAI_KEY(key = PREF_OPENAI_KEY),
     SETTING_OPENAI_MODEL_ID(key = PREF_OPENAI_MODEL_ID),
     SETTING_OPENAI_URL(key = PREF_OPENAI_URL),

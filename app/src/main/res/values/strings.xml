@@ -298,4 +298,22 @@
   <string name="could_not_add_font">Could not add font</string>
   <string name="could_not_remove_font">Could not remove font</string>
   <string name="something_went_wrong">Something went wrong</string>
+
+  <!-- Text Selection Menu Settings -->
+  <string name="text_selection_menu">Text Selection Menu</string>
+  <string name="text_selection_menu_settings">Text Selection Menu Settings</string>
+  <string name="text_selection_menu_description">Configure menu items shown when selecting text</string>
+  <string name="configured_items_count">%d items configured</string>
+  <string name="reset_to_defaults">Reset to Defaults</string>
+  <string name="reset_text_menu_confirmation">Reset text selection menu to default settings? This will restore the default order and enable all items.</string>
+  <string name="reset">Reset</string>
+  <string name="drag_to_reorder">Drag to reorder</string>
+  <string name="item_enabled">Item enabled</string>
+  <string name="item_disabled">Item disabled</string>
+  <string name="move_item">Move %s</string>
+  <string name="text_processor">Text processor</string>
+  <string name="copy">Copy</string>
+  <string name="paste">Paste</string>
+  <string name="cut">Cut</string>
+  <string name="select_all">Select all</string>
 </resources>

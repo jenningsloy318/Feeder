@@ -24,6 +24,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.DragHandle
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -197,6 +199,7 @@ fun TextSelectionMenuList(
                         item.type.name
                     },
                 ) { isDragging ->
+                    val dragModifier = Modifier.draggableHandle()
                     MenuItemRow(
                         itemType = item.type,
                         enabled = item.enabled,
@@ -211,6 +214,7 @@ fun TextSelectionMenuList(
                         },
                         isDragging = isDragging,
                         specificApp = item.specificApp,
+                        dragModifier = dragModifier,
                     )
                 }
             }
@@ -236,6 +240,7 @@ fun MenuItemRow(
     isDragging: Boolean,
     specificApp: com.nononsenseapps.feeder.archmodel.DiscoveredApp? = null,
     modifier: Modifier = Modifier,
+    dragModifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
     val dimens = LocalDimens.current
@@ -271,21 +276,38 @@ fun MenuItemRow(
 
     val moveItemContentDescription = stringResource(R.string.move_item, itemName)
 
-    Row(
+    Card(
         modifier =
             modifier
                 .width(dimens.maxContentWidth)
-                .height(64.dp)
-                .safeSemantics(mergeDescendants = true) {
-                    stateDescription =
-                        when (enabled) {
-                            true -> context.getString(R.string.item_enabled)
-                            else -> context.getString(R.string.item_disabled)
-                        }
-                    role = Role.Switch
-                },
-        verticalAlignment = Alignment.CenterVertically,
+                .height(64.dp),
+        elevation = if (isDragging) {
+            CardDefaults.cardElevation(defaultElevation = 8.dp)
+        } else {
+            CardDefaults.cardElevation(defaultElevation = 0.dp)
+        },
+        colors = CardDefaults.cardColors(
+            containerColor = if (isDragging) {
+                MaterialTheme.colorScheme.surfaceVariant
+            } else {
+                MaterialTheme.colorScheme.surface
+            }
+        )
     ) {
+        Row(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .safeSemantics(mergeDescendants = true) {
+                        stateDescription =
+                            when (enabled) {
+                                true -> context.getString(R.string.item_enabled)
+                                else -> context.getString(R.string.item_disabled)
+                            }
+                        role = Role.Switch
+                    },
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
         Icon(
             imageVector = Icons.Default.DragHandle,
             contentDescription = stringResource(R.string.drag_to_reorder),
@@ -293,6 +315,7 @@ fun MenuItemRow(
                 Modifier
                     .padding(start = 8.dp, end = 16.dp)
                     .size(24.dp)
+                    .then(dragModifier)
                     .semantics { contentDescription = moveItemContentDescription },
         )
 
@@ -321,5 +344,6 @@ fun MenuItemRow(
             onCheckedChange = { onToggle() },
             modifier = Modifier.clearAndSetSemantics { },
         )
+        }
     }
 }

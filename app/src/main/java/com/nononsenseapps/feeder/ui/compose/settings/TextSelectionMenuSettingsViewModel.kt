@@ -105,6 +105,10 @@ class TextSelectionMenuSettingsViewModel(
 
         val currentConfig = repository.textMenuConfig.value
         val items = currentConfig.items.toMutableList()
+
+        // Add bounds checking to prevent crashes
+        if (index >= items.size) return
+
         val temp = items[index]
         items[index] = items[index - 1]
         items[index - 1] = temp
@@ -121,6 +125,10 @@ class TextSelectionMenuSettingsViewModel(
         if (index >= currentConfig.items.size - 1) return
 
         val items = currentConfig.items.toMutableList()
+
+        // Add bounds checking to prevent crashes
+        if (index < 0 || index >= items.size) return
+
         val temp = items[index]
         items[index] = items[index + 1]
         items[index + 1] = temp
@@ -138,6 +146,12 @@ class TextSelectionMenuSettingsViewModel(
     ) {
         val currentConfig = repository.textMenuConfig.value
         val items = currentConfig.items.toMutableList()
+
+        // Add bounds checking to prevent crashes
+        if (fromIndex < 0 || fromIndex >= items.size || toIndex < 0 || toIndex >= items.size || fromIndex == toIndex) {
+            return // Invalid indices, do nothing
+        }
+
         val item = items.removeAt(fromIndex)
         items.add(toIndex, item)
 

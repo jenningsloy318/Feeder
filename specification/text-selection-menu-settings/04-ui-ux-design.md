@@ -10,9 +10,11 @@ This document defines the visual design and interaction patterns for the text se
 **Key Decisions**:
 1. **Dedicated Settings Screen**: Separate screen accessed from main settings
 2. **Card-Based List**: Each menu item in a Material 3 Card
-3. **Up/Down Arrows**: For reordering (no drag-and-drop)
+3. **Drag-and-Drop**: Using `sh.calvin.reorderable` library for reordering
 4. **Inline Toggle**: Switch on each card for enable/disable
 5. **Reset Button**: In app bar with confirmation dialog
+
+**[UPDATED: 2025-11-27]** Changed from up/down arrows to drag-and-drop reordering using the reorderable library.
 
 ## Screen Flow
 
@@ -83,44 +85,51 @@ Main Settings Screen
 ┌────────────────────────────────────────┐
 │                                         │
 │  ┌──────────────────────────────────┐  │
-│  │ Copy                              │  │
-│  │                         ↑ ↓  [●] │  │
+│  │ ≡  Copy                       [●] │  │
 │  └──────────────────────────────────┘  │
 │                                         │
 │  ┌──────────────────────────────────┐  │
-│  │ Select All                        │  │
-│  │                         ↑ ↓  [●] │  │
+│  │ ≡  Select All                 [●] │  │
 │  └──────────────────────────────────┘  │
 │                                         │
 │  ┌──────────────────────────────────┐  │
-│  │ Translate                         │  │
-│  │ com.google.android.apps.translate │  │
-│  │                         ↑ ↓  [●] │  │
+│  │ ≡  Translate                  [●] │  │
+│  │    com.google.android.apps...     │  │
 │  └──────────────────────────────────┘  │
 │                                         │
 │  ┌──────────────────────────────────┐  │
-│  │ To Read                           │  │
-│  │ com.example.toread                │  │
-│  │                         ↑ ↓  [○] │  │
+│  │ ≡  To Read                    [○] │  │
+│  │    com.example.toread             │  │
 │  └──────────────────────────────────┘  │
 │                                         │
 └────────────────────────────────────────┘
 ```
+
+**[UPDATED: 2025-11-27]** Replaced up/down arrows with drag handle (≡) icon for drag-and-drop reordering.
 
 ### Menu Item Card
 
 **Structure**:
 ```
 ┌──────────────────────────────────────┐
-│ [Title]                               │
-│ [Subtitle] (optional)                 │
-│                         ↑ ↓  [●/○]   │
+│ ≡  [Title]                     [●/○] │
+│    [Subtitle] (optional)              │
 └──────────────────────────────────────┘
 ```
 
+**[UPDATED: 2025-11-27]** Replaced up/down arrows with drag handle icon.
+
 **Components**:
 
-1. **Left Side** (Column, weight=1f):
+1. **Drag Handle** (Icon, leftmost):
+   - **Icon**: `Icons.Rounded.DragHandle` (≡)
+   - **Size**: 24dp
+   - **Color**: `onSurfaceVariant`
+   - **Purpose**: Visual indicator for drag-and-drop
+   - **Modifier**: `Modifier.draggableHandle()` from reorderable library
+   - **Content Description**: "Drag to reorder"
+
+2. **Middle Section** (Column, weight=1f):
    - **Title** (Text):
      - Typography: `bodyLarge`
      - Color: `onSurface`
@@ -132,17 +141,7 @@ Main Settings Screen
      - Examples: "com.google.android.apps.translate"
      - Only shown for text processors
 
-2. **Right Side** (Row, horizontal spacing 4dp):
-   - **Up Arrow** (IconButton):
-     - Icon: `Icons.Default.ArrowUpward`
-     - Enabled: When item can move up (not first)
-     - Disabled: Gray out when first item
-
-   - **Down Arrow** (IconButton):
-     - Icon: `Icons.Default.ArrowDownward`
-     - Enabled: When item can move down (not last)
-     - Disabled: Gray out when last item
-
+3. **Right Side** (rightmost):
    - **Toggle Switch** (Switch):
      - Checked: Item enabled (appears in menu)
      - Unchecked: Item disabled (grayed in menu)
@@ -158,56 +157,43 @@ Main Settings Screen
 
 ```
 ┌──────────────────────────────────────┐
-│ Copy                                  │
-│                         ↑ ↓  [●]     │
+│ ≡  Copy                          [●] │
 └──────────────────────────────────────┘
 ```
 
 - Title: Full opacity
 - Switch: ON (checked)
-- Arrows: Enabled (based on position)
+- Drag handle: Always visible and active
 
 #### Disabled Item
 
 ```
 ┌──────────────────────────────────────┐
-│ Select All                            │
-│                         ↑ ↓  [○]     │
+│ ≡  Select All                    [○] │
 └──────────────────────────────────────┘
 ```
 
 - Title: Full opacity (no visual change in settings screen)
 - Switch: OFF (unchecked)
-- Arrows: Enabled (based on position)
+- Drag handle: Always visible and active
 
-**Note**: Disabled state affects text selection menu appearance, not the settings screen card.
+**Note**: Disabled state affects text selection menu appearance, not the settings screen card. Items can still be reordered when disabled.
 
-#### First Item
-
-```
-┌──────────────────────────────────────┐
-│ Copy                                  │
-│                         ↑̶ ↓  [●]     │
-└──────────────────────────────────────┘
-```
-
-- Up arrow: Disabled (grayed out)
-- Down arrow: Enabled
-- Can only move down
-
-#### Last Item
+#### Dragging State
 
 ```
 ┌──────────────────────────────────────┐
-│ To Read                               │
-│ com.example.toread                    │
-│                         ↑ ↓̶  [○]     │
+│ ≡  Copy                          [●] │  ← Elevated, shadow visible
 └──────────────────────────────────────┘
 ```
 
-- Up arrow: Enabled
-- Down arrow: Disabled (grayed out)
-- Can only move up
+- **Elevation**: 4dp shadow (animated)
+- **Z-index**: Lifted above other items
+- **Opacity**: 100% (fully visible)
+- **Haptic Feedback**:
+  - Start drag: `GestureThresholdActivate`
+  - During drag: `SegmentFrequentTick` (on each position change)
+  - End drag: `GestureEnd`
 
 ### Reset Confirmation Dialog
 
@@ -283,43 +269,69 @@ Example: User disabled "Select All" and reordered:
 
 ## Interaction Patterns
 
-### Reordering Items
+**[UPDATED: 2025-11-27]** Reordering now uses drag-and-drop instead of up/down arrows.
 
-**User Action**: Tap up arrow on "Translate" item (currently position 2)
+### Drag-and-Drop Reordering
 
-**Before**:
+**User Action**: Long-press drag handle on "Translate" item and drag upward
+
+**Step 1 - Start Drag**:
 ```
 1. Copy [●]
-2. Translate [●]  ← Tap up arrow
+2. Translate [●]  ← User long-presses drag handle
 3. Select All [●]
 ```
+- Haptic feedback: `GestureThresholdActivate`
+- Card elevation increases to 4dp
+- Item visually "lifts" above list
 
-**After**:
+**Step 2 - During Drag**:
 ```
-1. Translate [●]  ← Moved up
+1. [Placeholder space]
+2. Copy [●]
+3. Translate [●]  ← Dragging upward (elevated)
+4. Select All [●]
+```
+- Item follows finger/pointer position
+- Other items shift to make space
+- Haptic feedback: `SegmentFrequentTick` on each position change
+- Smooth reordering animation
+
+**Step 3 - Release/Drop**:
+```
+1. Translate [●]  ← Dropped in new position
 2. Copy [●]
 3. Select All [●]
 ```
+- Haptic feedback: `GestureEnd`
+- Card elevation returns to 1dp (animated)
+- List state updates
+- Configuration saved
 
-**Visual Feedback**:
-- Immediate update (no animation)
-- List reorders instantly
-- Arrow button states update (first item's up arrow disables)
+**Alternative: Drag Downward**:
 
-**User Action**: Tap down arrow on "Copy" item
+User can also drag "Copy" downward to reorder:
 
 **Before**:
 ```
-1. Translate [●]
-2. Copy [●]  ← Tap down arrow
-3. Select All [●]
+1. Copy [●]  ← Drag handle pressed
+2. Select All [●]
+3. Translate [●]
 ```
 
-**After**:
+**During drag**:
 ```
-1. Translate [●]
+1. [Placeholder space]
 2. Select All [●]
-3. Copy [●]  ← Moved down
+3. Copy [●]  ← Dragging downward (elevated)
+4. Translate [●]
+```
+
+**After release**:
+```
+1. Select All [●]
+2. Translate [●]
+3. Copy [●]  ← New position
 ```
 
 ### Enabling/Disabling Items
@@ -368,11 +380,28 @@ Select All                    ↑ ↓  [○]  ← Switch OFF
 
 ## Accessibility
 
+**[UPDATED: 2025-11-27]** Accessibility updated for drag-and-drop interactions.
+
 ### Screen Reader Announcements
 
 **Menu Item Card**:
 ```
-"Copy. Enabled. Position 1 of 4. Move up, button, disabled. Move down, button. Toggle, switch, on."
+"Copy. Enabled. Position 1 of 4. Drag to reorder, button. Toggle, switch, on."
+```
+
+**When drag starts**:
+```
+"Started dragging Copy"
+```
+
+**During drag (position changes)**:
+```
+"Copy moved to position 2"
+```
+
+**When drag ends**:
+```
+"Copy placed at position 2 of 4"
 ```
 
 **When switch toggled**:
@@ -380,17 +409,33 @@ Select All                    ↑ ↓  [○]  ← Switch OFF
 "Copy disabled" or "Copy enabled"
 ```
 
-**Move up button tapped**:
-```
-"Copy moved to position 1" (or specific position)
-```
-
 ### Content Descriptions
 
-- **Up Arrow**: "Move up" (or "Move up, disabled" when first)
-- **Down Arrow**: "Move down" (or "Move down, disabled" when last)
+- **Drag Handle**: "Drag to reorder"
 - **Switch**: State handled automatically by Material 3 Switch
 - **Reset Icon**: "Reset to defaults"
+
+### Drag-and-Drop Accessibility
+
+The reorderable library provides built-in accessibility support:
+
+1. **Screen Reader Mode**:
+   - Drag handle acts as a button
+   - User can tap to select item
+   - Use volume keys or custom gestures to move
+   - Announces position changes
+
+2. **Keyboard Navigation** (if using external keyboard):
+   - Tab to focus drag handle
+   - Space/Enter to grab item
+   - Arrow keys to move up/down
+   - Space/Enter again to drop
+   - Escape to cancel
+
+3. **TalkBack Integration**:
+   - Supports TalkBack drag-and-drop gestures
+   - Provides audio feedback for all state changes
+   - Clear instructions when drag handle focused
 
 ### Keyboard Navigation
 
@@ -487,17 +532,42 @@ Same layout with max content width constraint:
 
 ## Animation
 
+**[UPDATED: 2025-11-27]** Animation updated for drag-and-drop interactions.
+
 ### Switch Toggle
 
 - Duration: 150ms
 - Easing: Fast out, slow in
 - Material 3 default animation
 
-### List Reorder
+### Drag-and-Drop Reordering
 
-- **No animation**: Instant update
-- Reason: Simple, predictable, no layout shift issues
-- Alternative future enhancement: Animate items swapping
+**Drag Start**:
+- Elevation: Animate from 1dp to 4dp
+- Duration: 150ms
+- Easing: Fast out, slow in
+
+**During Drag**:
+- Item follows touch/pointer smoothly (no lag)
+- Other items animate to make space
+- Spring animation for item repositioning
+- Smooth, fluid movement
+
+**Drag End**:
+- Elevation: Animate from 4dp back to 1dp
+- Duration: 200ms
+- Easing: Fast out, slow in
+- Item settles into final position
+
+**Item Repositioning** (when other items make space):
+- Duration: 300ms
+- Easing: Spring animation (natural bounce)
+- Items slide up/down smoothly
+
+**Haptic Feedback Timing**:
+- Start: Immediately on threshold activation
+- During: On each snap to new position
+- End: On release
 
 ### Dialog
 
@@ -511,54 +581,49 @@ Same layout with max content width constraint:
 
 ```
 ┌──────────────────────────────────────┐
-│ Copy                                  │
-│                         ↑̶ ↓  [●]     │
+│ ≡  Copy                          [●] │
 └──────────────────────────────────────┘
-│ Select All                            │
-│                         ↑ ↓̶  [●]     │
+│ ≡  Select All                    [●] │
 └──────────────────────────────────────┘
 ```
 
-Only built-in items (Copy, Select All) shown. No text processors in list.
+Only built-in items (Copy, Select All) shown. Drag-and-drop still works for reordering these two items.
 
 ### All Items Disabled
 
 ```
 ┌──────────────────────────────────────┐
-│ Copy                                  │
-│                         ↑ ↓  [○]     │
+│ ≡  Copy                          [○] │
 └──────────────────────────────────────┘
-│ Select All                            │
-│                         ↑ ↓  [○]     │
+│ ≡  Select All                    [○] │
 └──────────────────────────────────────┘
 ```
 
-All switches OFF. Text selection menu shows all items grayed out.
+All switches OFF. Text selection menu shows all items grayed out. Drag-and-drop still works for reordering.
 
 ### Single Item
 
 ```
 ┌──────────────────────────────────────┐
-│ Copy                                  │
-│                         ↑̶ ↓̶  [●]     │
+│ ≡  Copy                          [●] │
 └──────────────────────────────────────┘
 ```
 
-Both arrows disabled (can't reorder single item).
+Drag handle still shown but dragging has no effect (nowhere to move). Library handles this gracefully.
 
 ### Text Processor with Long Name
 
 ```
 ┌──────────────────────────────────────┐
-│ Super Long Application Name That...  │
-│ com.example.very.long.package.name   │
-│                         ↑ ↓  [●]     │
+│ ≡  Super Long Application Na...  [●] │
+│    com.example.very.long.package...  │
 └──────────────────────────────────────┘
 ```
 
 - Title: Ellipsis at end if too long
 - Subtitle: Ellipsis at end if too long
 - Max lines: 1 for title, 1 for subtitle
+- Drag handle always visible (fixed width)
 
 ## First-Time User Experience
 
@@ -569,11 +634,9 @@ Both arrows disabled (can't reorder single item).
 **What they see**:
 ```
 ┌──────────────────────────────────────┐
-│ Copy                                  │
-│                         ↑̶ ↓  [●]     │
+│ ≡  Copy                          [●] │
 └──────────────────────────────────────┘
-│ Select All                            │
-│                         ↑ ↓̶  [●]     │
+│ ≡  Select All                    [●] │
 └──────────────────────────────────────┘
 ```
 
@@ -593,19 +656,15 @@ Only default items (Copy, Select All) shown.
 **What they see**:
 ```
 ┌──────────────────────────────────────┐
-│ Copy                                  │
-│                         ↑ ↓  [●]     │
+│ ≡  Copy                          [●] │
 └──────────────────────────────────────┘
-│ Select All                            │
-│                         ↑ ↓  [●]     │
+│ ≡  Select All                    [●] │
 └──────────────────────────────────────┘
-│ Translate                             │
-│ com.google.android.apps.translate     │
-│                         ↑ ↓  [●]     │
+│ ≡  Translate                     [●] │
+│    com.google.android.apps...        │
 └──────────────────────────────────────┘
-│ To Read                               │
-│ com.example.toread                    │
-│                         ↑ ↓̶  [●]     │
+│ ≡  To Read                       [●] │
+│    com.example.toread                │
 └──────────────────────────────────────┘
 ```
 
@@ -650,20 +709,50 @@ Both use:
 
 ## Alternative Designs Considered
 
-### Drag-and-Drop Reordering
+**[UPDATED: 2025-11-27]** Reversed decision - now using drag-and-drop.
+
+### Up/Down Arrows (Previously Selected, Now Rejected)
+
+**Pros**:
+- Simple implementation
+- Clear, explicit actions
+- No third-party dependencies initially considered
+- Precise control
+
+**Cons**:
+- More taps needed for large reorders (e.g., move item from position 1 to 10 = 9 taps)
+- Less modern UX
+- Tedious for frequent reordering
+- Not as intuitive as drag-and-drop
+
+**Original Decision**: Selected for simplicity
+**Revised Decision**: **Rejected** after code assessment revealed `sh.calvin.reorderable` library exists with excellent Material 3 integration
+
+### Drag-and-Drop Reordering (NOW SELECTED)
 
 **Pros**:
 - More intuitive for reordering
 - Modern interaction pattern
-- Fewer taps for multiple reorders
+- Fewer interactions for multiple reorders
+- Better UX for power users
+- Library available (`sh.calvin.reorderable`) with excellent Material 3 support
+- Built-in accessibility (TalkBack, keyboard navigation)
+- Haptic feedback support
+- Already proven in Android ecosystem
 
 **Cons**:
-- Complex implementation (no existing pattern in app)
-- Accessibility challenges (needs keyboard alternative)
-- Risk of accidental drags
-- Requires third-party library or custom code
+- Requires third-party library (mitigated: well-maintained, popular library)
+- Slightly more complex implementation (mitigated: library handles complexity)
+- Need to add dependency
 
-**Decision**: Rejected in favor of up/down arrows for simplicity and accessibility.
+**Revised Decision**: **SELECTED** because the reorderable library provides:
+1. Full Material 3 integration (Card, LazyColumn support)
+2. Built-in accessibility features
+3. Haptic feedback out of the box
+4. Well-maintained (active development)
+5. Better user experience for this use case
+
+The cons are minimal compared to the significant UX improvement.
 
 ### Inline in Main Settings
 
@@ -692,72 +781,152 @@ Both use:
 
 ## Implementation Notes
 
+**[UPDATED: 2025-11-27]** Implementation updated for drag-and-drop.
+
+### Dependencies
+
+**Add to build.gradle.kts**:
+```kotlin
+dependencies {
+    implementation("sh.calvin.reorderable:reorderable:2.4.0") // Check for latest version
+}
+```
+
 ### Material 3 Components Used
 
 - `Scaffold`: Screen structure
 - `SensibleTopAppBar`: App bar with scroll behavior
-- `LazyColumn`: Scrollable list
+- `LazyColumn`: Scrollable list (with reorderable support)
 - `Card`: Item containers
-- `IconButton`: Up/down arrows
+- `Icon`: Drag handle (`Icons.Rounded.DragHandle`)
 - `Switch`: Enable/disable toggle
 - `AlertDialog`: Reset confirmation
 - `TextButton`: Dialog actions
 
 All components from `androidx.compose.material3`.
 
+### Reorderable Library Components
+
+From `sh.calvin.reorderable`:
+
+- `rememberReorderableLazyListState`: Manages drag-and-drop state
+- `ReorderableItem`: Wrapper for each draggable item
+- `Modifier.draggableHandle()`: Makes drag handle interactive
+- `onDragStarted`: Callback for drag start
+- `onDragStopped`: Callback for drag end
+
 ### Compose Patterns
 
-- `remember`: State for dialog visibility
+- `remember`: State for dialog visibility, interaction sources
 - `collectAsStateWithLifecycle`: ViewModel state observation
 - `nestedScroll`: Scroll behavior integration
+- `MutableInteractionSource`: For drag event handling
+- `LocalHapticFeedback.current`: Haptic feedback
+- `animateDpAsState`: Elevation animation during drag
 - Modifier chaining for layout
+
+### Implementation Pattern
+
+```kotlin
+val lazyListState = rememberLazyListState()
+val reorderableLazyListState = rememberReorderableLazyListState(lazyListState) { from, to ->
+    // Update list order in ViewModel
+    viewModel.moveItem(from.index, to.index)
+
+    // Haptic feedback
+    hapticFeedback.performHapticFeedback(HapticFeedbackType.SegmentFrequentTick)
+}
+
+LazyColumn(state = lazyListState) {
+    items(menuItems, key = { it.id }) { item ->
+        ReorderableItem(reorderableLazyListState, key = item.id) { isDragging ->
+            // Card with drag handle and switch
+        }
+    }
+}
+```
 
 ### No Custom Components Needed
 
-All UI elements use standard Material 3 components. No custom composables required beyond what's specified in code assessment.
+All UI elements use standard Material 3 components plus the reorderable library. No custom composables required beyond what's specified in code assessment.
 
 ## Testing Checklist
+
+**[UPDATED: 2025-11-27]** Testing updated for drag-and-drop.
 
 ### Visual Tests
 
 - [ ] Cards display correctly on phone
 - [ ] Cards display correctly on tablet
-- [ ] Arrow buttons enable/disable based on position
+- [ ] Drag handle (≡) icon visible on all items
 - [ ] Switch states render correctly
+- [ ] Card elevation increases during drag (4dp shadow visible)
 - [ ] Dialog appears centered and styled correctly
 - [ ] Dark theme renders correctly
 - [ ] High contrast mode works
+- [ ] Dragged item appears elevated above others
 
 ### Interaction Tests
 
-- [ ] Up arrow moves item up
-- [ ] Down arrow moves item down
-- [ ] First item's up arrow is disabled
-- [ ] Last item's down arrow is disabled
+- [ ] Long-press drag handle initiates drag
+- [ ] Item follows finger/pointer during drag
+- [ ] Other items animate to make space during drag
+- [ ] Item can be dragged up
+- [ ] Item can be dragged down
+- [ ] Releasing drag places item in new position
+- [ ] List order persists after drag
 - [ ] Switch toggles item enabled state
 - [ ] Reset icon shows dialog
 - [ ] Reset confirms and applies defaults
 - [ ] Cancel closes dialog without changes
 - [ ] Back navigation works
+- [ ] Can drag when only 2 items exist
+- [ ] Single item shows drag handle but dragging has no effect
+
+### Haptic Feedback Tests
+
+- [ ] Haptic feedback on drag start (`GestureThresholdActivate`)
+- [ ] Haptic feedback during drag on position change (`SegmentFrequentTick`)
+- [ ] Haptic feedback on drag end (`GestureEnd`)
+- [ ] No haptic feedback when drag canceled
+
+### Animation Tests
+
+- [ ] Elevation animates smoothly on drag start
+- [ ] Elevation animates smoothly on drag end
+- [ ] Other items slide smoothly to make space
+- [ ] Spring animation feels natural (not too bouncy)
+- [ ] No lag or jank during drag
 
 ### Accessibility Tests
 
 - [ ] Screen reader announces items correctly
-- [ ] Button states announced (enabled/disabled)
+- [ ] Drag handle announced as "Drag to reorder, button"
+- [ ] Drag start announced ("Started dragging [item]")
+- [ ] Position changes announced during drag
+- [ ] Drag end announced ("Placed at position X of Y")
 - [ ] Switch states announced
-- [ ] Keyboard navigation works
+- [ ] TalkBack drag gestures work
+- [ ] Keyboard navigation works (if external keyboard)
 - [ ] Content descriptions present
 - [ ] Focus order logical
 
 ## Conclusion
 
-This UI/UX design provides a clean, accessible, and consistent interface for configuring text selection menu items. The design:
+**[UPDATED: 2025-11-27]** Final conclusion updated to reflect drag-and-drop decision.
+
+This UI/UX design provides a modern, intuitive, and accessible interface for configuring text selection menu items. The design:
 
 1. **Follows Material Design 3** principles and Feeder app patterns
-2. **Uses simple up/down arrows** instead of complex drag-and-drop
-3. **Combines enable/disable and reordering** in one screen
-4. **Provides clear visual feedback** for all actions
-5. **Handles edge cases** gracefully
-6. **Meets accessibility** requirements
+2. **Uses modern drag-and-drop** interaction with `sh.calvin.reorderable` library
+3. **Combines enable/disable and reordering** in one unified screen
+4. **Provides rich haptic feedback** for tactile interaction
+5. **Includes smooth animations** for visual polish
+6. **Handles edge cases** gracefully
+7. **Meets accessibility requirements** with built-in TalkBack and keyboard support
+8. **Leverages well-maintained library** instead of reinventing the wheel
+
+**Key Improvement Over Original Design**:
+Drag-and-drop provides significantly better UX for reordering compared to up/down arrows, especially when users need to move items multiple positions. The reorderable library eliminates implementation complexity while providing professional-grade features (haptic feedback, accessibility, animations) out of the box.
 
 **Ready to proceed to Phase 6 (Specification Writing) to formalize all details into final specification.**

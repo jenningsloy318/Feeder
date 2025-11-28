@@ -120,6 +120,7 @@ class FeederTextActionModeCallback(
     }
 
     private val textProcessors = mutableListOf<ComponentName>()
+    private val discoveredApps = mutableMapOf<String, com.nononsenseapps.feeder.archmodel.DiscoveredApp>() // key: menu item ID
 
     override fun onCreateActionMode(
         mode: ActionMode?,
@@ -142,6 +143,16 @@ class FeederTextActionModeCallback(
                         // Depends on copy/paste
                         addTextProcessors(menu)
                     }
+                MenuItemType.SHARE_HANDLER,
+                MenuItemType.ACTION_SEND_HANDLER,
+                MenuItemType.OTHER_SYSTEM_HANDLER -> {
+                    // Handle specific discovered apps
+                    itemConfig.specificApp?.let { app ->
+                        onCopyRequested?.let {
+                            addSpecificAppToMenu(menu, app)
+                        }
+                    }
+                }
             }
         }
         return true
@@ -169,31 +180,40 @@ class FeederTextActionModeCallback(
             else -> {
                 if (itemId < 100) return false
 
-                // Since we can't access the selected text - hack it by using the clipboard
-                val prevClip = clipboardManager.primaryClip
-                onCopyRequested?.invoke()
-
-                val clip = clipboardManager.primaryClip
-                if (clip != null && clip.itemCount > 0) {
-                    textProcessors.getOrNull(itemId - 100)?.let { cn ->
-                        activityLauncher.startActivity(
-                            openAdjacentIfSuitable = true,
-                            intent =
-                                Intent(Intent.ACTION_PROCESS_TEXT).apply {
-                                    type = "text/plain"
-                                    component = cn
-                                    putExtra(Intent.EXTRA_PROCESS_TEXT, clip.getItemAt(0).text)
-                                },
-                        )
-                    }
+                // Handle discovered apps
+                discoveredApps[itemId.toString()]?.let { app ->
+                    handleDiscoveredAppAction(app)
+                    return true
                 }
 
-                try {
-                    prevClip?.let { clipboardManager.setPrimaryClip(it) }
-                } catch (e: Exception) {
-                    // This can crash if the content contains a fileUri for example
-                    // android.os.FileUriExposedException: file:/// exposed beyond app through ClipData.Item.getUri()
-                    Log.e(LOG_TAG, "Resetting clipboard failed", e)
+                // Handle text processors (existing functionality)
+                if (itemId >= 100) {
+                    // Since we can't access the selected text - hack it by using the clipboard
+                    val prevClip = clipboardManager.primaryClip
+                    onCopyRequested?.invoke()
+
+                    val clip = clipboardManager.primaryClip
+                    if (clip != null && clip.itemCount > 0) {
+                        textProcessors.getOrNull(itemId - 100)?.let { cn ->
+                            activityLauncher.startActivity(
+                                openAdjacentIfSuitable = true,
+                                intent =
+                                    Intent(Intent.ACTION_PROCESS_TEXT).apply {
+                                        type = "text/plain"
+                                        component = cn
+                                        putExtra(Intent.EXTRA_PROCESS_TEXT, clip.getItemAt(0).text)
+                                    },
+                            )
+                        }
+                    }
+
+                    try {
+                        prevClip?.let { clipboardManager.setPrimaryClip(it) }
+                    } catch (e: Exception) {
+                        // This can crash if the content contains a fileUri for example
+                        // android.os.FileUriExposedException: file:/// exposed beyond app through ClipData.Item.getUri()
+                        Log.e(LOG_TAG, "Resetting clipboard failed", e)
+                    }
                 }
             }
         }
@@ -273,6 +293,17 @@ class FeederTextActionModeCallback(
                             addTextProcessors(menu)
                         }
                     }
+                MenuItemType.SHARE_HANDLER,
+                MenuItemType.ACTION_SEND_HANDLER,
+                MenuItemType.OTHER_SYSTEM_HANDLER -> {
+                    if (itemConfig.enabled) {
+                        itemConfig.specificApp?.let { app ->
+                            onCopyRequested?.let {
+                                addSpecificAppToMenu(menu, app)
+                            }
+                        }
+                    }
+                }
             }
         }
     }
@@ -295,6 +326,107 @@ class FeederTextActionModeCallback(
             callback != null && menu.findItem(item.id) == null -> addMenuItem(menu, item)
             callback == null && menu.findItem(item.id) != null -> menu.removeItem(item.id)
         }
+    }
+
+    /**
+     * Add a specific discovered app to the menu
+     */
+    private fun addSpecificAppToMenu(
+        menu: Menu,
+        app: com.nononsenseapps.feeder.archmodel.DiscoveredApp,
+    ) {
+        val menuItemId = generateMenuItemId(app)
+
+        if (menu.findItem(menuItemId) == null) {
+            menu
+                .add(1, menuItemId, menuItemId, app.label)
+                .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER)
+
+            // Store the app for later use
+            discoveredApps[menuItemId.toString()] = app
+        }
+    }
+
+    /**
+     * Handle action for a discovered app
+     */
+    private fun handleDiscoveredAppAction(app: com.nononsenseapps.feeder.archmodel.DiscoveredApp) {
+        // Since we can't access the selected text - hack it by using the clipboard
+        val prevClip = clipboardManager.primaryClip
+        onCopyRequested?.invoke()
+
+        val clip = clipboardManager.primaryClip
+        if (clip != null && clip.itemCount > 0) {
+            val text = clip.getItemAt(0).text.toString()
+
+            val intent = when (app.intentAction) {
+                Intent.ACTION_SEND -> {
+                    Intent(Intent.ACTION_SEND).apply {
+                        type = app.intentType ?: "text/plain"
+                        setPackage(app.packageName)
+                        if (app.activityName != null) {
+                            component = ComponentName(app.packageName, app.activityName)
+                        }
+                        putExtra(Intent.EXTRA_TEXT, text)
+                    }
+                }
+                Intent.ACTION_VIEW -> {
+                    Intent(Intent.ACTION_VIEW).apply {
+                        type = app.intentType ?: "text/plain"
+                        setPackage(app.packageName)
+                        if (app.activityName != null) {
+                            component = ComponentName(app.packageName, app.activityName)
+                        }
+                        setDataAndType(android.net.Uri.parse("text:$text"), app.intentType ?: "text/plain")
+                    }
+                }
+                Intent.ACTION_SENDTO -> {
+                    Intent(Intent.ACTION_SENDTO).apply {
+                        data = android.net.Uri.parse("smsto:")
+                        setPackage(app.packageName)
+                        if (app.activityName != null) {
+                            component = ComponentName(app.packageName, app.activityName)
+                        }
+                        putExtra("sms_body", text)
+                    }
+                }
+                Intent.ACTION_PROCESS_TEXT -> {
+                    Intent(Intent.ACTION_PROCESS_TEXT).apply {
+                        type = "text/plain"
+                        component = ComponentName(app.packageName, app.activityName ?: "")
+                        putExtra(Intent.EXTRA_PROCESS_TEXT, text)
+                    }
+                }
+                else -> {
+                    // Fallback to ACTION_SEND
+                    Intent(Intent.ACTION_SEND).apply {
+                        type = "text/plain"
+                        setPackage(app.packageName)
+                        putExtra(Intent.EXTRA_TEXT, text)
+                    }
+                }
+            }
+
+            activityLauncher.startActivity(
+                openAdjacentIfSuitable = true,
+                intent = intent,
+            )
+        }
+
+        try {
+            prevClip?.let { clipboardManager.setPrimaryClip(it) }
+        } catch (e: Exception) {
+            Log.e(LOG_TAG, "Resetting clipboard failed", e)
+        }
+    }
+
+    /**
+     * Generate a unique menu item ID for a discovered app
+     */
+    private fun generateMenuItemId(app: com.nononsenseapps.feeder.archmodel.DiscoveredApp): Int {
+        // Use a hash of package name and activity name to generate a consistent ID
+        val hash = app.packageName.hashCode() + (app.activityName?.hashCode() ?: 0)
+        return Math.abs(hash) % 10000 + 200 // Start from 200 to avoid conflicts
     }
 }
 

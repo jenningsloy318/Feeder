@@ -49,6 +49,11 @@ class ManageSettingsActivity : DIAwareComponentActivity() {
                         )
                         finish()
                     },
+                    onNavigateToTextSelectionMenuSettingsScreen = {
+                        // TODO: Add navigation to text selection menu settings screen
+                        // For now, just log that this was called
+                        android.util.Log.d("ManageSettingsActivity", "Text selection menu settings navigation requested")
+                    },
                     settingsViewModel = diAwareViewModel(),
                 )
             }

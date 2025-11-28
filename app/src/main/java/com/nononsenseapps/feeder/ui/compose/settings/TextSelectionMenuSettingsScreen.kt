@@ -143,9 +143,10 @@ fun TextSelectionMenuList(
     val dimens = LocalDimens.current
     val haptic = LocalHapticFeedback.current
 
+    val lazyListState = androidx.compose.foundation.lazy.rememberLazyListState()
     val reorderableLazyListState =
         rememberReorderableLazyListState(
-            lazyListState = androidx.compose.foundation.lazy.rememberLazyListState(),
+            lazyListState = lazyListState,
             onMove = { from, to ->
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 onMoveItem(from.index, to.index)
@@ -160,7 +161,7 @@ fun TextSelectionMenuList(
                 .padding(horizontal = dimens.margin),
     ) {
         LazyColumn(
-            state = reorderableLazyListState.lazyListState,
+            state = lazyListState,
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier =
                 Modifier
@@ -179,17 +180,37 @@ fun TextSelectionMenuList(
 
             itemsIndexed(
                 items = viewState.menuItems,
-                key = { _, item -> item.type },
+                key = { _, item ->
+                    // Create unique key based on type and specific app
+                    if (item.specificApp != null) {
+                        "${item.type}_${item.specificApp.packageName}"
+                    } else {
+                        item.type.name
+                    }
+                },
             ) { index, item ->
                 ReorderableItem(
                     state = reorderableLazyListState,
-                    key = item.type,
+                    key = if (item.specificApp != null) {
+                        "${item.type}_${item.specificApp.packageName}"
+                    } else {
+                        item.type.name
+                    },
                 ) { isDragging ->
                     MenuItemRow(
                         itemType = item.type,
                         enabled = item.enabled,
-                        onToggle = { onToggleEnabled(item.type) },
+                        onToggle = {
+                            if (item.specificApp != null) {
+                                // For specific apps, we need to handle them individually
+                                // This would require a different approach in the ViewModel
+                                onToggleEnabled(item.type)
+                            } else {
+                                onToggleEnabled(item.type)
+                            }
+                        },
                         isDragging = isDragging,
+                        specificApp = item.specificApp,
                     )
                 }
             }
@@ -213,21 +234,42 @@ fun MenuItemRow(
     enabled: Boolean,
     onToggle: () -> Unit,
     isDragging: Boolean,
+    specificApp: com.nononsenseapps.feeder.archmodel.DiscoveredApp? = null,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
     val dimens = LocalDimens.current
 
-    val itemName =
-        stringResource(
+    val itemName = when {
+        specificApp != null -> specificApp.label
+        else -> stringResource(
             when (itemType) {
                 MenuItemType.COPY -> R.string.copy
                 MenuItemType.PASTE -> R.string.paste
                 MenuItemType.CUT -> R.string.cut
                 MenuItemType.SELECT_ALL -> R.string.select_all
                 MenuItemType.TEXT_PROCESSOR -> R.string.text_processor
-            },
+                MenuItemType.SHARE_HANDLER -> R.string.share_handler
+                MenuItemType.ACTION_SEND_HANDLER -> R.string.action_send_handler
+                MenuItemType.OTHER_SYSTEM_HANDLER -> R.string.other_system_handler
+            }
         )
+    }
+
+    val itemDescription = when {
+        specificApp != null -> {
+            when (itemType) {
+                MenuItemType.TEXT_PROCESSOR -> "Text processor"
+                MenuItemType.SHARE_HANDLER -> "Share handler"
+                MenuItemType.ACTION_SEND_HANDLER -> "Send handler"
+                MenuItemType.OTHER_SYSTEM_HANDLER -> "System handler"
+                else -> null
+            }
+        }
+        else -> null
+    }
+
+    val moveItemContentDescription = stringResource(R.string.move_item, itemName)
 
     Row(
         modifier =
@@ -251,14 +293,26 @@ fun MenuItemRow(
                 Modifier
                     .padding(start = 8.dp, end = 16.dp)
                     .size(24.dp)
-                    .semantics { contentDescription = stringResource(R.string.move_item, itemName) },
+                    .semantics { contentDescription = moveItemContentDescription },
         )
 
-        Text(
-            text = itemName,
-            style = MaterialTheme.typography.titleMedium,
+        Column(
             modifier = Modifier.weight(1f),
-        )
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = itemName,
+                style = MaterialTheme.typography.titleMedium,
+            )
+
+            if (itemDescription != null) {
+                Text(
+                    text = itemDescription,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
 
         Spacer(modifier = Modifier.width(8.dp))
 

@@ -88,6 +88,7 @@ class OpmlParserTest : DIAware {
                         UserSettings.SETTING_OPENAI_AZURE_VERSION -> "2023-05-15"
                         UserSettings.SETTING_OPENAI_AZURE_DEPLOYMENT_ID -> "test-deployment"
                         UserSettings.SETTING_OPENAI_REQUEST_TIMEOUT_SECONDS -> "45"
+                        UserSettings.SETTING_TEXT_MENU_CONFIG -> "" // Skip text menu config in tests
                     },
             )
         }

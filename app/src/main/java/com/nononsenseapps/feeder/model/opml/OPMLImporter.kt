@@ -94,6 +94,11 @@ open class OPMLImporter(
             UserSettings.SETTINGS_FILTER_READ -> settingsStore.setFeedListFilterRead(value.toBoolean())
             UserSettings.SETTINGS_LIST_SHOW_ONLY_TITLES -> settingsStore.setShowOnlyTitles(value.toBoolean())
             UserSettings.SETTING_OPEN_ADJACENT -> settingsStore.setOpenAdjacent(value.toBoolean())
+            UserSettings.SETTING_TEXT_MENU_CONFIG -> {
+                // For text menu config, we'll skip OPML import as it's complex JSON
+                // and users would typically want to reconfigure this per-device anyway
+                Log.d(LOG_TAG, "Skipping text menu config import from OPML")
+            }
             UserSettings.SETTING_FONT ->
                 settingsStore.setFont(
                     com.nononsenseapps.feeder.ui.compose.settings.getFontSelectionFromPath(

@@ -312,6 +312,9 @@
   <string name="item_disabled">Item disabled</string>
   <string name="move_item">Move %s</string>
   <string name="text_processor">Text processor</string>
+  <string name="share_handler">Share Handler</string>
+  <string name="action_send_handler">Send Handler</string>
+  <string name="other_system_handler">System Handler</string>
   <string name="copy">Copy</string>
   <string name="paste">Paste</string>
   <string name="cut">Cut</string>

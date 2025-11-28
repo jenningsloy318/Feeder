@@ -142,6 +142,7 @@ class OpmlWriterKtTest {
               <feeder:setting key="pref_open_drawer_on_fab" value="true"/>
               <feeder:setting key="pref_show_title_unread_count" value="true"/>
               <feeder:setting key="pref_max_item_count_per_feed" value="200"/>
+              <feeder:setting key="pref_text_menu_config" value=""/>
               <feeder:setting key="pref_openai_key" value="test-api-key"/>
               <feeder:setting key="pref_openai_model_id" value="gpt-4o-mini"/>
               <feeder:setting key="pref_openai_url" value="https://api.openai.com"/>
@@ -196,6 +197,7 @@ class OpmlWriterKtTest {
                         UserSettings.SETTING_OPENAI_AZURE_VERSION -> "2023-05-15"
                         UserSettings.SETTING_OPENAI_AZURE_DEPLOYMENT_ID -> "test-deployment"
                         UserSettings.SETTING_OPENAI_REQUEST_TIMEOUT_SECONDS -> "45"
+                        UserSettings.SETTING_TEXT_MENU_CONFIG -> "" // Skip text menu config in tests
                     }
             }
     }

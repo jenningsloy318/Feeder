@@ -6,6 +6,8 @@ import android.util.Log
 import androidx.compose.runtime.Immutable
 import androidx.paging.PagingData
 import com.nononsenseapps.feeder.ApplicationCoroutineScope
+import com.nononsenseapps.feeder.ai.model.AISettings
+import com.nononsenseapps.feeder.ai.provider.AIProvider
 import com.nononsenseapps.feeder.background.runOnceBlocklistUpdate
 import com.nononsenseapps.feeder.background.runOnceRssSync
 import com.nononsenseapps.feeder.background.runOnceSyncChainSendRead
@@ -327,9 +329,25 @@ class Repository(
         sessionStore.setResumeTime(value)
     }
 
-    val openAISettings = settingsStore.openAiSettings
+    // AI Provider Selection
+    val aiProviderType = settingsStore.aiProviderType
 
-    fun setOpenAiSettings(value: OpenAISettings) = settingsStore.setOpenAiSettings(value)
+    fun setAIProviderType(value: AIProvider) = settingsStore.setAIProviderType(value)
+
+    // OpenAI Settings
+    val openAISettings = settingsStore.openAISettings
+
+    fun setOpenAISettings(value: com.nononsenseapps.feeder.ai.model.OpenAISettings) = settingsStore.setOpenAISettings(value)
+
+    // Anthropic Settings
+    val anthropicSettings = settingsStore.anthropicSettings
+
+    fun setAnthropicSettings(value: com.nononsenseapps.feeder.ai.model.AnthropicSettings) = settingsStore.setAnthropicSettings(value)
+
+    // Active AI Settings (based on selected provider)
+    val aiSettings = settingsStore.aiSettings
+
+    val aiSettingsFlow = settingsStore.aiSettingsFlow
 
     val showTitleUnreadCount = settingsStore.showTitleUnreadCount
 

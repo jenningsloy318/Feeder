@@ -33,6 +33,11 @@ preference = "1.2.1"
 testRunner = "1.7.0"
 lifecycle = "2.9.4"
 room = "2.8.3"
+# OpenAI official SDK (stable version 4.13.0 with proper API structure)
+openai-java = "4.13.0"
+# Anthropic official SDK (stable version 2.11.1 with proper API structure)
+anthropic-java = "2.11.1"
+# Deprecated: old third-party OpenAI client (kept for backward compatibility with existing code)
 openai-client = "4.0.1"
 compose = "2025.10.01"
 activityCompose = "1.11.0"
@@ -54,8 +59,11 @@ icu4j = "77.1"
 retrofit-bom = { module = "com.squareup.retrofit2:retrofit-bom", version.ref = "retrofit" }
 okhttp-bom = { module = "com.squareup.okhttp3:okhttp-bom", version.ref = "okhttp" }
 compose-bom = { module = "androidx.compose:compose-bom", version.ref = "compose" }
-openai-client-bom = { module = "com.aallam.openai:openai-client-bom", version.ref = "openai-client" }
-openai-client = { module = "com.aallam.openai:openai-client" }
+# OpenAI official SDK
+openai-java = { module = "com.openai:openai-java", version.ref = "openai-java" }
+# Anthropic official SDK
+anthropic-java = { module = "com.anthropic:anthropic-java", version.ref = "anthropic-java" }
+anthropic-java-okhttp = { module = "com.anthropic:anthropic-java-client-okhttp", version.ref = "anthropic-java" }
 ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp" }
 ktlint-compose = { module = "io.nlopez.compose.rules:ktlint", version.ref = "ktlint-compose" }
 room = { module = "androidx.room:room-compiler", version.ref = "room" }

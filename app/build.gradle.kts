@@ -251,7 +251,6 @@ dependencies {
     // BOMS
     implementation(platform(libs.okhttp.bom))
     implementation(platform(libs.compose.bom))
-    implementation(platform(libs.openai.client.bom))
     implementation(platform(libs.retrofit.bom))
 
     // Dependencies
@@ -260,8 +259,11 @@ dependencies {
     implementation(libs.bundles.jvm)
     implementation(libs.bundles.okhttp.android)
     implementation(libs.bundles.kotlin)
-    implementation(libs.openai.client)
-    implementation(libs.ktor.client.okhttp)
+
+    // AI SDKs - Official SDKs for OpenAI and Anthropic
+    implementation(libs.openai.java)
+    implementation(libs.anthropic.java)
+    implementation(libs.anthropic.java.okhttp)
 
     // Markdown
     implementation(libs.jetbrains.markdown)

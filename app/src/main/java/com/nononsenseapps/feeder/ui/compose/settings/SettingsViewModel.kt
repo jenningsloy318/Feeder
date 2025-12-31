@@ -6,18 +6,21 @@ import androidx.compose.runtime.Immutable
 import androidx.core.content.getSystemService
 import androidx.lifecycle.viewModelScope
 import com.nononsenseapps.feeder.ApplicationCoroutineScope
+import com.nononsenseapps.feeder.ai.AIApi
+import com.nononsenseapps.feeder.ai.model.AISettings
+import com.nononsenseapps.feeder.ui.compose.settings.AISettingsEvent
+import com.nononsenseapps.feeder.ui.compose.settings.AISettingsState
+import com.nononsenseapps.feeder.ui.compose.settings.ModelsState
 import com.nononsenseapps.feeder.archmodel.DarkThemePreferences
 import com.nononsenseapps.feeder.archmodel.FeedItemStyle
 import com.nononsenseapps.feeder.archmodel.ItemOpener
 import com.nononsenseapps.feeder.archmodel.LinkOpener
-import com.nononsenseapps.feeder.archmodel.OpenAISettings
 import com.nononsenseapps.feeder.archmodel.Repository
 import com.nononsenseapps.feeder.archmodel.SortingOptions
 import com.nononsenseapps.feeder.archmodel.SwipeAsRead
 import com.nononsenseapps.feeder.archmodel.SyncFrequency
 import com.nononsenseapps.feeder.archmodel.ThemeOptions
 import com.nononsenseapps.feeder.base.DIAwareViewModel
-import com.nononsenseapps.feeder.openai.OpenAIApi
 import com.nononsenseapps.feeder.ui.compose.settings.FontSelection
 import com.nononsenseapps.feeder.ui.compose.settings.FontSelection.SystemDefault
 import kotlinx.coroutines.Dispatchers
@@ -40,7 +43,7 @@ class SettingsViewModel(
     private val repository: Repository by instance()
     private val context: Application by instance()
     private val applicationCoroutineScope: ApplicationCoroutineScope by instance()
-    private val openAIApi: OpenAIApi by instance()
+    private val aiApi: AIApi by instance()
 
     fun setCurrentTheme(value: ThemeOptions) {
         repository.setCurrentTheme(value)
@@ -158,22 +161,32 @@ class SettingsViewModel(
         repository.setOpenDrawerOnFab(value)
     }
 
-    fun onOpenAISettingsEvent(event: OpenAISettingsEvent) {
+    fun onOpenAISettingsEvent(event: AISettingsEvent) {
         when (event) {
-            is OpenAISettingsEvent.LoadModels -> loadOpenAIModels(event.settings)
-            is OpenAISettingsEvent.UpdateSettings -> repository.setOpenAiSettings(event.settings)
-            is OpenAISettingsEvent.SwitchEditMode -> {
+            is AISettingsEvent.LoadModels -> loadOpenAIModels(event.settings)
+            is AISettingsEvent.UpdateSettings ->
+                when (event.settings) {
+                    is com.nononsenseapps.feeder.ai.model.AISettings.OpenAI -> {
+                        repository.setAIProviderType(com.nononsenseapps.feeder.ai.provider.AIProvider.OPENAI_COMPATIBLE)
+                        repository.setOpenAISettings(event.settings.openaiSettings)
+                    }
+                    is com.nononsenseapps.feeder.ai.model.AISettings.Anthropic -> {
+                        repository.setAIProviderType(com.nononsenseapps.feeder.ai.provider.AIProvider.ANTHROPIC)
+                        repository.setAnthropicSettings(event.settings.anthropicSettings)
+                    }
+                }
+            is AISettingsEvent.SwitchEditMode -> {
                 val current = _viewState.value.openAIState
                 _viewState.value = _viewState.value.copy(openAIState = current.copy(isEditMode = event.enabled))
             }
-            is OpenAISettingsEvent.ShowModelsError -> {
+            is AISettingsEvent.ShowModelsError -> {
                 val current = _viewState.value.openAIState
                 _viewState.value = _viewState.value.copy(openAIState = current.copy(showModelsError = event.show))
             }
         }
     }
 
-    private val openAIModelsState = MutableStateFlow<OpenAIModelsState>(OpenAIModelsState.None)
+    private val openAIModelsState = MutableStateFlow<ModelsState>(ModelsState.None)
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private val immutableFeedsSettings =
@@ -228,7 +241,7 @@ class SettingsViewModel(
                 repository.isOpenAdjacent,
                 repository.showReadingTime,
                 repository.showTitleUnreadCount,
-                repository.openAISettings,
+                repository.aiSettingsFlow,
                 openAIModelsState,
                 repository.isOpenDrawerOnFab,
                 repository.font,
@@ -263,8 +276,8 @@ class SettingsViewModel(
                     showTitleUnreadCount = params[25] as Boolean,
                     openAIState =
                         _viewState.value.openAIState.copy(
-                            settings = params[26] as OpenAISettings,
-                            modelsResult = params[27] as OpenAIModelsState,
+                            settings = params[26] as AISettings,
+                            modelsResult = params[27] as ModelsState,
                         ),
                     isOpenDrawerOnFab = params[28] as Boolean,
                     font = params[29] as FontSelection,
@@ -275,18 +288,21 @@ class SettingsViewModel(
         }
     }
 
-    private fun loadOpenAIModels(settings: OpenAISettings) {
+    private fun loadOpenAIModels(settings: AISettings) {
         viewModelScope.launch(Dispatchers.IO) {
-            openAIModelsState.value = OpenAIModelsState.Loading
+            openAIModelsState.value = ModelsState.Loading
             openAIModelsState.value =
-                openAIApi.listModelIds(settings).let { res ->
-                    when (res) {
-                        is OpenAIApi.ModelsResult.Error -> OpenAIModelsState.Error(res.message ?: "")
-                        OpenAIApi.ModelsResult.MissingToken -> OpenAIModelsState.None
-                        is OpenAIApi.ModelsResult.Success -> OpenAIModelsState.Success(res.ids)
-                        OpenAIApi.ModelsResult.AzureApiVersionRequired -> OpenAIModelsState.None
-                        OpenAIApi.ModelsResult.AzureDeploymentIdRequired -> OpenAIModelsState.None
+                try {
+                    val result = aiApi.listModelIds(settings)
+                    when (result) {
+                        is com.nononsenseapps.feeder.ai.AIClient.ModelsResult.Success -> ModelsState.Success(result.ids)
+                        is com.nononsenseapps.feeder.ai.AIClient.ModelsResult.Error -> ModelsState.Error(result.message ?: "Unknown error")
+                        com.nononsenseapps.feeder.ai.AIClient.ModelsResult.MissingToken -> ModelsState.Error("Missing API key")
+                        com.nononsenseapps.feeder.ai.AIClient.ModelsResult.AzureApiVersionRequired -> ModelsState.Error("Azure API version is required")
+                        com.nononsenseapps.feeder.ai.AIClient.ModelsResult.AzureDeploymentIdRequired -> ModelsState.Error("Azure deployment ID is required")
                     }
+                } catch (e: Exception) {
+                    ModelsState.Error(e.message ?: "Unknown error")
                 }
         }
     }
@@ -323,7 +339,7 @@ data class SettingsViewState(
     val maxLines: Int = 2,
     val showOnlyTitle: Boolean = false,
     val isOpenAdjacent: Boolean = true,
-    val openAIState: OpenAISettingsState = OpenAISettingsState(),
+    val openAIState: AISettingsState = AISettingsState(),
     val showReadingTime: Boolean = false,
     val showTitleUnreadCount: Boolean = false,
     val isOpenDrawerOnFab: Boolean = false,
@@ -335,42 +351,3 @@ data class UIFeedSettings(
     val title: String,
     val notify: Boolean,
 )
-
-data class OpenAISettingsState(
-    val settings: OpenAISettings = OpenAISettings(),
-    val modelsResult: OpenAIModelsState = OpenAIModelsState.None,
-    val isEditMode: Boolean = false,
-    val showModelsError: Boolean = false,
-)
-
-sealed interface OpenAIModelsState {
-    data object None : OpenAIModelsState
-
-    data object Loading : OpenAIModelsState
-
-    data class Success(
-        val ids: List<String>,
-    ) : OpenAIModelsState
-
-    data class Error(
-        val message: String,
-    ) : OpenAIModelsState
-}
-
-sealed interface OpenAISettingsEvent {
-    data class UpdateSettings(
-        val settings: OpenAISettings,
-    ) : OpenAISettingsEvent
-
-    data class LoadModels(
-        val settings: OpenAISettings,
-    ) : OpenAISettingsEvent
-
-    data class SwitchEditMode(
-        val enabled: Boolean,
-    ) : OpenAISettingsEvent
-
-    data class ShowModelsError(
-        val show: Boolean,
-    ) : OpenAISettingsEvent
-}

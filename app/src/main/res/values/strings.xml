@@ -270,6 +270,9 @@
   <string name="summarize_on_open">Summarize on open</string>
   <string name="openai_settings">AI integration</string>
   <string name="openai_settings_info">Compatible with many AI providers, but not all</string>
+  <string name="ai_provider">AI Provider</string>
+  <string name="ai_provider_openai_compatible">OpenAI-compatible</string>
+  <string name="ai_provider_anthropic">Anthropic (Claude)</string>
   <string name="api_key">API key</string>
   <string name="model_id">Model Id</string>
   <string name="azure_api_version">Azure API version</string>

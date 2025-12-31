@@ -1,10 +1,10 @@
 package com.nononsenseapps.feeder.di
 
 import android.app.Application
+import com.nononsenseapps.feeder.ai.AIApi
 import com.nononsenseapps.feeder.archmodel.FeedItemStore
 import com.nononsenseapps.feeder.archmodel.FeedStore
 import com.nononsenseapps.feeder.archmodel.FontStore
-import com.nononsenseapps.feeder.archmodel.OpenAISettings
 import com.nononsenseapps.feeder.archmodel.Repository
 import com.nononsenseapps.feeder.archmodel.SessionStore
 import com.nononsenseapps.feeder.archmodel.SettingsStore
@@ -14,9 +14,6 @@ import com.nononsenseapps.feeder.base.bindWithComposableViewModelScope
 import com.nononsenseapps.feeder.data.suggestions.SuggestedFeedRepository
 import com.nononsenseapps.feeder.model.OPMLParserHandler
 import com.nononsenseapps.feeder.model.opml.OPMLImporter
-import com.nononsenseapps.feeder.openai.OpenAIApi
-import com.nononsenseapps.feeder.openai.OpenAIClient
-import com.nononsenseapps.feeder.openai.OpenAIClientDefault
 import com.nononsenseapps.feeder.ui.CommonActivityViewModel
 import com.nononsenseapps.feeder.ui.MainActivityViewModel
 import com.nononsenseapps.feeder.ui.NavigationDeepLinkViewModel
@@ -47,8 +44,8 @@ val archModelModule =
         bind<FeedItemStore>() with singleton { FeedItemStore(di) }
         bind<SyncRemoteStore>() with singleton { SyncRemoteStore(di) }
         bind<OPMLParserHandler>() with singleton { OPMLImporter(di) }
-        bindFactory<OpenAISettings, OpenAIClient> { settings -> OpenAIClientDefault(settings) }
-        bind<OpenAIApi>() with singleton { OpenAIApi(instance(), appLang = Locale.getDefault().getISO3Language(), factory()) }
+        // AI API with factory pattern for multiple providers
+        bind<AIApi>() with singleton { AIApi(instance(), appLang = Locale.getDefault().getISO3Language()) }
         bind<SuggestedFeedRepository>() with
             singleton {
                 SuggestedFeedRepository(

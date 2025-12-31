@@ -437,10 +437,10 @@ fun ArticleContent(
     ) { indexOffset ->
         var offsetCounter = indexOffset
 
-        if (viewState.openAiSummary !is OpenAISummaryState.Empty) {
+        if (viewState.aiSummary !is AISummaryState.Empty) {
             offsetCounter++
             item {
-                SummarySection(viewState.openAiSummary)
+                SummarySection(viewState.aiSummary)
             }
         }
         // Can take a composition or two before viewstate is set to its actual values
@@ -497,17 +497,17 @@ fun ArticleContent(
 }
 
 @Composable
-private fun SummarySection(summary: OpenAISummaryState) {
+private fun SummarySection(summary: AISummaryState) {
     OutlinedCard(
         modifier = Modifier.fillMaxWidth(),
     ) {
         when (summary) {
-            OpenAISummaryState.Empty -> {}
-            OpenAISummaryState.Loading ->
+            AISummaryState.Empty -> {}
+            AISummaryState.Loading ->
                 LinearProgressIndicator(
                     modifier = Modifier.padding(16.dp).fillMaxWidth(),
                 )
-            is OpenAISummaryState.Result ->
+            is AISummaryState.Result ->
                 Text(
                     modifier = Modifier.padding(8.dp),
                     text = summary.value.content,

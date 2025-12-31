@@ -1,0 +1,133 @@
+package com.nononsenseapps.feeder.ai.model
+
+import com.nononsenseapps.feeder.ai.provider.AIProvider
+
+/**
+ * Settings for OpenAI-compatible provider.
+ *
+ * @property key API key for OpenAI-compatible endpoint
+ * @property modelId Model identifier (e.g., "gpt-4o-mini")
+ * @property baseUrl Custom base URL for API requests (empty for default OpenAI endpoint)
+ * @property timeoutSeconds Request timeout in seconds (30-600 range, default 30)
+ * @property azureApiVersion Azure API version (Azure OpenAI only)
+ * @property azureDeploymentId Azure deployment ID (Azure OpenAI only)
+ */
+data class OpenAISettings(
+    val key: String = "",
+    val modelId: String = "",
+    val baseUrl: String = "",
+    val timeoutSeconds: Int = 30,
+    val azureApiVersion: String = "",
+    val azureDeploymentId: String = "",
+) {
+    /**
+     * Check if the configured base URL is an Azure OpenAI endpoint.
+     */
+    val isAzure: Boolean
+        get() = baseUrl.contains("openai.azure.com", ignoreCase = true)
+
+    /**
+     * Check if the configured base URL is a Perplexity endpoint.
+     * Perplexity doesn't support model listing.
+     */
+    val isPerplexity: Boolean
+        get() = baseUrl.contains("api.perplexity.ai", ignoreCase = true)
+
+    /**
+     * Check if settings are valid.
+     */
+    val isValid: Boolean
+        get() = modelId.isNotEmpty() &&
+            key.isNotEmpty() &&
+            if (isAzure) {
+                azureApiVersion.isNotBlank() && azureDeploymentId.isNotBlank()
+            } else {
+                true
+            }
+
+    companion object {
+        const val DEFAULT_MODEL = "gpt-4o-mini"
+    }
+}
+
+/**
+ * Settings for Anthropic provider.
+ *
+ * @property key API key for Anthropic
+ * @property modelId Model identifier (e.g., "claude-3-5-sonnet-20241022")
+ * @property baseUrl Custom base URL for API requests (empty for default Anthropic endpoint)
+ * @property timeoutSeconds Request timeout in seconds (30-600 range, default 30)
+ */
+data class AnthropicSettings(
+    val key: String = "",
+    val modelId: String = "",
+    val baseUrl: String = "",
+    val timeoutSeconds: Int = 30,
+) {
+    /**
+     * Check if settings are valid.
+     */
+    val isValid: Boolean
+        get() = modelId.isNotEmpty() && key.isNotEmpty()
+
+    companion object {
+        const val DEFAULT_MODEL = "claude-3-5-sonnet-20241022"
+    }
+}
+
+/**
+ * Sealed interface for provider-specific settings.
+ */
+sealed interface AISettings {
+    val providerType: AIProvider
+
+    /**
+     * OpenAI-compatible settings.
+     */
+    @Suppress("DataClassShouldBeImmutable")
+    data class OpenAI(
+        val openaiSettings: com.nononsenseapps.feeder.ai.model.OpenAISettings = com.nononsenseapps.feeder.ai.model.OpenAISettings(),
+    ) : AISettings {
+        override val providerType: AIProvider = AIProvider.OPENAI_COMPATIBLE
+    }
+
+    /**
+     * Anthropic settings.
+     */
+    @Suppress("DataClassShouldBeImmutable")
+    data class Anthropic(
+        val anthropicSettings: com.nononsenseapps.feeder.ai.model.AnthropicSettings = com.nononsenseapps.feeder.ai.model.AnthropicSettings(),
+    ) : AISettings {
+        override val providerType: AIProvider = AIProvider.ANTHROPIC
+    }
+
+    /**
+     * Check if settings are valid.
+     */
+    val isValid: Boolean
+        get() =
+            when (this) {
+                is OpenAI -> openaiSettings.isValid
+                is Anthropic -> anthropicSettings.isValid
+            }
+
+    /**
+     * Get default model ID for the current provider.
+     */
+    fun getDefaultModelId(): String =
+        when (this) {
+            is OpenAI -> OpenAISettings.DEFAULT_MODEL
+            is Anthropic -> AnthropicSettings.DEFAULT_MODEL
+        }
+
+    companion object {
+        /**
+         * Get default settings for a given provider.
+         */
+        fun defaultForProvider(provider: AIProvider): AISettings =
+            when (provider) {
+                AIProvider.OPENAI_COMPATIBLE -> OpenAI()
+                AIProvider.ANTHROPIC -> Anthropic()
+            }
+    }
+}

@@ -106,27 +106,45 @@ open class OPMLImporter(
             UserSettings.SETTING_SHOW_TITLE_UNREAD_COUNT -> settingsStore.setShowTitleUnreadCount(value.toBoolean())
             UserSettings.SETTING_MAX_ITEM_COUNT_PER_FEED -> settingsStore.setMaxCountPerFeed(value.toIntOrNull() ?: 100)
 
-            // OpenAI related settings
-            UserSettings.SETTING_OPENAI_KEY,
-            UserSettings.SETTING_OPENAI_MODEL_ID,
-            UserSettings.SETTING_OPENAI_URL,
-            UserSettings.SETTING_OPENAI_AZURE_VERSION,
-            UserSettings.SETTING_OPENAI_AZURE_DEPLOYMENT_ID,
-            UserSettings.SETTING_OPENAI_REQUEST_TIMEOUT_SECONDS,
-            -> {
-                val current = settingsStore.openAiSettings.value
-                val newSettings =
-                    when (UserSettings.fromKey(key)) {
-                        UserSettings.SETTING_OPENAI_KEY -> current.copy(key = value)
-                        UserSettings.SETTING_OPENAI_MODEL_ID -> current.copy(modelId = value)
-                        UserSettings.SETTING_OPENAI_URL -> current.copy(baseUrl = value)
-                        UserSettings.SETTING_OPENAI_AZURE_VERSION -> current.copy(azureApiVersion = value)
-                        UserSettings.SETTING_OPENAI_AZURE_DEPLOYMENT_ID -> current.copy(azureDeploymentId = value)
-                        UserSettings.SETTING_OPENAI_REQUEST_TIMEOUT_SECONDS -> current.copy(timeoutSeconds = value.toIntOrNull() ?: 30)
-                        else -> current
-                    }
-                settingsStore.setOpenAiSettings(newSettings)
-            }
+            // AI Provider Type
+            UserSettings.SETTING_AI_PROVIDER_TYPE ->
+                settingsStore.setAIProviderType(
+                    com.nononsenseapps.feeder.ai.provider.AIProvider.fromString(value),
+                )
+
+            // OpenAI settings
+            UserSettings.SETTING_OPENAI_KEY -> settingsStore.setOpenAISettings(
+                settingsStore.openAISettings.value.copy(key = value),
+            )
+            UserSettings.SETTING_OPENAI_MODEL_ID -> settingsStore.setOpenAISettings(
+                settingsStore.openAISettings.value.copy(modelId = value),
+            )
+            UserSettings.SETTING_OPENAI_URL -> settingsStore.setOpenAISettings(
+                settingsStore.openAISettings.value.copy(baseUrl = value),
+            )
+            UserSettings.SETTING_OPENAI_AZURE_VERSION -> settingsStore.setOpenAISettings(
+                settingsStore.openAISettings.value.copy(azureApiVersion = value),
+            )
+            UserSettings.SETTING_OPENAI_AZURE_DEPLOYMENT_ID -> settingsStore.setOpenAISettings(
+                settingsStore.openAISettings.value.copy(azureDeploymentId = value),
+            )
+            UserSettings.SETTING_OPENAI_REQUEST_TIMEOUT_SECONDS -> settingsStore.setOpenAISettings(
+                settingsStore.openAISettings.value.copy(timeoutSeconds = value.toIntOrNull() ?: 30),
+            )
+
+            // Anthropic settings
+            UserSettings.SETTING_ANTHROPIC_KEY -> settingsStore.setAnthropicSettings(
+                settingsStore.anthropicSettings.value.copy(key = value),
+            )
+            UserSettings.SETTING_ANTHROPIC_MODEL_ID -> settingsStore.setAnthropicSettings(
+                settingsStore.anthropicSettings.value.copy(modelId = value),
+            )
+            UserSettings.SETTING_ANTHROPIC_URL -> settingsStore.setAnthropicSettings(
+                settingsStore.anthropicSettings.value.copy(baseUrl = value),
+            )
+            UserSettings.SETTING_ANTHROPIC_REQUEST_TIMEOUT_SECONDS -> settingsStore.setAnthropicSettings(
+                settingsStore.anthropicSettings.value.copy(timeoutSeconds = value.toIntOrNull() ?: 30),
+            )
         }
     }
 

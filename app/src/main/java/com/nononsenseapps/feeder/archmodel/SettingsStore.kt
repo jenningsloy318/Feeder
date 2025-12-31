@@ -7,6 +7,10 @@ import android.database.sqlite.SQLiteConstraintException
 import android.os.Build
 import androidx.annotation.StringRes
 import com.nononsenseapps.feeder.R
+import com.nononsenseapps.feeder.ai.model.AISettings
+import com.nononsenseapps.feeder.ai.model.AnthropicSettings
+import com.nononsenseapps.feeder.ai.model.OpenAISettings as ModelOpenAISettings
+import com.nononsenseapps.feeder.ai.provider.AIProvider
 import com.nononsenseapps.feeder.background.schedulePeriodicRssSync
 import com.nononsenseapps.feeder.db.room.BlocklistDao
 import com.nononsenseapps.feeder.db.room.ID_UNSET
@@ -16,12 +20,17 @@ import com.nononsenseapps.feeder.ui.compose.settings.getFontSelectionFromPath
 import com.nononsenseapps.feeder.util.FilePathProvider
 import com.nononsenseapps.feeder.util.PREF_MAX_ITEM_COUNT_PER_FEED
 import com.nononsenseapps.feeder.util.getStringNonNull
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import org.kodein.di.DI
 import org.kodein.di.DIAware
@@ -454,29 +463,97 @@ class SettingsStore(
         schedulePeriodicRssSync(di = di, replace = true)
     }
 
-    private val _openAiSettings =
+    // AI provider type selection
+    private val _aiProviderType = MutableStateFlow(AIProvider.fromString(sp.getString(PREF_AI_PROVIDER_TYPE, null)))
+    val aiProviderType = _aiProviderType.asStateFlow()
+
+    // OpenAI settings
+    private val _openAISettings =
         MutableStateFlow(
-            OpenAISettings(
+            ModelOpenAISettings(
                 key = sp.getStringNonNull(PREF_OPENAI_KEY, ""),
-                modelId = sp.getStringNonNull(PREF_OPENAI_MODEL_ID, "gpt-4o-mini"),
+                modelId = sp.getStringNonNull(PREF_OPENAI_MODEL_ID, ModelOpenAISettings.DEFAULT_MODEL),
                 baseUrl = sp.getStringNonNull(PREF_OPENAI_URL, ""),
+                timeoutSeconds = sp.getInt(PREF_OPENAI_REQUEST_TIMEOUT_SECONDS, 30),
                 azureApiVersion = sp.getStringNonNull(PREF_OPENAI_AZURE_VERSION, ""),
                 azureDeploymentId = sp.getStringNonNull(PREF_OPENAI_AZURE_DEPLOYMENT_ID, ""),
-                timeoutSeconds = sp.getInt(PREF_OPENAI_REQUEST_TIMEOUT_SECONDS, 30),
             ),
         )
-    val openAiSettings = _openAiSettings.asStateFlow()
+    val openAISettings = _openAISettings.asStateFlow()
 
-    fun setOpenAiSettings(value: OpenAISettings) {
-        _openAiSettings.value = value
+    // Anthropic settings
+    private val _anthropicSettings =
+        MutableStateFlow(
+            AnthropicSettings(
+                key = sp.getStringNonNull(PREF_ANTHROPIC_KEY, ""),
+                modelId = sp.getStringNonNull(PREF_ANTHROPIC_MODEL_ID, AnthropicSettings.DEFAULT_MODEL),
+                baseUrl = sp.getStringNonNull(PREF_ANTHROPIC_URL, ""),
+                timeoutSeconds = sp.getInt(PREF_ANTHROPIC_REQUEST_TIMEOUT_SECONDS, 30),
+            ),
+        )
+    val anthropicSettings = _anthropicSettings.asStateFlow()
+
+    /**
+     * Get the active AI settings based on the selected provider.
+     */
+    val aiSettings: AISettings
+        get() =
+            when (_aiProviderType.value) {
+                AIProvider.OPENAI_COMPATIBLE -> AISettings.OpenAI(_openAISettings.value)
+                AIProvider.ANTHROPIC -> AISettings.Anthropic(_anthropicSettings.value)
+            }
+
+    /**
+     * Get the active AI settings as a StateFlow that reacts to provider changes.
+     * This combines the provider type flow with the respective settings flows.
+     */
+    val aiSettingsFlow: StateFlow<AISettings>
+        get() =
+            _aiProviderType
+                .flatMapLatest { provider ->
+                    when (provider) {
+                        AIProvider.OPENAI_COMPATIBLE ->
+                            _openAISettings.mapLatest { openaiSettings ->
+                                AISettings.OpenAI(openaiSettings)
+                            }
+                        AIProvider.ANTHROPIC ->
+                            _anthropicSettings.mapLatest { anthropicSettings ->
+                                AISettings.Anthropic(anthropicSettings)
+                            }
+                    }
+                }
+                .stateIn(
+                    scope = CoroutineScope(Dispatchers.Default + SupervisorJob()),
+                    started = kotlinx.coroutines.flow.SharingStarted.Eagerly,
+                    initialValue = aiSettings,
+                )
+
+    fun setAIProviderType(value: AIProvider) {
+        _aiProviderType.value = value
+        sp.edit().putString(PREF_AI_PROVIDER_TYPE, value.name).apply()
+    }
+
+    fun setOpenAISettings(value: ModelOpenAISettings) {
+        _openAISettings.value = value
         sp
             .edit()
             .putString(PREF_OPENAI_KEY, value.key)
             .putString(PREF_OPENAI_MODEL_ID, value.modelId)
             .putString(PREF_OPENAI_URL, value.baseUrl)
+            .putInt(PREF_OPENAI_REQUEST_TIMEOUT_SECONDS, value.timeoutSeconds)
             .putString(PREF_OPENAI_AZURE_VERSION, value.azureApiVersion)
             .putString(PREF_OPENAI_AZURE_DEPLOYMENT_ID, value.azureDeploymentId)
-            .putInt(PREF_OPENAI_REQUEST_TIMEOUT_SECONDS, value.timeoutSeconds)
+            .apply()
+    }
+
+    fun setAnthropicSettings(value: AnthropicSettings) {
+        _anthropicSettings.value = value
+        sp
+            .edit()
+            .putString(PREF_ANTHROPIC_KEY, value.key)
+            .putString(PREF_ANTHROPIC_MODEL_ID, value.modelId)
+            .putString(PREF_ANTHROPIC_URL, value.baseUrl)
+            .putInt(PREF_ANTHROPIC_REQUEST_TIMEOUT_SECONDS, value.timeoutSeconds)
             .apply()
     }
 
@@ -598,7 +675,7 @@ const val PREF_OPEN_DRAWER_ON_FAB = "pref_open_drawer_on_fab"
 const val PREF_READALOUD_USE_DETECT_LANGUAGE = "pref_readaloud_detect_lang"
 
 /**
- * OpenAI integration
+ * OpenAI integration settings
  */
 const val PREF_OPENAI_KEY = "pref_openai_key"
 const val PREF_OPENAI_MODEL_ID = "pref_openai_model_id"
@@ -606,6 +683,19 @@ const val PREF_OPENAI_URL = "pref_openai_url"
 const val PREF_OPENAI_AZURE_VERSION = "pref_openai_azure_version"
 const val PREF_OPENAI_AZURE_DEPLOYMENT_ID = "pref_openai_azure_deployment_id"
 const val PREF_OPENAI_REQUEST_TIMEOUT_SECONDS = "pref_openai_request_timeout_seconds"
+
+/**
+ * Anthropic integration settings
+ */
+const val PREF_ANTHROPIC_KEY = "pref_anthropic_key"
+const val PREF_ANTHROPIC_MODEL_ID = "pref_anthropic_model_id"
+const val PREF_ANTHROPIC_URL = "pref_anthropic_url"
+const val PREF_ANTHROPIC_REQUEST_TIMEOUT_SECONDS = "pref_anthropic_request_timeout_seconds"
+
+/**
+ * AI provider selection
+ */
+const val PREF_AI_PROVIDER_TYPE = "pref_ai_provider_type"
 
 /**
  * Appearance settings
@@ -658,6 +748,13 @@ enum class UserSettings(
     SETTING_OPENAI_AZURE_VERSION(key = PREF_OPENAI_AZURE_VERSION),
     SETTING_OPENAI_AZURE_DEPLOYMENT_ID(key = PREF_OPENAI_AZURE_DEPLOYMENT_ID),
     SETTING_OPENAI_REQUEST_TIMEOUT_SECONDS(key = PREF_OPENAI_REQUEST_TIMEOUT_SECONDS),
+    // Anthropic settings
+    SETTING_ANTHROPIC_KEY(key = PREF_ANTHROPIC_KEY),
+    SETTING_ANTHROPIC_MODEL_ID(key = PREF_ANTHROPIC_MODEL_ID),
+    SETTING_ANTHROPIC_URL(key = PREF_ANTHROPIC_URL),
+    SETTING_ANTHROPIC_REQUEST_TIMEOUT_SECONDS(key = PREF_ANTHROPIC_REQUEST_TIMEOUT_SECONDS),
+    // AI provider selection
+    SETTING_AI_PROVIDER_TYPE(key = PREF_AI_PROVIDER_TYPE),
     ;
 
     companion object {
@@ -733,15 +830,6 @@ enum class SwipeAsRead(
     ONLY_FROM_END(R.string.only_from_end),
     FROM_ANYWHERE(R.string.from_anywhere),
 }
-
-data class OpenAISettings(
-    val modelId: String = "",
-    val baseUrl: String = "",
-    val timeoutSeconds: Int = 30,
-    val azureApiVersion: String = "",
-    val azureDeploymentId: String = "",
-    val key: String = "",
-)
 
 fun String.dropEnds(
     starting: Int,

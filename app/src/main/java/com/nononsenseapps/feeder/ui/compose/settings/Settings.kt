@@ -280,7 +280,7 @@ private fun SettingsScreenPreview() {
             showTitleUnreadCount = false,
             onShowTitleUnreadCountChange = {},
             onStartActivity = {},
-            openAIState = OpenAISettingsState(),
+            openAIState = AISettingsState(),
             onOpenAIEvent = {},
             isOpenDrawerOnFab = false,
             onOpenDrawerOnFab = {},
@@ -348,8 +348,8 @@ fun SettingsList(
     showTitleUnreadCount: Boolean,
     onShowTitleUnreadCountChange: (Boolean) -> Unit,
     onStartActivity: (intent: Intent) -> Unit,
-    openAIState: OpenAISettingsState,
-    onOpenAIEvent: (OpenAISettingsEvent) -> Unit,
+    openAIState: AISettingsState,
+    onOpenAIEvent: (AISettingsEvent) -> Unit,
     isOpenDrawerOnFab: Boolean,
     onOpenDrawerOnFab: (Boolean) -> Unit,
     currentFontSelection: FontSelection,
@@ -722,7 +722,7 @@ fun SettingsList(
         SettingsGroup(
             title = R.string.openai_settings,
         ) {
-            OpenAISection(
+            AIProviderSection(
                 state = openAIState,
                 onEvent = onOpenAIEvent,
             )

@@ -148,6 +148,12 @@ class OpmlWriterKtTest {
               <feeder:setting key="pref_openai_azure_version" value="2023-05-15"/>
               <feeder:setting key="pref_openai_azure_deployment_id" value="test-deployment"/>
               <feeder:setting key="pref_openai_request_timeout_seconds" value="45"/>
+              <feeder:setting key="pref_anthropic_key" value="test-anthropic-key"/>
+              <feeder:setting key="pref_anthropic_model_id" value="claude-3-5-sonnet-20241022"/>
+              <feeder:setting key="pref_anthropic_url" value="https://api.anthropic.com"/>
+              <feeder:setting key="pref_anthropic_request_timeout_seconds" value="60"/>
+              <feeder:setting key="pref_ai_provider_type" value="openai"/>
+              <feeder:setting key="pref_summary_enabled" value="true"/>
               <feeder:blocked pattern="foo"/>
               <feeder:blocked pattern="break &quot;xml id &apos;9&apos; &gt; 0 &amp; &lt; 10"/>
             </feeder:settings>
@@ -196,6 +202,12 @@ class OpmlWriterKtTest {
                         UserSettings.SETTING_OPENAI_AZURE_VERSION -> "2023-05-15"
                         UserSettings.SETTING_OPENAI_AZURE_DEPLOYMENT_ID -> "test-deployment"
                         UserSettings.SETTING_OPENAI_REQUEST_TIMEOUT_SECONDS -> "45"
+                        UserSettings.SETTING_ANTHROPIC_KEY -> "test-anthropic-key"
+                        UserSettings.SETTING_ANTHROPIC_MODEL_ID -> "claude-3-5-sonnet-20241022"
+                        UserSettings.SETTING_ANTHROPIC_URL -> "https://api.anthropic.com"
+                        UserSettings.SETTING_ANTHROPIC_REQUEST_TIMEOUT_SECONDS -> "60"
+                        UserSettings.SETTING_AI_PROVIDER_TYPE -> "openai"
+                        UserSettings.SETTING_SUMMARY_ENABLED -> "true"
                     }
             }
     }

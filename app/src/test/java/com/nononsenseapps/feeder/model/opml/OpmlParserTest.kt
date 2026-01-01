@@ -1,10 +1,12 @@
 package com.nononsenseapps.feeder.model.opml
 
+import com.nononsenseapps.feeder.ai.model.AnthropicSettings
+import com.nononsenseapps.feeder.ai.model.OpenAISettings
+import com.nononsenseapps.feeder.ai.provider.AIProvider
 import com.nononsenseapps.feeder.archmodel.DarkThemePreferences
 import com.nononsenseapps.feeder.archmodel.FeedItemStyle
 import com.nononsenseapps.feeder.archmodel.ItemOpener
 import com.nononsenseapps.feeder.archmodel.LinkOpener
-import com.nononsenseapps.feeder.archmodel.OpenAISettings
 import com.nononsenseapps.feeder.archmodel.PREF_VAL_OPEN_WITH_CUSTOM_TAB
 import com.nononsenseapps.feeder.archmodel.SettingsStore
 import com.nononsenseapps.feeder.archmodel.SortingOptions
@@ -35,7 +37,14 @@ import org.kodein.di.singleton
 
 class OpmlParserTest : DIAware {
     private val feedDao: FeedDao = mockk()
-    private val settingsStore: SettingsStore = mockk(relaxUnitFun = true)
+    private val settingsStore: SettingsStore = mockk(relaxUnitFun = true) {
+        every { openAISettings } returns MutableStateFlow(OpenAISettings())
+        every { anthropicSettings } returns MutableStateFlow(AnthropicSettings())
+        every { setOpenAISettings(any()) } just Runs
+        every { setAnthropicSettings(any()) } just Runs
+        every { setAIProviderType(any()) } just Runs
+        every { setSummaryEnabled(any()) } just Runs
+    }
     private val filePathProvider: FilePathProvider = mockk(relaxUnitFun = true)
     override val di =
         DI.lazy {
@@ -88,6 +97,12 @@ class OpmlParserTest : DIAware {
                         UserSettings.SETTING_OPENAI_AZURE_VERSION -> "2023-05-15"
                         UserSettings.SETTING_OPENAI_AZURE_DEPLOYMENT_ID -> "test-deployment"
                         UserSettings.SETTING_OPENAI_REQUEST_TIMEOUT_SECONDS -> "45"
+                        UserSettings.SETTING_ANTHROPIC_KEY -> "test-anthropic-key"
+                        UserSettings.SETTING_ANTHROPIC_MODEL_ID -> "claude-3-5-sonnet-20241022"
+                        UserSettings.SETTING_ANTHROPIC_URL -> "https://api.anthropic.com"
+                        UserSettings.SETTING_ANTHROPIC_REQUEST_TIMEOUT_SECONDS -> "60"
+                        UserSettings.SETTING_AI_PROVIDER_TYPE -> "openai"
+                        UserSettings.SETTING_SUMMARY_ENABLED -> "true"
                     },
             )
         }
@@ -96,8 +111,6 @@ class OpmlParserTest : DIAware {
     @Test
     fun handlesAllSettings(): Unit =
         runBlocking {
-            every { settingsStore.openAiSettings } returns MutableStateFlow(OpenAISettings())
-            every { settingsStore.setOpenAiSettings(any()) } just Runs
             setAllSettings()
             verify {
                 settingsStore.setLinkOpener(LinkOpener.CUSTOM_TAB)
@@ -130,18 +143,12 @@ class OpmlParserTest : DIAware {
                 settingsStore.setOpenDrawerOnFab(true)
                 settingsStore.setShowTitleUnreadCount(true)
                 settingsStore.setMaxCountPerFeed(200)
-                settingsStore.openAiSettings
-                settingsStore.setOpenAiSettings(any())
-//                settingsStore.setOpenAiSettings(
-//                    OpenAISettings(
-//                        modelId = "gpt-4o-mini",
-//                        baseUrl = "https://api.openai.com",
-//                        timeoutSeconds = 45,
-//                        azureApiVersion = "2023-05-15",
-//                        azureDeploymentId = "test-deployment",
-//                        key = "test-api-key",
-//                    )
-//                )
+                settingsStore.openAISettings
+                settingsStore.setOpenAISettings(any())
+                settingsStore.anthropicSettings
+                settingsStore.setAnthropicSettings(any())
+                settingsStore.setAIProviderType(any())
+                settingsStore.setSummaryEnabled(true)
             }
 
             confirmVerified(settingsStore)

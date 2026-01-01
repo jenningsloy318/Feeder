@@ -32,6 +32,7 @@ import com.nononsenseapps.feeder.ui.compose.navigation.ProviderEditDestination
 import com.nononsenseapps.feeder.ui.compose.navigation.ProviderListDestination
 import com.nononsenseapps.feeder.ui.compose.navigation.SearchFeedDestination
 import com.nononsenseapps.feeder.ui.compose.navigation.SettingsDestination
+import com.nononsenseapps.feeder.ui.compose.navigation.SummarySettingsDestination
 import com.nononsenseapps.feeder.ui.compose.navigation.SyncScreenDestination
 import com.nononsenseapps.feeder.ui.compose.navigation.TextSettingsDestination
 import com.nononsenseapps.feeder.ui.compose.utils.withAllProviders
@@ -125,6 +126,8 @@ class MainActivity : DIAwareComponentActivity() {
             // AI Provider management
             ProviderListDestination.register(this, navController, navDrawerListState)
             ProviderEditDestination.register(this, navController, navDrawerListState)
+            // Summary settings
+            SummarySettingsDestination.register(this, navController, navDrawerListState)
             // Sync settings
             SyncScreenDestination.register(this, navController, navDrawerListState)
             // Add Fonts

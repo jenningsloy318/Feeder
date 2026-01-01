@@ -35,6 +35,8 @@ import com.nononsenseapps.feeder.ui.compose.settings.ProviderEditViewModel
 import com.nononsenseapps.feeder.ui.compose.settings.ProviderListScreen
 import com.nononsenseapps.feeder.ui.compose.settings.ProviderListViewModel
 import com.nononsenseapps.feeder.ui.compose.settings.SettingsScreen
+import com.nononsenseapps.feeder.ui.compose.settings.SummarySettingsScreen
+import com.nononsenseapps.feeder.ui.compose.settings.SummarySettingsViewModel
 import com.nononsenseapps.feeder.ui.compose.settings.TextSettingsScreen
 import com.nononsenseapps.feeder.ui.compose.settings.TextSettingsViewModel
 import com.nononsenseapps.feeder.ui.compose.sync.SyncScreen
@@ -343,6 +345,9 @@ data object SettingsDestination : NavigationDestination(
             onNavigateToProviderListScreen = {
                 ProviderListDestination.navigate(navController)
             },
+            onNavigateToSummarySettings = {
+                SummarySettingsDestination.navigate(navController)
+            },
             settingsViewModel = backStackEntry.diAwareViewModel(),
         )
     }
@@ -435,6 +440,39 @@ data object ProviderEditDestination : NavigationDestination(
             onNavigateUp = {
                 // Always navigate back to provider list screen
                 ProviderListDestination.navigate(navController)
+            },
+            viewModel = viewModel,
+        )
+    }
+}
+
+/**
+ * Navigation destination for the summary settings screen.
+ */
+data object SummarySettingsDestination : NavigationDestination(
+    path = "settings/summary",
+    navArguments = emptyList(),
+    deepLinks = emptyList(),
+) {
+    fun navigate(navController: NavController) {
+        navController.navigate(path) {
+            launchSingleTop = true
+        }
+    }
+
+    @Composable
+    override fun RegisterScreen(
+        navController: NavController,
+        backStackEntry: NavBackStackEntry,
+        navDrawerListState: LazyListState,
+    ) {
+        val viewModel: SummarySettingsViewModel = backStackEntry.diAwareViewModel()
+
+        SummarySettingsScreen(
+            onNavigateUp = {
+                if (!navController.popBackStack()) {
+                    SettingsDestination.navigate(navController)
+                }
             },
             viewModel = viewModel,
         )

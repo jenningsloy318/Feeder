@@ -145,6 +145,9 @@ open class OPMLImporter(
             UserSettings.SETTING_ANTHROPIC_REQUEST_TIMEOUT_SECONDS -> settingsStore.setAnthropicSettings(
                 settingsStore.anthropicSettings.value.copy(timeoutSeconds = value.toIntOrNull() ?: 30),
             )
+
+            // Summary settings
+            UserSettings.SETTING_SUMMARY_ENABLED -> settingsStore.setSummaryEnabled(value.toBoolean())
         }
     }
 

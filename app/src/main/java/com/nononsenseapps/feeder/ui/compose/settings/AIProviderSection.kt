@@ -65,6 +65,7 @@ fun AIProviderSection(
     state: AISettingsState,
     onEvent: (AISettingsEvent) -> Unit,
     onNavigateToProviders: () -> Unit,
+    onNavigateToSummary: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier) {
@@ -77,9 +78,9 @@ fun AIProviderSection(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        SummaryLanguageSectionItem(
+        SummarySectionItem(
             summaryLanguage = state.summaryLanguage,
-            onEvent = onEvent,
+            onNavigateToSummary = onNavigateToSummary,
             modifier = Modifier,
         )
     }
@@ -170,18 +171,16 @@ private fun AIProviderSectionItem(
 }
 
 @Composable
-private fun SummaryLanguageSectionItem(
+private fun SummarySectionItem(
     summaryLanguage: SummaryLanguage,
-    onEvent: (AISettingsEvent) -> Unit,
+    onNavigateToSummary: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var languageMenuExpanded by remember { mutableStateOf(false) }
-
     Row(
         modifier =
             modifier
                 .width(LocalDimens.current.maxContentWidth)
-                .clickable { languageMenuExpanded = true }
+                .clickable { onNavigateToSummary() }
                 .semantics { role = Role.Button },
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -193,37 +192,16 @@ private fun SummaryLanguageSectionItem(
         TitleAndSubtitle(
             title = {
                 Text(
-                    text = stringResource(R.string.summary_language_title),
+                    text = stringResource(R.string.summary_title),
                 )
             },
             subtitle = {
                 Text(
-                    text = stringResource(id = summaryLanguage.displayName),
+                    text = stringResource(R.string.summary_subtitle),
                     style = MaterialTheme.typography.bodySmall,
                 )
             },
         )
-    }
-
-    Box {
-        DropdownMenu(
-            expanded = languageMenuExpanded,
-            onDismissRequest = { languageMenuExpanded = false },
-        ) {
-            SummaryLanguage.entries.forEach { language ->
-                DropdownMenuItem(
-                    text = {
-                        Text(
-                            stringResource(id = language.displayName),
-                        )
-                    },
-                    onClick = {
-                        onEvent(AISettingsEvent.UpdateSummaryLanguage(language))
-                        languageMenuExpanded = false
-                    },
-                )
-            }
-        }
     }
 }
 

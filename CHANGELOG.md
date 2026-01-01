@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### 🚀 Features
+- Added dedicated Summary settings screen with enable/disable toggle for AI summaries
+- Improved AI Integration settings UX with separate configuration screen for summary language and enabled state
+- Added OPML import/export support for AI summary settings
+
+### 🐛 Bug Fixes & Minor Changes
+- Refactored AI summary API to respect user's enabled state before generating summaries
+- Updated AI Provider settings section to navigate to dedicated Summary screen
+
 ## [2.16.1] - 2025-11-23
 
 ### 🐛 Bug Fixes & Minor Changes

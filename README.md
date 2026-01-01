@@ -47,6 +47,8 @@ Then build and install the app to your phone which is connected via USB:
 * Notification support
 * OPML import/export
 * Material Design
+* AI-powered article summaries with configurable language and provider settings
+* Support for multiple AI providers (OpenAI-compatible and Anthropic Claude)
 
 ### Screenshots
 

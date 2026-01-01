@@ -77,6 +77,12 @@ class AIApi(
      */
     suspend fun summarize(content: String): AIClient.SummaryResult {
         return try {
+            // Check if summaries are enabled
+            val enabled = repository.summaryEnabled.first()
+            if (!enabled) {
+                return AIClient.SummaryResult.Error(content = "")
+            }
+
             val language = repository.summaryLanguage.first()
             client.generateSummary(content, language)
         } catch (e: Exception) {

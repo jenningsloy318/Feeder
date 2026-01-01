@@ -360,6 +360,11 @@ class Repository(
 
     fun setSummaryLanguage(value: com.nononsenseapps.feeder.ai.model.SummaryLanguage) = settingsStore.setSummaryLanguage(value)
 
+    // Summary Enabled Setting
+    val summaryEnabled = settingsStore.summaryEnabled
+
+    fun setSummaryEnabled(value: Boolean) = settingsStore.setSummaryEnabled(value)
+
     // Active AI Settings (based on selected provider)
     val aiSettings = settingsStore.aiSettings
 

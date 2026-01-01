@@ -1,3 +1,4 @@
 .worktree/
 .gradle/
 build/
+.claude/

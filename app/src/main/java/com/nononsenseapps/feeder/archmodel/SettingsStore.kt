@@ -704,6 +704,15 @@ class SettingsStore(
         sp.edit().putString(PREF_SUMMARY_LANGUAGE, value.code).apply()
     }
 
+    // Summary enabled setting
+    private val _summaryEnabled = MutableStateFlow(sp.getBoolean(PREF_SUMMARY_ENABLED, true))
+    val summaryEnabled = _summaryEnabled.asStateFlow()
+
+    fun setSummaryEnabled(value: Boolean) {
+        _summaryEnabled.value = value
+        sp.edit().putBoolean(PREF_SUMMARY_ENABLED, value).apply()
+    }
+
     private val _showTitleUnreadCount = MutableStateFlow(sp.getBoolean(PREF_SHOW_TITLE_UNREAD_COUNT, false))
     val showTitleUnreadCount = _showTitleUnreadCount.asStateFlow()
 
@@ -855,6 +864,11 @@ private const val KEY_PROVIDER_LIST = "ai_provider_list"
 const val PREF_SUMMARY_LANGUAGE = "pref_summary_language"
 
 /**
+ * AI summary enabled setting
+ */
+const val PREF_SUMMARY_ENABLED = "pref_summary_enabled"
+
+/**
  * Appearance settings
  */
 const val PREF_SHOW_TITLE_UNREAD_COUNT = "pref_show_title_unread_count"
@@ -912,6 +926,8 @@ enum class UserSettings(
     SETTING_ANTHROPIC_REQUEST_TIMEOUT_SECONDS(key = PREF_ANTHROPIC_REQUEST_TIMEOUT_SECONDS),
     // AI provider selection
     SETTING_AI_PROVIDER_TYPE(key = PREF_AI_PROVIDER_TYPE),
+    // Summary settings
+    SETTING_SUMMARY_ENABLED(key = PREF_SUMMARY_ENABLED),
     ;
 
     companion object {

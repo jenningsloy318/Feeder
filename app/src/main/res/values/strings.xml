@@ -275,6 +275,20 @@
   <string name="ai_provider_anthropic">Anthropic (Claude)</string>
   <string name="api_key">API key</string>
   <string name="model_id">Model Id</string>
+  <string name="summary_language_title">Summary Language</string>
+  <string name="summary_language_description">Choose the language for AI-generated summaries</string>
+  <string name="summary_language_auto_detect">Auto-detect</string>
+  <string name="summary_language_english">English</string>
+  <string name="summary_language_chinese">Chinese</string>
+  <string name="summary_language_spanish">Spanish</string>
+  <string name="summary_language_french">French</string>
+  <string name="summary_language_german">German</string>
+  <string name="summary_language_japanese">Japanese</string>
+  <string name="summary_language_korean">Korean</string>
+  <string name="summary_language_portuguese">Portuguese</string>
+  <string name="summary_language_russian">Russian</string>
+  <string name="summary_language_arabic">Arabic</string>
+  <string name="summary_language_hindi">Hindi</string>
   <string name="azure_api_version">Azure API version</string>
   <string name="touch_to_play_audio">Touch to play audio</string>
   <string name="title_unread_count" translatable="false">(%1$d)</string>

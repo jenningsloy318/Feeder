@@ -76,6 +76,11 @@ class SettingsViewModel(
             repository.setSyncOnlyWhenCharging(value)
         }
 
+    fun setAutoFetchFullArticle(value: Boolean) =
+        applicationCoroutineScope.launch {
+            repository.setAutoFetchFullArticle(value)
+        }
+
     fun setLoadImageOnlyOnWifi(value: Boolean) {
         repository.setLoadImageOnlyOnWifi(value)
     }
@@ -228,6 +233,7 @@ class SettingsViewModel(
                 repository.syncOnResume,
                 repository.syncOnlyOnWifi,
                 repository.syncOnlyWhenCharging,
+                repository.autoFetchFullArticle,
                 repository.loadImageOnlyOnWifi,
                 repository.showThumbnails,
                 repository.maximumCountPerFeed,
@@ -262,33 +268,34 @@ class SettingsViewModel(
                     syncOnResume = params[4] as Boolean,
                     syncOnlyOnWifi = params[5] as Boolean,
                     syncOnlyWhenCharging = params[6] as Boolean,
-                    loadImageOnlyOnWifi = params[7] as Boolean,
-                    showThumbnails = params[8] as Boolean,
-                    maximumCountPerFeed = params[9] as Int,
-                    itemOpener = params[10] as ItemOpener,
-                    linkOpener = params[11] as LinkOpener,
-                    syncFrequency = params[12] as SyncFrequency,
-                    batteryOptimizationIgnored = params[13] as Boolean,
-                    feedItemStyle = params[14] as FeedItemStyle,
-                    swipeAsRead = params[15] as SwipeAsRead,
-                    blockList = params[16] as List<String>,
-                    useDetectLanguage = params[17] as Boolean,
-                    useDynamicTheme = params[18] as Boolean,
-                    feedsSettings = params[19] as List<UIFeedSettings>,
-                    isMarkAsReadOnScroll = params[20] as Boolean,
-                    maxLines = params[21] as Int,
-                    showOnlyTitle = params[22] as Boolean,
-                    isOpenAdjacent = params[23] as Boolean,
-                    showReadingTime = params[24] as Boolean,
-                    showTitleUnreadCount = params[25] as Boolean,
+                    autoFetchFullArticle = params[7] as Boolean,
+                    loadImageOnlyOnWifi = params[8] as Boolean,
+                    showThumbnails = params[9] as Boolean,
+                    maximumCountPerFeed = params[10] as Int,
+                    itemOpener = params[11] as ItemOpener,
+                    linkOpener = params[12] as LinkOpener,
+                    syncFrequency = params[13] as SyncFrequency,
+                    batteryOptimizationIgnored = params[14] as Boolean,
+                    feedItemStyle = params[15] as FeedItemStyle,
+                    swipeAsRead = params[16] as SwipeAsRead,
+                    blockList = params[17] as List<String>,
+                    useDetectLanguage = params[18] as Boolean,
+                    useDynamicTheme = params[19] as Boolean,
+                    feedsSettings = params[20] as List<UIFeedSettings>,
+                    isMarkAsReadOnScroll = params[21] as Boolean,
+                    maxLines = params[22] as Int,
+                    showOnlyTitle = params[23] as Boolean,
+                    isOpenAdjacent = params[24] as Boolean,
+                    showReadingTime = params[25] as Boolean,
+                    showTitleUnreadCount = params[26] as Boolean,
                     openAIState =
                         _viewState.value.openAIState.copy(
-                            settings = params[26] as AISettings,
-                            summaryLanguage = params[27] as SummaryLanguage,
-                            modelsResult = params[28] as ModelsState,
+                            settings = params[27] as AISettings,
+                            summaryLanguage = params[28] as SummaryLanguage,
+                            modelsResult = params[29] as ModelsState,
                         ),
-                    isOpenDrawerOnFab = params[29] as Boolean,
-                    font = params[30] as FontSelection,
+                    isOpenDrawerOnFab = params[30] as Boolean,
+                    font = params[31] as FontSelection,
                 )
             }.collect {
                 _viewState.value = it
@@ -332,6 +339,7 @@ data class SettingsViewState(
     val syncOnResume: Boolean = false,
     val syncOnlyOnWifi: Boolean = false,
     val syncOnlyWhenCharging: Boolean = false,
+    val autoFetchFullArticle: Boolean = false,
     val loadImageOnlyOnWifi: Boolean = false,
     val showThumbnails: Boolean = false,
     val maximumCountPerFeed: Int = 100,

@@ -168,6 +168,8 @@ fun SettingsScreen(
             onSyncOnlyOnWifiChange = settingsViewModel::setSyncOnlyOnWifi,
             syncOnlyWhenChargingValue = viewState.syncOnlyWhenCharging,
             onSyncOnlyWhenChargingChange = settingsViewModel::setSyncOnlyWhenCharging,
+            autoFetchFullArticleValue = viewState.autoFetchFullArticle,
+            onAutoFetchFullArticleChange = settingsViewModel::setAutoFetchFullArticle,
             loadImageOnlyOnWifiValue = viewState.loadImageOnlyOnWifi,
             onLoadImageOnlyOnWifiChange = settingsViewModel::setLoadImageOnlyOnWifi,
             showThumbnailsValue = viewState.showThumbnails,
@@ -249,6 +251,8 @@ private fun SettingsScreenPreview() {
             onSyncOnlyOnWifiChange = {},
             syncOnlyWhenChargingValue = true,
             onSyncOnlyWhenChargingChange = {},
+            autoFetchFullArticleValue = false,
+            onAutoFetchFullArticleChange = {},
             loadImageOnlyOnWifiValue = true,
             onLoadImageOnlyOnWifiChange = {},
             showThumbnailsValue = true,
@@ -318,6 +322,8 @@ fun SettingsList(
     onSyncOnlyOnWifiChange: (Boolean) -> Unit,
     syncOnlyWhenChargingValue: Boolean,
     onSyncOnlyWhenChargingChange: (Boolean) -> Unit,
+    autoFetchFullArticleValue: Boolean,
+    onAutoFetchFullArticleChange: (Boolean) -> Unit,
     loadImageOnlyOnWifiValue: Boolean,
     onLoadImageOnlyOnWifiChange: (Boolean) -> Unit,
     showThumbnailsValue: Boolean,
@@ -514,6 +520,12 @@ fun SettingsList(
                 title = stringResource(id = R.string.only_when_charging),
                 checked = syncOnlyWhenChargingValue,
                 onCheckedChange = onSyncOnlyWhenChargingChange,
+            )
+
+            SwitchSetting(
+                title = stringResource(id = R.string.setting_auto_fetch_full_article),
+                checked = autoFetchFullArticleValue,
+                onCheckedChange = onAutoFetchFullArticleChange,
             )
 
             MenuSetting(

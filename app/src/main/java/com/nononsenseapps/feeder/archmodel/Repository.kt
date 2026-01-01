@@ -250,6 +250,10 @@ class Repository(
 
     fun setSyncOnlyWhenCharging(value: Boolean) = settingsStore.setSyncOnlyWhenCharging(value)
 
+    val autoFetchFullArticle: StateFlow<Boolean> = settingsStore.autoFetchFullArticle
+
+    fun setAutoFetchFullArticle(value: Boolean) = settingsStore.setAutoFetchFullArticle(value)
+
     val loadImageOnlyOnWifi = settingsStore.loadImageOnlyOnWifi
 
     fun setLoadImageOnlyOnWifi(value: Boolean) = settingsStore.setLoadImageOnlyOnWifi(value)

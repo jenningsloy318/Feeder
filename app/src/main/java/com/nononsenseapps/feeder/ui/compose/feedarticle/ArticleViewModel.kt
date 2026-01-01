@@ -42,6 +42,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -177,6 +178,27 @@ class ArticleViewModel(
         )
 
     init {
+        // Auto-fetch full text if setting is enabled
+        viewModelScope.launch {
+            try {
+                // Wait for article to be available
+                val article = articleFlow.filterNotNull().first()
+
+                // Check if auto-fetch is enabled
+                val autoFetchEnabled = repository.autoFetchFullArticle.first()
+
+                // Fetch full text if:
+                // 1. Setting is enabled
+                // 2. Article doesn't already have full text
+                if (autoFetchEnabled && !article.fullTextByDefault) {
+                    Log.d(LOG_TAG, "Auto-fetch triggered for article ${article.id}")
+                    toggleFullText()
+                }
+            } catch (e: Exception) {
+                Log.e(LOG_TAG, "Error in auto-fetch logic", e)
+            }
+        }
+
         viewModelScope.launch {
             combine(
                 articleFlow,

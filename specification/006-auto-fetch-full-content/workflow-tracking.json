@@ -1,0 +1,43 @@
+{
+  "featureName": "Auto Fetch Full Article",
+  "startedAt": "2026-01-01T22:11:00Z",
+  "phases": [
+    { "id": 0, "name": "Apply Dev Rules", "status": "complete", "startedAt": "2026-01-01T22:11:00Z", "completedAt": "2026-01-01T22:12:00Z" },
+    { "id": 1, "name": "Specification Setup", "status": "complete", "startedAt": "2026-01-01T22:12:00Z", "completedAt": "2026-01-01T22:13:00Z" },
+    { "id": 2, "name": "Requirements Clarification", "status": "complete", "startedAt": "2026-01-01T22:13:00Z", "completedAt": "2026-01-01T22:15:00Z" },
+    { "id": 3, "name": "Research", "status": "complete", "startedAt": "2026-01-01T22:15:00Z", "completedAt": "2026-01-01T22:20:00Z" },
+    { "id": 4, "name": "Debug Analysis", "status": "skipped", "startedAt": null, "completedAt": null, "skipReason": "Not a bug fix" },
+    { "id": 5, "name": "Code Assessment", "status": "complete", "startedAt": "2026-01-01T22:20:00Z", "completedAt": "2026-01-01T22:25:00Z" },
+    { "id": 6, "name": "Architecture Design", "status": "skipped", "startedAt": null, "completedAt": null, "skipReason": "Simple feature - no complex architecture needed" },
+    { "id": 7, "name": "UI/UX Design", "status": "complete", "startedAt": "2026-01-01T22:25:00Z", "completedAt": "2026-01-01T22:30:00Z" },
+    { "id": 8, "name": "Specification Writing", "status": "complete", "startedAt": "2026-01-01T22:30:00Z", "completedAt": "2026-01-01T22:40:00Z" },
+    { "id": 9, "name": "Specification Review", "status": "complete", "startedAt": "2026-01-01T22:40:00Z", "completedAt": "2026-01-01T22:45:00Z" },
+    { "id": 10, "name": "Execution & QA", "status": "in_progress", "startedAt": "2026-01-01T22:45:00Z", "completedAt": null },
+    { "id": 11, "name": "Code Review", "status": "pending", "startedAt": null, "completedAt": null },
+    { "id": 12, "name": "Documentation Update", "status": "pending", "startedAt": null, "completedAt": null },
+    { "id": 13, "name": "Cleanup", "status": "pending", "startedAt": null, "completedAt": null },
+    { "id": 14, "name": "Commit & Push", "status": "pending", "startedAt": null, "completedAt": null },
+    { "id": 15, "name": "Final Verification", "status": "pending", "startedAt": null, "completedAt": null }
+  ],
+  "tasks": [
+    { "id": "T-001", "phase": 10, "description": "Add String Resources to strings.xml", "status": "in_progress", "files": ["app/src/main/res/values/strings.xml"], "updatedAt": "2026-01-01T22:45:00Z" },
+    { "id": "T-002", "phase": 10, "description": "Add SettingsStore StateFlow for auto-fetch setting", "status": "pending", "files": ["app/src/main/java/com/nononsenseapps/feeder/archmodel/SettingsStore.kt"], "updatedAt": null },
+    { "id": "T-003", "phase": 10, "description": "Expose auto-fetch setting in SettingsViewModel", "status": "pending", "files": ["app/src/main/java/com/nononsenseapps/feeder/ui/compose/settings/SettingsViewModel.kt"], "updatedAt": null },
+    { "id": "T-004", "phase": 10, "description": "Add toggle switch to Settings screen UI", "status": "pending", "files": ["app/src/main/java/com/nononsenseapps/feeder/ui/compose/settings/Settings.kt"], "updatedAt": null },
+    { "id": "T-005", "phase": 10, "description": "Inject SettingsStore into ArticleViewModel", "status": "pending", "files": ["app/src/main/java/com/nononsenseapps/feeder/ui/compose/feedarticle/ArticleViewModel.kt"], "updatedAt": null },
+    { "id": "T-006", "phase": 10, "description": "Implement auto-fetch logic in ArticleViewModel init block", "status": "pending", "files": ["app/src/main/java/com/nononsenseapps/feeder/ui/compose/feedarticle/ArticleViewModel.kt"], "updatedAt": null },
+    { "id": "T-007", "phase": 10, "description": "Write unit tests for SettingsStore and ArticleViewModel", "status": "pending", "files": ["app/src/test/java/com/nononsenseapps/feeder/archmodel/SettingsStoreTest.kt", "app/src/test/java/com/nononsenseapps/feeder/ui/compose/feedarticle/ArticleViewModelTest.kt"], "updatedAt": null },
+    { "id": "T-008", "phase": 10, "description": "Write UI tests for settings toggle", "status": "pending", "files": ["app/src/androidTest/java/com/nononsenseapps/feeder/ui/compose/settings/SettingsScreenTest.kt"], "updatedAt": null },
+    { "id": "T-009", "phase": 10, "description": "Integration testing of end-to-end auto-fetch flow", "status": "pending", "files": [], "updatedAt": null },
+    { "id": "T-010", "phase": 10, "description": "Code review, lint, and refinement", "status": "pending", "files": [], "updatedAt": null }
+  ],
+  "iteration": {
+    "loops": 0,
+    "lastReviewVerdict": null
+  },
+  "status": {
+    "allPhasesComplete": false,
+    "allTasksComplete": false,
+    "workflowDone": false
+  }
+}

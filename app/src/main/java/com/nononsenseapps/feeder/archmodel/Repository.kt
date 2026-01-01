@@ -344,6 +344,11 @@ class Repository(
 
     fun setAnthropicSettings(value: com.nononsenseapps.feeder.ai.model.AnthropicSettings) = settingsStore.setAnthropicSettings(value)
 
+    // Summary Language Setting
+    val summaryLanguage = settingsStore.summaryLanguage
+
+    fun setSummaryLanguage(value: com.nononsenseapps.feeder.ai.model.SummaryLanguage) = settingsStore.setSummaryLanguage(value)
+
     // Active AI Settings (based on selected provider)
     val aiSettings = settingsStore.aiSettings
 

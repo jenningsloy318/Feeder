@@ -6,8 +6,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
@@ -54,6 +56,7 @@ import com.nononsenseapps.feeder.R
 import com.nononsenseapps.feeder.ai.model.AISettings
 import com.nononsenseapps.feeder.ai.model.AnthropicSettings
 import com.nononsenseapps.feeder.ai.model.OpenAISettings
+import com.nononsenseapps.feeder.ai.model.SummaryLanguage
 import com.nononsenseapps.feeder.ai.provider.AIProvider
 import com.nononsenseapps.feeder.ui.compose.theme.LocalDimens
 
@@ -63,11 +66,21 @@ fun AIProviderSection(
     onEvent: (AISettingsEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    AIProviderSectionItem(
-        settings = state.settings,
-        onEvent = onEvent,
-        modifier = modifier,
-    )
+    Column(modifier = modifier) {
+        AIProviderSectionItem(
+            settings = state.settings,
+            onEvent = onEvent,
+            modifier = Modifier,
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        SummaryLanguageSectionItem(
+            summaryLanguage = state.summaryLanguage,
+            onEvent = onEvent,
+            modifier = Modifier,
+        )
+    }
 
     if (state.isEditMode) {
         var current by remember(state.settings) { mutableStateOf(state.settings) }
@@ -147,6 +160,64 @@ private fun AIProviderSectionItem(
                 )
             },
         )
+    }
+}
+
+@Composable
+private fun SummaryLanguageSectionItem(
+    summaryLanguage: SummaryLanguage,
+    onEvent: (AISettingsEvent) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    var languageMenuExpanded by remember { mutableStateOf(false) }
+
+    Row(
+        modifier =
+            modifier
+                .width(LocalDimens.current.maxContentWidth)
+                .clickable { languageMenuExpanded = true }
+                .semantics { role = Role.Button },
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(
+            modifier = Modifier.size(64.dp),
+            contentAlignment = Alignment.Center,
+        ) { }
+
+        TitleAndSubtitle(
+            title = {
+                Text(
+                    text = stringResource(R.string.summary_language_title),
+                )
+            },
+            subtitle = {
+                Text(
+                    text = stringResource(id = summaryLanguage.displayName),
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            },
+        )
+    }
+
+    Box {
+        DropdownMenu(
+            expanded = languageMenuExpanded,
+            onDismissRequest = { languageMenuExpanded = false },
+        ) {
+            SummaryLanguage.entries.forEach { language ->
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            stringResource(id = language.displayName),
+                        )
+                    },
+                    onClick = {
+                        onEvent(AISettingsEvent.UpdateSummaryLanguage(language))
+                        languageMenuExpanded = false
+                    },
+                )
+            }
+        }
     }
 }
 
@@ -575,6 +646,7 @@ data class AISettingsState(
     val modelsResult: ModelsState = ModelsState.None,
     val isEditMode: Boolean = false,
     val showModelsError: Boolean = false,
+    val summaryLanguage: SummaryLanguage = SummaryLanguage.AUTO_DETECT,
 )
 
 sealed interface ModelsState {
@@ -606,5 +678,9 @@ sealed interface AISettingsEvent {
 
     data class ShowModelsError(
         val show: Boolean,
+    ) : AISettingsEvent
+
+    data class UpdateSummaryLanguage(
+        val language: SummaryLanguage,
     ) : AISettingsEvent
 }

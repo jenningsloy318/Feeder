@@ -6,6 +6,7 @@ import com.anthropic.models.messages.Message
 import com.anthropic.models.messages.MessageCreateParams
 import com.nononsenseapps.feeder.ai.AIClient
 import com.nononsenseapps.feeder.ai.model.AnthropicSettings
+import com.nononsenseapps.feeder.ai.model.SummaryLanguage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.time.Duration
@@ -27,28 +28,42 @@ class AnthropicClient(
         return emptyList()
     }
 
-    override suspend fun generateSummary(content: String): AIClient.SummaryResult {
+    private fun buildSummaryPrompt(language: SummaryLanguage): String {
+        return when (language) {
+            SummaryLanguage.AUTO_DETECT -> """
+                You are a helpful assistant that summarizes news articles.
+                Detect the article's language and summarize in that same language.
+
+                Start your response with "Lang: " followed by the detected language code.
+                For example: "Lang: en"
+
+                Then provide a concise summary of the article.
+            """.trimIndent()
+
+            else -> """
+                You are a helpful assistant that summarizes news articles in ${language.languageName}.
+
+                Provide a concise summary of the following article in ${language.languageName}.
+            """.trimIndent()
+        }
+    }
+
+    override suspend fun generateSummary(
+        content: String,
+        language: SummaryLanguage
+    ): AIClient.SummaryResult {
         if (!settings.isValid) {
             return AIClient.SummaryResult.Error(content = "Invalid settings")
         }
 
         return try {
-            val systemPrompt = """You are a helpful assistant that summarizes news articles.
-Start your response with "Lang: " followed by the detected language code,
-then provide a concise summary of the article in that same language.
-
-For example:
-Lang: en
-This article discusses...
-
-Now summarize this article:"""
-
-            val userMessage = "$systemPrompt\n$content"
+            val systemPrompt = buildSummaryPrompt(language)
 
             val params = MessageCreateParams.builder()
                 .model(settings.modelId)
+                .system(systemPrompt)
                 .maxTokens(1024L)
-                .addUserMessage(userMessage)
+                .addUserMessage(content)
                 .build()
 
             val response = withContext(Dispatchers.IO) {

@@ -1,6 +1,7 @@
 package com.nononsenseapps.feeder.ai
 
 import com.nononsenseapps.feeder.ai.model.AISettings
+import com.nononsenseapps.feeder.ai.model.SummaryLanguage
 import com.nononsenseapps.feeder.ai.provider.AIProvider
 import com.nononsenseapps.feeder.ai.provider.AnthropicClient
 import com.nononsenseapps.feeder.ai.provider.OpenAICompatibleClient
@@ -20,9 +21,13 @@ interface AIClient {
      * Generate a summary for the given content.
      *
      * @param content The text content to summarize
+     * @param language The target language for the summary (default: AUTO_DETECT)
      * @return SummaryResult containing the summary or error information
      */
-    suspend fun generateSummary(content: String): SummaryResult
+    suspend fun generateSummary(
+        content: String,
+        language: SummaryLanguage = SummaryLanguage.AUTO_DETECT,
+    ): SummaryResult
 
     /**
      * Result of a summary generation request.

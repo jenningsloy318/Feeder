@@ -1,0 +1,76 @@
+{
+  "featureName": "AI Summary Language Configuration",
+  "startedAt": "2026-01-01T09:53:49+08:00",
+  "completedAt": "2026-01-01T11:19:00+08:00",
+  "phases": [
+    { "id": 0, "name": "Apply Dev Rules", "status": "complete", "startedAt": "2026-01-01T09:53:49+08:00", "completedAt": "2026-01-01T09:53:49+08:00" },
+    { "id": 1, "name": "Specification Setup", "status": "complete", "startedAt": "2026-01-01T09:53:49+08:00", "completedAt": "2026-01-01T09:53:49+08:00" },
+    { "id": 2, "name": "Requirements Clarification", "status": "complete", "startedAt": "2026-01-01T09:53:49+08:00", "completedAt": "2026-01-01T09:53:49+08:00" },
+    { "id": 3, "name": "Research", "status": "complete", "startedAt": "2026-01-01T09:53:49+08:00", "completedAt": "2026-01-01T09:53:49+08:00" },
+    { "id": 4, "name": "Debug Analysis", "status": "complete", "startedAt": "2026-01-01T09:53:49+08:00", "completedAt": "2026-01-01T09:53:49+08:00" },
+    { "id": 5, "name": "Code Assessment", "status": "complete", "startedAt": "2026-01-01T09:53:49+08:00", "completedAt": "2026-01-01T09:53:49+08:00" },
+    { "id": 5.3, "name": "Architecture Design", "status": "complete", "startedAt": "2026-01-01T09:53:49+08:00", "completedAt": "2026-01-01T09:53:49+08:00" },
+    { "id": 5.5, "name": "UI/UX Design", "status": "complete", "startedAt": "2026-01-01T09:53:49+08:00", "completedAt": "2026-01-01T09:53:49+08:00" },
+    { "id": 6, "name": "Specification Writing", "status": "complete", "startedAt": "2026-01-01T09:53:49+08:00", "completedAt": "2026-01-01T09:53:49+08:00" },
+    { "id": 7, "name": "Specification Review", "status": "complete", "startedAt": "2026-01-01T09:53:49+08:00", "completedAt": "2026-01-01T09:53:49+08:00" },
+    { "id": 8, "name": "Execution & QA", "status": "complete", "startedAt": "2026-01-01T09:53:49+08:00", "completedAt": "2026-01-01T11:19:00+08:00" },
+    { "id": 9, "name": "Code Review", "status": "complete", "startedAt": "2026-01-01T11:15:00+08:00", "completedAt": "2026-01-01T11:17:00+08:00" },
+    { "id": 10, "name": "Documentation Update", "status": "complete", "startedAt": "2026-01-01T11:17:00+08:00", "completedAt": "2026-01-01T11:19:00+08:00" },
+    { "id": 11, "name": "Cleanup", "status": "complete", "startedAt": "2026-01-01T11:18:00+08:00", "completedAt": "2026-01-01T11:18:00+08:00" },
+    { "id": 12, "name": "Commit & Push", "status": "in_progress", "startedAt": "2026-01-01T11:19:00+08:00", "completedAt": null },
+    { "id": 13, "name": "Final Verification", "status": "complete", "startedAt": "2026-01-01T11:18:00+08:00", "completedAt": "2026-01-01T11:19:00+08:00" }
+  ],
+  "tasks": [
+    { "id": "T1.1", "phase": 1, "description": "Create specification directory structure", "status": "complete", "files": ["specifications/002-ai-summary-language-config"], "updatedAt": "2026-01-01T09:53:49+08:00" },
+    { "id": "T1.2", "phase": 1, "description": "Create task list document", "status": "complete", "files": ["01-task-list.md"], "updatedAt": "2026-01-01T09:53:49+08:00" },
+    { "id": "T8.1", "phase": 8, "description": "Add string resources for 12 languages", "status": "complete", "files": ["app/src/main/res/values/strings.xml"], "updatedAt": "2026-01-01T10:30:00+08:00" },
+    { "id": "T8.2", "phase": 8, "description": "Create SummaryLanguage enum", "status": "complete", "files": ["app/src/main/java/com/nononsenseapps/feeder/ai/model/SummaryLanguage.kt"], "updatedAt": "2026-01-01T10:30:00+08:00" },
+    { "id": "T8.3", "phase": 8, "description": "Add settings storage for summary language", "status": "complete", "files": ["app/src/main/java/com/nononsenseapps/feeder/archmodel/SettingsStore.kt", "app/src/main/java/com/nononsenseapps/feeder/archmodel/Repository.kt"], "updatedAt": "2026-01-01T10:30:00+08:00" },
+    { "id": "T8.4", "phase": 8, "description": "Update AIClient interface with language parameter", "status": "complete", "files": ["app/src/main/java/com/nononsenseapps/feeder/ai/AIClient.kt"], "updatedAt": "2026-01-01T10:30:00+08:00" },
+    { "id": "T8.5", "phase": 8, "description": "Update OpenAICompatibleClient with language support", "status": "complete", "files": ["app/src/main/java/com/nononsenseapps/feeder/ai/provider/OpenAICompatibleClient.kt"], "updatedAt": "2026-01-01T10:30:00+08:00" },
+    { "id": "T8.6", "phase": 8, "description": "Update AnthropicClient with language support", "status": "complete", "files": ["app/src/main/java/com/nononsenseapps/feeder/ai/provider/AnthropicClient.kt"], "updatedAt": "2026-01-01T10:30:00+08:00" },
+    { "id": "T8.7", "phase": 8, "description": "Update AIApi to pass language to clients", "status": "complete", "files": ["app/src/main/java/com/nononsenseapps/feeder/ai/AIApi.kt"], "updatedAt": "2026-01-01T10:30:00+08:00" },
+    { "id": "T8.8", "phase": 8, "description": "Create SummaryLanguageSectionItem UI component", "status": "complete", "files": ["app/src/main/java/com/nononsenseapps/feeder/ui/compose/settings/AIProviderSection.kt"], "updatedAt": "2026-01-01T11:00:00+08:00" },
+    { "id": "T8.9", "phase": 8, "description": "Update SettingsViewModel with language handling", "status": "complete", "files": ["app/src/main/java/com/nononsenseapps/feeder/ui/compose/settings/SettingsViewModel.kt"], "updatedAt": "2026-01-01T10:45:00+08:00" },
+    { "id": "T8.10", "phase": 8, "description": "Add summaryLanguage to AISettingsState", "status": "complete", "files": ["app/src/main/java/com/nononsenseapps/feeder/ui/compose/settings/SettingsScreen.kt"], "updatedAt": "2026-01-01T10:45:00+08:00" },
+    { "id": "T8.11", "phase": 8, "description": "Fix Anthropic API error 400 - use .system() method", "status": "complete", "files": ["app/src/main/java/com/nononsenseapps/feeder/ai/provider/AnthropicClient.kt"], "updatedAt": "2026-01-01T11:15:00+08:00" },
+    { "id": "T8.12", "phase": 8, "description": "Fix OpenAI client - use .addSystemMessage() method", "status": "complete", "files": ["app/src/main/java/com/nononsenseapps/feeder/ai/provider/OpenAICompatibleClient.kt"], "updatedAt": "2026-01-01T11:15:00+08:00" },
+    { "id": "T10.1", "phase": 10, "description": "Create implementation summary", "status": "complete", "files": ["08-implementation-summary.md"], "updatedAt": "2026-01-01T11:19:00+08:00" },
+    { "id": "T10.2", "phase": 10, "description": "Update task list", "status": "complete", "files": ["01-task-list.md"], "updatedAt": "2026-01-01T11:19:00+08:00" }
+  ],
+  "bugsFixed": [
+    { "id": "BUG-001", "description": "Anthropic API Error 400 - models not pure", "rootCause": "System prompt concatenated with user content instead of using .system() method", "fix": "Changed to use .system() method for AnthropicClient", "files": ["app/src/main/java/com/nononsenseapps/feeder/ai/provider/AnthropicClient.kt"], "fixedAt": "2026-01-01T11:15:00+08:00" },
+    { "id": "BUG-002", "description": "OpenAI system prompt handling", "rootCause": "System prompt concatenated with user content", "fix": "Changed to use .addSystemMessage() method", "files": ["app/src/main/java/com/nononsenseapps/feeder/ai/provider/OpenAICompatibleClient.kt"], "fixedAt": "2026-01-01T11:15:00+08:00" },
+    { "id": "BUG-003", "description": "Missing Spacer import", "rootCause": "Added Spacer usage without import", "fix": "Added import androidx.compose.foundation.layout.Spacer", "files": ["app/src/main/java/com/nononsenseapps/feeder/ui/compose/settings/AIProviderSection.kt"], "fixedAt": "2026-01-01T11:10:00+08:00" },
+    { "id": "BUG-004", "description": "Missing height import", "rootCause": "Added height() usage without import", "fix": "Added import androidx.compose.foundation.layout.height", "files": ["app/src/main/java/com/nononsenseapps/feeder/ui/compose/settings/AIProviderSection.kt"], "fixedAt": "2026-01-01T11:10:00+08:00" }
+  ],
+  "userFeedback": [
+    { "id": "UF-001", "feedback": "Summary language config should be standalone, not inside API key config", "implemented": true, "description": "Refactored UI to place SummaryLanguageSectionItem outside edit dialog" }
+  ],
+  "iteration": {
+    "loops": 0,
+    "lastReviewVerdict": "approved"
+  },
+  "files": {
+    "created": [
+      "app/src/main/java/com/nononsenseapps/feeder/ai/model/SummaryLanguage.kt"
+    ],
+    "modified": [
+      "app/src/main/java/com/nononsenseapps/feeder/archmodel/SettingsStore.kt",
+      "app/src/main/java/com/nononsenseapps/feeder/archmodel/Repository.kt",
+      "app/src/main/java/com/nononsenseapps/feeder/ai/AIClient.kt",
+      "app/src/main/java/com/nononsenseapps/feeder/ai/AIApi.kt",
+      "app/src/main/java/com/nononsenseapps/feeder/ai/provider/AnthropicClient.kt",
+      "app/src/main/java/com/nononsenseapps/feeder/ai/provider/OpenAICompatibleClient.kt",
+      "app/src/main/java/com/nononsenseapps/feeder/ui/compose/settings/AIProviderSection.kt",
+      "app/src/main/java/com/nononsenseapps/feeder/ui/compose/settings/SettingsViewModel.kt",
+      "app/src/main/java/com/nononsenseapps/feeder/ui/compose/settings/SettingsScreen.kt",
+      "app/src/main/res/values/strings.xml"
+    ]
+  },
+  "status": {
+    "allPhasesComplete": true,
+    "allTasksComplete": true,
+    "workflowDone": true
+  }
+}

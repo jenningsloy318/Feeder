@@ -10,6 +10,7 @@ import com.nononsenseapps.feeder.R
 import com.nononsenseapps.feeder.ai.model.AISettings
 import com.nononsenseapps.feeder.ai.model.AnthropicSettings
 import com.nononsenseapps.feeder.ai.model.OpenAISettings as ModelOpenAISettings
+import com.nononsenseapps.feeder.ai.model.SummaryLanguage
 import com.nononsenseapps.feeder.ai.provider.AIProvider
 import com.nononsenseapps.feeder.background.schedulePeriodicRssSync
 import com.nononsenseapps.feeder.db.room.BlocklistDao
@@ -557,6 +558,17 @@ class SettingsStore(
             .apply()
     }
 
+    // Summary language setting
+    private val _summaryLanguage = MutableStateFlow(
+        SummaryLanguage.fromCode(sp.getString(PREF_SUMMARY_LANGUAGE, null)),
+    )
+    val summaryLanguage = _summaryLanguage.asStateFlow()
+
+    fun setSummaryLanguage(value: SummaryLanguage) {
+        _summaryLanguage.value = value
+        sp.edit().putString(PREF_SUMMARY_LANGUAGE, value.code).apply()
+    }
+
     private val _showTitleUnreadCount = MutableStateFlow(sp.getBoolean(PREF_SHOW_TITLE_UNREAD_COUNT, false))
     val showTitleUnreadCount = _showTitleUnreadCount.asStateFlow()
 
@@ -696,6 +708,11 @@ const val PREF_ANTHROPIC_REQUEST_TIMEOUT_SECONDS = "pref_anthropic_request_timeo
  * AI provider selection
  */
 const val PREF_AI_PROVIDER_TYPE = "pref_ai_provider_type"
+
+/**
+ * AI summary language setting
+ */
+const val PREF_SUMMARY_LANGUAGE = "pref_summary_language"
 
 /**
  * Appearance settings

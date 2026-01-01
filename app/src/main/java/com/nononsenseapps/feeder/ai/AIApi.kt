@@ -2,6 +2,7 @@ package com.nononsenseapps.feeder.ai
 
 import com.nononsenseapps.feeder.ai.model.AISettings
 import com.nononsenseapps.feeder.archmodel.Repository
+import kotlinx.coroutines.flow.first
 import kotlinx.serialization.Serializable
 
 /**
@@ -76,7 +77,8 @@ class AIApi(
      */
     suspend fun summarize(content: String): AIClient.SummaryResult {
         return try {
-            client.generateSummary(content)
+            val language = repository.summaryLanguage.first()
+            client.generateSummary(content, language)
         } catch (e: Exception) {
             AIClient.SummaryResult.Error(content = e.message ?: e.cause?.message ?: "")
         }

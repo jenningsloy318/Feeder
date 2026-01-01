@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.nononsenseapps.feeder.ApplicationCoroutineScope
 import com.nononsenseapps.feeder.ai.AIApi
 import com.nononsenseapps.feeder.ai.model.AISettings
+import com.nononsenseapps.feeder.ai.model.SummaryLanguage
 import com.nononsenseapps.feeder.ui.compose.settings.AISettingsEvent
 import com.nononsenseapps.feeder.ui.compose.settings.AISettingsState
 import com.nononsenseapps.feeder.ui.compose.settings.ModelsState
@@ -183,6 +184,11 @@ class SettingsViewModel(
                 val current = _viewState.value.openAIState
                 _viewState.value = _viewState.value.copy(openAIState = current.copy(showModelsError = event.show))
             }
+            is AISettingsEvent.UpdateSummaryLanguage -> {
+                repository.setSummaryLanguage(event.language)
+                val current = _viewState.value.openAIState
+                _viewState.value = _viewState.value.copy(openAIState = current.copy(summaryLanguage = event.language))
+            }
         }
     }
 
@@ -242,6 +248,7 @@ class SettingsViewModel(
                 repository.showReadingTime,
                 repository.showTitleUnreadCount,
                 repository.aiSettingsFlow,
+                repository.summaryLanguage,
                 openAIModelsState,
                 repository.isOpenDrawerOnFab,
                 repository.font,
@@ -277,10 +284,11 @@ class SettingsViewModel(
                     openAIState =
                         _viewState.value.openAIState.copy(
                             settings = params[26] as AISettings,
-                            modelsResult = params[27] as ModelsState,
+                            summaryLanguage = params[27] as SummaryLanguage,
+                            modelsResult = params[28] as ModelsState,
                         ),
-                    isOpenDrawerOnFab = params[28] as Boolean,
-                    font = params[29] as FontSelection,
+                    isOpenDrawerOnFab = params[29] as Boolean,
+                    font = params[30] as FontSelection,
                 )
             }.collect {
                 _viewState.value = it

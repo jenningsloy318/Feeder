@@ -1,6 +1,7 @@
 package com.nononsenseapps.feeder.ai.model
 
 import com.nononsenseapps.feeder.ai.provider.AIProvider
+import kotlinx.serialization.Serializable
 
 /**
  * Settings for OpenAI-compatible provider.
@@ -12,6 +13,7 @@ import com.nononsenseapps.feeder.ai.provider.AIProvider
  * @property azureApiVersion Azure API version (Azure OpenAI only)
  * @property azureDeploymentId Azure deployment ID (Azure OpenAI only)
  */
+@Serializable
 data class OpenAISettings(
     val key: String = "",
     val modelId: String = "",
@@ -58,6 +60,7 @@ data class OpenAISettings(
  * @property baseUrl Custom base URL for API requests (empty for default Anthropic endpoint)
  * @property timeoutSeconds Request timeout in seconds (30-600 range, default 30)
  */
+@Serializable
 data class AnthropicSettings(
     val key: String = "",
     val modelId: String = "",

@@ -344,6 +344,17 @@ class Repository(
 
     fun setAnthropicSettings(value: com.nononsenseapps.feeder.ai.model.AnthropicSettings) = settingsStore.setAnthropicSettings(value)
 
+    // Multi-Provider Support
+    val providers = settingsStore.providers
+
+    fun addProvider(provider: com.nononsenseapps.feeder.ai.model.ProviderConfig) = settingsStore.addProvider(provider)
+
+    fun updateProvider(provider: com.nononsenseapps.feeder.ai.model.ProviderConfig) = settingsStore.updateProvider(provider)
+
+    fun deleteProvider(id: String) = settingsStore.deleteProvider(id)
+
+    fun activateProvider(id: String) = settingsStore.activateProvider(id)
+
     // Summary Language Setting
     val summaryLanguage = settingsStore.summaryLanguage
 

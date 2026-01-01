@@ -30,6 +30,10 @@ import com.nononsenseapps.feeder.ui.compose.editfeed.EditFeedScreenViewModel
 import com.nononsenseapps.feeder.ui.compose.feed.FeedScreen
 import com.nononsenseapps.feeder.ui.compose.feedarticle.ArticleScreen
 import com.nononsenseapps.feeder.ui.compose.searchfeed.SearchFeedScreen
+import com.nononsenseapps.feeder.ui.compose.settings.ProviderEditScreen
+import com.nononsenseapps.feeder.ui.compose.settings.ProviderEditViewModel
+import com.nononsenseapps.feeder.ui.compose.settings.ProviderListScreen
+import com.nononsenseapps.feeder.ui.compose.settings.ProviderListViewModel
 import com.nononsenseapps.feeder.ui.compose.settings.SettingsScreen
 import com.nononsenseapps.feeder.ui.compose.settings.TextSettingsScreen
 import com.nononsenseapps.feeder.ui.compose.settings.TextSettingsViewModel
@@ -336,7 +340,103 @@ data object SettingsDestination : NavigationDestination(
             onNavigateToTextSettingsScreen = {
                 TextSettingsDestination.navigate(navController)
             },
+            onNavigateToProviderListScreen = {
+                ProviderListDestination.navigate(navController)
+            },
             settingsViewModel = backStackEntry.diAwareViewModel(),
+        )
+    }
+}
+
+/**
+ * Navigation destination for the provider list screen.
+ */
+data object ProviderListDestination : NavigationDestination(
+    path = "settings/providers",
+    navArguments = emptyList(),
+    deepLinks = emptyList(),
+) {
+    fun navigate(navController: NavController) {
+        navController.navigate(path) {
+            launchSingleTop = true
+        }
+    }
+
+    @Composable
+    override fun RegisterScreen(
+        navController: NavController,
+        backStackEntry: NavBackStackEntry,
+        navDrawerListState: LazyListState,
+    ) {
+        val providerListViewModel = backStackEntry.diAwareViewModel<ProviderListViewModel>()
+
+        ProviderListScreen(
+            onNavigateUp = {
+                if (!navController.popBackStack()) {
+                    SettingsDestination.navigate(navController)
+                }
+            },
+            onNavigateToEditProvider = { providerId ->
+                ProviderEditDestination.navigate(navController, providerId)
+            },
+            onNavigateToAddProvider = { providerType ->
+                ProviderEditDestination.navigate(navController, providerType = providerType)
+            },
+            viewModel = providerListViewModel,
+        )
+    }
+}
+
+/**
+ * Navigation destination for the provider edit screen.
+ */
+data object ProviderEditDestination : NavigationDestination(
+    path = "settings/providers/edit",
+    navArguments =
+        listOf(
+            QueryParamArgument("providerId") {
+                type = NavType.StringType
+                defaultValue = null
+                nullable = true
+            },
+            QueryParamArgument("providerType") {
+                type = NavType.StringType
+                defaultValue = null
+                nullable = true
+            },
+        ),
+    deepLinks = emptyList(),
+) {
+    fun navigate(
+        navController: NavController,
+        providerId: String? = null,
+        providerType: com.nononsenseapps.feeder.ai.provider.AIProvider? = null,
+    ) {
+        val params =
+            queryParams {
+                +("providerId" to providerId)
+                +("providerType" to providerType?.name)
+            }
+
+        navController.navigate(path + params) {
+            launchSingleTop = true
+        }
+    }
+
+    @Composable
+    override fun RegisterScreen(
+        navController: NavController,
+        backStackEntry: NavBackStackEntry,
+        navDrawerListState: LazyListState,
+    ) {
+        val viewModel: ProviderEditViewModel = backStackEntry.diAwareViewModel()
+
+        ProviderEditScreen(
+            onNavigateUp = {
+                // Always navigate back to provider list screen
+                ProviderListDestination.navigate(navController)
+            },
+            viewModel = viewModel,
         )
     }
 }

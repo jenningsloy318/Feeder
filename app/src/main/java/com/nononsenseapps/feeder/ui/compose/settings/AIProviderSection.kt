@@ -64,12 +64,14 @@ import com.nononsenseapps.feeder.ui.compose.theme.LocalDimens
 fun AIProviderSection(
     state: AISettingsState,
     onEvent: (AISettingsEvent) -> Unit,
+    onNavigateToProviders: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier) {
         AIProviderSectionItem(
             settings = state.settings,
             onEvent = onEvent,
+            onNavigateToProviders = onNavigateToProviders,
             modifier = Modifier,
         )
 
@@ -126,6 +128,7 @@ fun AIProviderSection(
 private fun AIProviderSectionItem(
     settings: AISettings,
     onEvent: (AISettingsEvent) -> Unit,
+    onNavigateToProviders: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val key = when (settings) {
@@ -137,7 +140,7 @@ private fun AIProviderSectionItem(
         modifier =
             modifier
                 .width(LocalDimens.current.maxContentWidth)
-                .clickable { onEvent(AISettingsEvent.SwitchEditMode(enabled = true)) }
+                .clickable { onNavigateToProviders() }
                 .semantics { role = Role.Button },
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -146,16 +149,19 @@ private fun AIProviderSectionItem(
             contentAlignment = Alignment.Center,
         ) { }
 
-        val transformedKey = remember(key) { VisualTransformationApiKey().filter(AnnotatedString(key)) }
         TitleAndSubtitle(
             title = {
                 Text(
-                    text = stringResource(R.string.api_key),
+                    text = stringResource(R.string.provider_list_title),
                 )
             },
             subtitle = {
                 Text(
-                    text = transformedKey.text,
+                    text = if (key.isNotBlank()) {
+                        stringResource(R.string.provider_configured)
+                    } else {
+                        stringResource(R.string.no_providers_configured)
+                    },
                     style = MaterialTheme.typography.bodySmall,
                 )
             },

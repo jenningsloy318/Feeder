@@ -315,4 +315,24 @@
   <string name="could_not_add_font">Could not add font</string>
   <string name="could_not_remove_font">Could not remove font</string>
   <string name="something_went_wrong">Something went wrong</string>
+  <!-- Provider Management -->
+  <string name="provider_list_title">AI Providers</string>
+  <string name="add_provider">Add provider</string>
+  <string name="edit">Edit</string>
+  <string name="delete">Delete</string>
+  <string name="edit_provider">Edit provider</string>
+  <string name="delete_provider">Delete provider</string>
+  <string name="delete_provider_confirmation">Are you sure you want to delete \"%s\"?</string>
+  <string name="no_providers_configured">No providers configured</string>
+  <string name="provider_configured">Providers configured</string>
+  <string name="add_provider_to_get_started">Add a provider to get started with AI features</string>
+  <string name="active_provider">Active</string>
+  <string name="provider_name">Provider name</string>
+  <string name="provider_name_hint">My OpenAI Provider</string>
+  <string name="provider_name_required">Provider name is required</string>
+  <string name="api_key_required">API key is required</string>
+  <string name="provider_saved">Provider saved successfully</string>
+  <string name="save_provider">Save</string>
+  <string name="cancel">Cancel</string>
+  <string name="set_as_default_provider">Set as default provider</string>
 </resources>

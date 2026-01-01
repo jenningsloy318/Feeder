@@ -28,6 +28,8 @@ import com.nononsenseapps.feeder.ui.compose.navigation.AddFeedDestination
 import com.nononsenseapps.feeder.ui.compose.navigation.ArticleDestination
 import com.nononsenseapps.feeder.ui.compose.navigation.EditFeedDestination
 import com.nononsenseapps.feeder.ui.compose.navigation.FeedDestination
+import com.nononsenseapps.feeder.ui.compose.navigation.ProviderEditDestination
+import com.nononsenseapps.feeder.ui.compose.navigation.ProviderListDestination
 import com.nononsenseapps.feeder.ui.compose.navigation.SearchFeedDestination
 import com.nononsenseapps.feeder.ui.compose.navigation.SettingsDestination
 import com.nononsenseapps.feeder.ui.compose.navigation.SyncScreenDestination
@@ -120,6 +122,9 @@ class MainActivity : DIAwareComponentActivity() {
             AddFeedDestination.register(this, navController, navDrawerListState)
             // Settings
             SettingsDestination.register(this, navController, navDrawerListState)
+            // AI Provider management
+            ProviderListDestination.register(this, navController, navDrawerListState)
+            ProviderEditDestination.register(this, navController, navDrawerListState)
             // Sync settings
             SyncScreenDestination.register(this, navController, navDrawerListState)
             // Add Fonts

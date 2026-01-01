@@ -10,8 +10,10 @@ import com.nononsenseapps.feeder.R
 import com.nononsenseapps.feeder.ai.model.AISettings
 import com.nononsenseapps.feeder.ai.model.AnthropicSettings
 import com.nononsenseapps.feeder.ai.model.OpenAISettings as ModelOpenAISettings
+import com.nononsenseapps.feeder.ai.model.ProviderConfig
 import com.nononsenseapps.feeder.ai.model.SummaryLanguage
 import com.nononsenseapps.feeder.ai.provider.AIProvider
+import kotlinx.serialization.json.Json
 import com.nononsenseapps.feeder.background.schedulePeriodicRssSync
 import com.nononsenseapps.feeder.db.room.BlocklistDao
 import com.nononsenseapps.feeder.db.room.ID_UNSET
@@ -30,8 +32,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.update
 import org.kodein.di.DI
 import org.kodein.di.DIAware
@@ -494,41 +498,6 @@ class SettingsStore(
         )
     val anthropicSettings = _anthropicSettings.asStateFlow()
 
-    /**
-     * Get the active AI settings based on the selected provider.
-     */
-    val aiSettings: AISettings
-        get() =
-            when (_aiProviderType.value) {
-                AIProvider.OPENAI_COMPATIBLE -> AISettings.OpenAI(_openAISettings.value)
-                AIProvider.ANTHROPIC -> AISettings.Anthropic(_anthropicSettings.value)
-            }
-
-    /**
-     * Get the active AI settings as a StateFlow that reacts to provider changes.
-     * This combines the provider type flow with the respective settings flows.
-     */
-    val aiSettingsFlow: StateFlow<AISettings>
-        get() =
-            _aiProviderType
-                .flatMapLatest { provider ->
-                    when (provider) {
-                        AIProvider.OPENAI_COMPATIBLE ->
-                            _openAISettings.mapLatest { openaiSettings ->
-                                AISettings.OpenAI(openaiSettings)
-                            }
-                        AIProvider.ANTHROPIC ->
-                            _anthropicSettings.mapLatest { anthropicSettings ->
-                                AISettings.Anthropic(anthropicSettings)
-                            }
-                    }
-                }
-                .stateIn(
-                    scope = CoroutineScope(Dispatchers.Default + SupervisorJob()),
-                    started = kotlinx.coroutines.flow.SharingStarted.Eagerly,
-                    initialValue = aiSettings,
-                )
-
     fun setAIProviderType(value: AIProvider) {
         _aiProviderType.value = value
         sp.edit().putString(PREF_AI_PROVIDER_TYPE, value.name).apply()
@@ -557,6 +526,172 @@ class SettingsStore(
             .putInt(PREF_ANTHROPIC_REQUEST_TIMEOUT_SECONDS, value.timeoutSeconds)
             .apply()
     }
+
+    // Multi-provider support
+    private val json = Json {
+        ignoreUnknownKeys = true
+        encodeDefaults = true
+    }
+
+    private val _providers = MutableStateFlow(emptyList<ProviderConfig>())
+    val providers: StateFlow<List<ProviderConfig>> = _providers.asStateFlow()
+
+    init {
+        // Load providers on initialization
+        _providers.value = loadProviders()
+    }
+
+    private fun loadProviders(): List<ProviderConfig> {
+        // Check if already migrated
+        val jsonString = sp.getString(KEY_PROVIDER_LIST, null)
+        if (jsonString != null) {
+            return try {
+                json.decodeFromString<List<ProviderConfig>>(jsonString)
+            } catch (e: Exception) {
+                // If parsing fails, migrate from old settings
+                migrateFromOldSettings()
+            }
+        }
+
+        // Not migrated yet, migrate from old settings
+        return migrateFromOldSettings()
+    }
+
+    private fun migrateFromOldSettings(): List<ProviderConfig> {
+        val providers = mutableListOf<ProviderConfig>()
+        val activeProviderType = _aiProviderType.value
+
+        // Migrate OpenAI settings if present
+        val oldOpenAIKey = sp.getString(PREF_OPENAI_KEY, "")
+        if (!oldOpenAIKey.isNullOrBlank()) {
+            providers.add(
+                ProviderConfig(
+                    id = "migrated_openai_${System.currentTimeMillis()}",
+                    name = "OpenAI Provider (Migrated)",
+                    providerType = AIProvider.OPENAI_COMPATIBLE,
+                    openAISettings = ModelOpenAISettings(
+                        key = oldOpenAIKey,
+                        modelId = sp.getString(PREF_OPENAI_MODEL_ID, ModelOpenAISettings.DEFAULT_MODEL) ?: ModelOpenAISettings.DEFAULT_MODEL,
+                        baseUrl = sp.getStringNonNull(PREF_OPENAI_URL, ""),
+                        timeoutSeconds = sp.getInt(PREF_OPENAI_REQUEST_TIMEOUT_SECONDS, 30),
+                        azureApiVersion = sp.getStringNonNull(PREF_OPENAI_AZURE_VERSION, ""),
+                        azureDeploymentId = sp.getStringNonNull(PREF_OPENAI_AZURE_DEPLOYMENT_ID, ""),
+                    ),
+                    isActive = activeProviderType == AIProvider.OPENAI_COMPATIBLE,
+                    createdAt = System.currentTimeMillis(),
+                    updatedAt = System.currentTimeMillis(),
+                ),
+            )
+        }
+
+        // Migrate Anthropic settings if present
+        val oldAnthropicKey = sp.getString(PREF_ANTHROPIC_KEY, "")
+        if (!oldAnthropicKey.isNullOrBlank()) {
+            providers.add(
+                ProviderConfig(
+                    id = "migrated_anthropic_${System.currentTimeMillis()}",
+                    name = "Anthropic Provider (Migrated)",
+                    providerType = AIProvider.ANTHROPIC,
+                    anthropicSettings = AnthropicSettings(
+                        key = oldAnthropicKey,
+                        modelId = sp.getString(PREF_ANTHROPIC_MODEL_ID, AnthropicSettings.DEFAULT_MODEL) ?: AnthropicSettings.DEFAULT_MODEL,
+                        baseUrl = sp.getStringNonNull(PREF_ANTHROPIC_URL, ""),
+                        timeoutSeconds = sp.getInt(PREF_ANTHROPIC_REQUEST_TIMEOUT_SECONDS, 30),
+                    ),
+                    isActive = activeProviderType == AIProvider.ANTHROPIC,
+                    createdAt = System.currentTimeMillis(),
+                    updatedAt = System.currentTimeMillis(),
+                ),
+            )
+        }
+
+        // Ensure exactly one provider is active
+        val finalProviders = if (providers.none { it.isActive } && providers.isNotEmpty()) {
+            providers.mapIndexed { index, provider ->
+                provider.copy(isActive = index == 0)
+            }
+        } else {
+            providers
+        }
+
+        // Save migrated providers
+        if (finalProviders.isNotEmpty()) {
+            saveProviders(finalProviders)
+        }
+
+        return finalProviders
+    }
+
+    fun saveProviders(providers: List<ProviderConfig>) {
+        _providers.value = providers
+        val jsonString = json.encodeToString(providers)
+        sp.edit().putString(KEY_PROVIDER_LIST, jsonString).apply()
+    }
+
+    fun addProvider(provider: ProviderConfig) {
+        val updated = _providers.value + provider
+        saveProviders(updated)
+    }
+
+    fun updateProvider(provider: ProviderConfig) {
+        val updated = _providers.value.map {
+            if (it.id == provider.id) provider else it
+        }
+        saveProviders(updated)
+    }
+
+    fun deleteProvider(id: String) {
+        var updated = _providers.value.filter { it.id != id }
+        // Ensure at least one provider remains active
+        if (updated.none { it.isActive } && updated.isNotEmpty()) {
+            updated = updated.mapIndexed { index, provider ->
+                provider.copy(isActive = index == 0)
+            }
+        }
+        saveProviders(updated)
+    }
+
+    fun activateProvider(id: String) {
+        val updated = _providers.value.map {
+            it.copy(isActive = it.id == id)
+        }
+        saveProviders(updated)
+    }
+
+    // UPDATED: aiSettings now uses provider list
+    val aiSettings: AISettings
+        get() {
+            // Try new multi-provider format first
+            val activeProvider = _providers.value.firstOrNull { it.isActive }
+            if (activeProvider != null) {
+                return activeProvider.toAISettings()
+            }
+
+            // Fallback to old single-provider format
+            return when (_aiProviderType.value) {
+                AIProvider.OPENAI_COMPATIBLE -> AISettings.OpenAI(_openAISettings.value)
+                AIProvider.ANTHROPIC -> AISettings.Anthropic(_anthropicSettings.value)
+            }
+        }
+
+    // UPDATED: aiSettingsFlow now uses provider list
+    val aiSettingsFlow: StateFlow<AISettings>
+        get() = _providers
+            .map { providers ->
+                providers.firstOrNull { it.isActive }?.toAISettings()
+                    ?: fallbackToOldSettings()
+            }
+            .stateIn(
+                scope = CoroutineScope(Dispatchers.Default + SupervisorJob()),
+                started = SharingStarted.Eagerly,
+                initialValue = aiSettings,
+            )
+
+    private fun fallbackToOldSettings(): AISettings =
+        when (_aiProviderType.value) {
+            AIProvider.OPENAI_COMPATIBLE -> AISettings.OpenAI(_openAISettings.value)
+            AIProvider.ANTHROPIC -> AISettings.Anthropic(_anthropicSettings.value)
+        }
 
     // Summary language setting
     private val _summaryLanguage = MutableStateFlow(
@@ -708,6 +843,11 @@ const val PREF_ANTHROPIC_REQUEST_TIMEOUT_SECONDS = "pref_anthropic_request_timeo
  * AI provider selection
  */
 const val PREF_AI_PROVIDER_TYPE = "pref_ai_provider_type"
+
+/**
+ * Multi-provider list storage
+ */
+private const val KEY_PROVIDER_LIST = "ai_provider_list"
 
 /**
  * AI summary language setting

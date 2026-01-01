@@ -1,0 +1,103 @@
+{
+  "featureName": "Fix Auto-Summary Not Triggering When Reading Articles",
+  "startedAt": "2026-01-01T21:11:09+08:00",
+  "phases": [
+    { "id": 0, "name": "Apply Dev Rules", "status": "complete", "startedAt": "2026-01-01T21:11:09+08:00", "completedAt": "2026-01-01T21:11:09+08:00" },
+    { "id": 1, "name": "Specification Setup", "status": "complete", "startedAt": "2026-01-01T21:11:09+08:00", "completedAt": "2026-01-01T21:11:10+08:00" },
+    { "id": 2, "name": "Requirements Clarification", "status": "complete", "startedAt": "2026-01-01T21:11:10+08:00", "completedAt": "2026-01-01T21:11:15+08:00" },
+    { "id": 3, "name": "Research", "status": "complete", "startedAt": "2026-01-01T21:11:15+08:00", "completedAt": "2026-01-01T21:11:20+08:00" },
+    { "id": 4, "name": "Debug Analysis", "status": "complete", "startedAt": "2026-01-01T21:11:20+08:00", "completedAt": "2026-01-01T21:11:25+08:00" },
+    { "id": 5, "name": "Code Assessment", "status": "complete", "startedAt": "2026-01-01T21:11:25+08:00", "completedAt": "2026-01-01T21:25:33+08:00" },
+    { "id": 6, "name": "Specification Writing", "status": "complete", "startedAt": "2026-01-01T21:25:33+08:00", "completedAt": "2026-01-01T21:25:33+08:00" },
+    { "id": 7, "name": "Specification Review", "status": "complete", "startedAt": "2026-01-01T21:25:33+08:00", "completedAt": "2026-01-01T21:34:00+08:00" },
+    { "id": 8, "name": "Execution & QA", "status": "in_progress", "startedAt": "2026-01-01T21:34:00+08:00", "completedAt": null },
+    { "id": 9, "name": "Code Review", "status": "pending", "startedAt": null, "completedAt": null },
+    { "id": 10, "name": "Documentation Update", "status": "pending", "startedAt": null, "completedAt": null },
+    { "id": 11, "name": "Cleanup", "status": "pending", "startedAt": null, "completedAt": null },
+    { "id": 12, "name": "Commit & Push", "status": "pending", "startedAt": null, "completedAt": null },
+    { "id": 13, "name": "Final Verification", "status": "pending", "startedAt": null, "completedAt": null }
+  ],
+  "tasks": [
+    {
+      "id": "T5.1",
+      "phase": 5,
+      "description": "Complete code assessment of ArticleViewModel, ArticleScreen, and SettingsStore",
+      "status": "complete",
+      "files": ["04-assessment.md"],
+      "updatedAt": "2026-01-01T21:25:33+08:00"
+    },
+    {
+      "id": "T6.1",
+      "phase": 6,
+      "description": "Write technical specification (06-specification.md)",
+      "status": "complete",
+      "files": ["06-specification.md"],
+      "updatedAt": "2026-01-01T21:25:33+08:00"
+    },
+    {
+      "id": "T6.2",
+      "phase": 6,
+      "description": "Create implementation plan (07-implementation-plan.md)",
+      "status": "complete",
+      "files": ["07-implementation-plan.md"],
+      "updatedAt": "2026-01-01T21:25:33+08:00"
+    },
+    {
+      "id": "T6.3",
+      "phase": 6,
+      "description": "Update task list with detailed tasks (08-task-list.md)",
+      "status": "complete",
+      "files": ["08-task-list.md"],
+      "updatedAt": "2026-01-01T21:25:33+08:00"
+    },
+    {
+      "id": "T7.1",
+      "phase": 7,
+      "description": "Review specification documents for completeness and consistency",
+      "status": "complete",
+      "files": ["workflow-tracking.json"],
+      "updatedAt": "2026-01-01T21:34:00+08:00"
+    },
+    {
+      "id": "T8.1",
+      "phase": 8,
+      "description": "Modify ArticleViewModel.init block to observe repository.summaryEnabled",
+      "status": "in_progress",
+      "files": ["app/src/main/java/com/nononsenseapps/feeder/ui/compose/feedarticle/ArticleViewModel.kt"],
+      "updatedAt": "2026-01-01T21:34:00+08:00"
+    },
+    {
+      "id": "T8.2",
+      "phase": 8,
+      "description": "Verify build passes after code changes",
+      "status": "pending",
+      "files": [],
+      "updatedAt": null
+    },
+    {
+      "id": "T8.3",
+      "phase": 8,
+      "description": "Write unit tests for auto-summarization",
+      "status": "pending",
+      "files": ["app/src/test/java/com/nononsenseapps/feeder/ui/compose/feedarticle/ArticleViewModelTest.kt"],
+      "updatedAt": null
+    },
+    {
+      "id": "T8.4",
+      "phase": 8,
+      "description": "Perform manual testing (8 scenarios)",
+      "status": "pending",
+      "files": [],
+      "updatedAt": null
+    }
+  ],
+  "iteration": {
+    "loops": 0,
+    "lastReviewVerdict": null
+  },
+  "status": {
+    "allPhasesComplete": false,
+    "allTasksComplete": false,
+    "workflowDone": false
+  }
+}

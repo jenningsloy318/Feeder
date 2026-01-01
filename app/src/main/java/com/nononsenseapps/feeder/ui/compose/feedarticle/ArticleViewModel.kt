@@ -178,16 +178,25 @@ class ArticleViewModel(
 
     init {
         viewModelScope.launch {
-            articleFlow.collect { article ->
-                val feedId = article?.item?.feedId
-                if (feedId != null) {
-                    val feed = repository.getFeed(feedId)
-                    if (feed?.summarizeOnOpen == true) {
-                        summarize()
-                        return@collect // Only summarize on first load
+            combine(
+                articleFlow,
+                repository.summaryEnabled
+            ) { article, summaryEnabled ->
+                article to summaryEnabled
+            }.filterNotNull()
+                .collect { (article, summaryEnabled) ->
+                    val feedId = article?.item?.feedId
+                    if (feedId != null) {
+                        val feed = repository.getFeed(feedId)
+                        // Check both user setting and feed setting
+                        if ((summaryEnabled || feed?.summarizeOnOpen == true) &&
+                            aiSummary.value is AISummaryState.Empty &&
+                            article?.link != null) {
+                            summarize()
+                            return@collect // Only summarize on first load
+                        }
                     }
                 }
-            }
         }
     }
 

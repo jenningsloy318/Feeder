@@ -252,6 +252,16 @@ class SettingsStore(
         schedulePeriodicRssSync(di = di, replace = true)
     }
 
+    private val _autoFetchFullArticle = MutableStateFlow(
+        sp.getBoolean(PREF_AUTO_FETCH_FULL_ARTICLE, false)
+    )
+    val autoFetchFullArticle = _autoFetchFullArticle.asStateFlow()
+
+    fun setAutoFetchFullArticle(value: Boolean) {
+        _autoFetchFullArticle.value = value
+        sp.edit().putBoolean(PREF_AUTO_FETCH_FULL_ARTICLE, value).apply()
+    }
+
     private val _loadImageOnlyOnWifi = MutableStateFlow(sp.getBoolean(PREF_IMG_ONLY_WIFI, false))
     val loadImageOnlyOnWifi = _loadImageOnlyOnWifi.asStateFlow()
 
@@ -789,6 +799,7 @@ const val PREF_SYNC_ONLY_CHARGING = "pref_sync_only_charging"
 const val PREF_SYNC_ONLY_WIFI = "pref_sync_only_wifi"
 const val PREF_SYNC_FREQ = "pref_sync_freq"
 const val PREF_SYNC_ON_RESUME = "pref_sync_on_resume"
+const val PREF_AUTO_FETCH_FULL_ARTICLE = "pref_auto_fetch_full_article"
 
 /**
  * Image settings

@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
+import kotlinx.datetime.Clock
 
 /**
  * Manager class for orchestrating AI article translation operations.
@@ -110,6 +111,7 @@ class TranslationManager(
                                 paragraphIndex = globalIndex,
                                 aiProvider = aiClient.providerName,
                                 aiModel = aiClient.modelName,
+                                createdAt = Clock.System.now(),
                             )
                         )
                     }

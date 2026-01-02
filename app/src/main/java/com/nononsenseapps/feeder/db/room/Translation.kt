@@ -7,7 +7,6 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.nononsenseapps.feeder.db.COL_FEEDID
 import com.nononsenseapps.feeder.db.COL_ID
-import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 
 /**
@@ -68,5 +67,5 @@ data class Translation(
     val aiModel: String,
 
     @ColumnInfo(name = "created_at")
-    val createdAt: Instant = Clock.System.now(),
+    val createdAt: Instant,
 )

@@ -7,6 +7,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.nononsenseapps.feeder.ai.model.TargetLanguage
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
+import kotlinx.datetime.Clock
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -51,6 +52,7 @@ class TranslationDaoTest {
             paragraphIndex = 0,
             aiProvider = "openai",
             aiModel = "gpt-4",
+            createdAt = Clock.System.now(),
         )
 
         translationDao.insert(translation)
@@ -73,6 +75,7 @@ class TranslationDaoTest {
                 paragraphIndex = 0,
                 aiProvider = "openai",
                 aiModel = "gpt-4",
+                createdAt = Clock.System.now(),
             ),
             Translation(
                 articleId = testArticleId,
@@ -82,6 +85,7 @@ class TranslationDaoTest {
                 paragraphIndex = 1,
                 aiProvider = "openai",
                 aiModel = "gpt-4",
+                createdAt = Clock.System.now(),
             ),
         )
 
@@ -104,6 +108,7 @@ class TranslationDaoTest {
             paragraphIndex = 0,
             aiProvider = "openai",
             aiModel = "gpt-4",
+            createdAt = Clock.System.now(),
         )
 
         translationDao.insert(translation)
@@ -124,6 +129,7 @@ class TranslationDaoTest {
             paragraphIndex = 0,
             aiProvider = "openai",
             aiModel = "gpt-4",
+            createdAt = Clock.System.now(),
         )
 
         val spanishTranslation = Translation(
@@ -134,6 +140,7 @@ class TranslationDaoTest {
             paragraphIndex = 0,
             aiProvider = "openai",
             aiModel = "gpt-4",
+            createdAt = Clock.System.now(),
         )
 
         translationDao.insert(chineseTranslation)

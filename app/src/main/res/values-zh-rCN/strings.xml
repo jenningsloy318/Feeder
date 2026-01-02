@@ -304,4 +304,5 @@
     <string name="translation_language_arabic">阿拉伯语</string>
     <string name="translation_language_hindi">印地语</string>
     <string name="translation_progress">正在翻译第 %1$d 段，共 %2$d 段...</string>
+    <string name="retry">重试</string>
 </resources>

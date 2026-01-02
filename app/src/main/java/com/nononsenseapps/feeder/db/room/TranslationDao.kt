@@ -51,10 +51,10 @@ interface TranslationDao {
     /**
      * Insert multiple translations in a single transaction.
      *
-     * @param translations List of translations to insert
+     * @param translations Variable number of translations to insert
      */
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAll(translations: List<Translation>)
+    suspend fun insertAll(vararg translations: Translation)
 
     /**
      * Delete all translations for a specific article and target language.

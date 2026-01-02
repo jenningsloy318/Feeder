@@ -174,7 +174,6 @@ fun ProviderList(
                 onClick = { onProviderClick(provider) },
                 onDelete = { onDeleteProvider(provider) },
             )
-            HorizontalDivider()
         }
     }
 }
@@ -198,39 +197,44 @@ fun ProviderListItem(
         },
     )
 
-    SwipeToDismissBox(
-        state = dismissState,
-        backgroundContent = {
-            val color = when (dismissState.dismissDirection) {
-                SwipeToDismissBoxValue.StartToEnd -> Color.Transparent
-                SwipeToDismissBoxValue.EndToStart -> MaterialTheme.colorScheme.error
-                SwipeToDismissBoxValue.Settled -> Color.Transparent
-            }
+    // Wrap in Column to ensure only one keyed item per LazyColumn entry
+    Column {
+        SwipeToDismissBox(
+            state = dismissState,
+            backgroundContent = {
+                val color = when (dismissState.dismissDirection) {
+                    SwipeToDismissBoxValue.StartToEnd -> Color.Transparent
+                    SwipeToDismissBoxValue.EndToStart -> MaterialTheme.colorScheme.error
+                    SwipeToDismissBoxValue.Settled -> Color.Transparent
+                }
 
-            Box(
-                modifier =
-                    Modifier
-                        .fillMaxSize()
-                        .background(color)
-                        .padding(horizontal = 20.dp),
-                contentAlignment = Alignment.CenterEnd,
-            ) {
-                Icon(
-                    Icons.Default.Delete,
-                    contentDescription = stringResource(R.string.delete),
-                    tint = MaterialTheme.colorScheme.onError,
-                    modifier = Modifier.scale(1.2f),
-                )
-            }
-        },
-        enableDismissFromStartToEnd = false,
-        enableDismissFromEndToStart = true,
-    ) {
-        ProviderItemContent(
-            provider = provider,
-            onClick = onClick,
-            modifier = modifier,
-        )
+                Box(
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .background(color)
+                            .padding(horizontal = 20.dp),
+                    contentAlignment = Alignment.CenterEnd,
+                ) {
+                    Icon(
+                        Icons.Default.Delete,
+                        contentDescription = stringResource(R.string.delete),
+                        tint = MaterialTheme.colorScheme.onError,
+                        modifier = Modifier.scale(1.2f),
+                    )
+                }
+            },
+            enableDismissFromStartToEnd = false,
+            enableDismissFromEndToStart = true,
+        ) {
+            ProviderItemContent(
+                provider = provider,
+                onClick = onClick,
+                modifier = modifier,
+            )
+        }
+
+        HorizontalDivider()
     }
 }
 

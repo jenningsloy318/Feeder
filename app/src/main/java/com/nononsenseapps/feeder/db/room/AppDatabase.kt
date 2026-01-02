@@ -55,7 +55,7 @@ private const val LOG_TAG = "FEEDER_APPDB"
     views = [
         FeedsWithItemsForNavDrawer::class,
     ],
-    version = 39,
+    version = 40,
 )
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
@@ -141,6 +141,7 @@ fun getAllMigrations(di: DI) =
         MigrationFrom36To37(di),
         MigrationFrom37To38(di),
         MigrationFrom38To39(di),
+        MigrationFrom39To40(di),
     )
 
 /*
@@ -213,6 +214,7 @@ class MigrationFrom38To39(
     DIAware {
     override fun migrate(database: SupportSQLiteDatabase) {
         // Create translations table
+        // Note: No FOREIGN KEY constraint in SQL to match the Translation entity which doesn't use @ForeignKey annotation
         database.execSQL(
             """
             CREATE TABLE IF NOT EXISTS translations (
@@ -224,15 +226,52 @@ class MigrationFrom38To39(
                 paragraph_index INTEGER NOT NULL,
                 ai_provider TEXT NOT NULL,
                 ai_model TEXT NOT NULL,
-                created_at INTEGER NOT NULL,
-                FOREIGN KEY(article_id) REFERENCES feed_items(id) ON UPDATE NO ACTION ON DELETE CASCADE
+                created_at INTEGER NOT NULL
             )
             """.trimIndent(),
         )
 
-        // Create indexes for performance
+        // Create indexes for performance - names must match Room's default naming convention
+        // Room generates index names as: index_<table>_<columns>
         database.execSQL(
-            "CREATE INDEX IF NOT EXISTS index_translations_article_language ON translations (article_id, target_language)",
+            "CREATE INDEX IF NOT EXISTS index_translations_article_id_target_language ON translations (article_id, target_language)",
+        )
+        database.execSQL(
+            "CREATE INDEX IF NOT EXISTS index_translations_article_id ON translations (article_id)",
+        )
+    }
+}
+
+// Migration 39→40: Drop and recreate translations table with correct schema
+// This fixes the issue where the initial migration created the table incorrectly
+class MigrationFrom39To40(
+    override val di: DI,
+) : Migration(39, 40),
+    DIAware {
+    override fun migrate(database: SupportSQLiteDatabase) {
+        // Drop the incorrectly created table
+        database.execSQL("DROP TABLE IF EXISTS translations")
+
+        // Recreate with correct schema (no foreign key, correct index names)
+        database.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS translations (
+                id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                article_id INTEGER NOT NULL,
+                target_language TEXT NOT NULL,
+                original_paragraph TEXT NOT NULL,
+                translated_paragraph TEXT NOT NULL,
+                paragraph_index INTEGER NOT NULL,
+                ai_provider TEXT NOT NULL,
+                ai_model TEXT NOT NULL,
+                created_at INTEGER NOT NULL
+            )
+            """.trimIndent(),
+        )
+
+        // Create indexes
+        database.execSQL(
+            "CREATE INDEX IF NOT EXISTS index_translations_article_id_target_language ON translations (article_id, target_language)",
         )
         database.execSQL(
             "CREATE INDEX IF NOT EXISTS index_translations_article_id ON translations (article_id)",

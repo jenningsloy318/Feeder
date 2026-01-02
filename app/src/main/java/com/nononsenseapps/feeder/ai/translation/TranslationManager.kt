@@ -136,7 +136,7 @@ class TranslationManager(
             }
 
             // Save batch to database
-            translationDao.insertAll(translationEntities)
+            translationDao.insertAll(*translationEntities.toTypedArray())
             translationEntities.clear()
 
             // Emit intermediate progress

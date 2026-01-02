@@ -1,8 +1,58 @@
 # Implementation Progress Report
 
-**Date:** 2026-01-02 20:30:00
+**Date:** 2026-01-02 22:00:00
 **Phase:** COMPLETE - All Phases (0-13)
 **Status:** Feature Complete, Tested, and Ready for Deployment
+
+---
+
+## Recent Session Fixes & Improvements
+
+### Bug Fixes (Current Session):
+1. **LazyColumn Duplicate Key Crash** (ProviderListScreen.kt)
+   - Wrapped SwipeToDismissBox and HorizontalDivider in Column
+   - Ensures only one keyed composable per LazyColumn entry
+
+2. **Navigation Destination Not Found** (MainActivity.kt)
+   - Added TranslationSettingsDestination.register() to NavHost
+   - Fixed navigation to translation settings screen
+
+3. **TranslationDao KSP Compilation Error**
+   - Changed insertAll parameter from List to vararg
+   - Updated call site to use spread operator
+
+4. **Unused Import in TranslatedParagraph.kt**
+   - Removed unused `asText` import
+
+### Feature Enhancements (Current Session):
+1. **Inline Translation Display** (LinearArticleContent.kt)
+   - Modified linearArticleContent to pass translationState
+   - Created translationsByIndex map for O(1) lookup
+   - Added currentParagraphIndex tracking
+   - Modified LinearElementContent and LinearTextContent to accept translation
+   - Translations now appear inline below each paragraph with 70% alpha
+
+2. **Auto-Translation Trigger** (ArticleViewModel.kt)
+   - Added auto-translation logic in init block
+   - Triggers translation when article is opened if:
+     - Translation setting is enabled
+     - AI provider is configured
+     - No translation exists yet
+     - Article has content
+
+3. **Error Handling with Retry** (TranslationListItem.kt)
+   - Added retry button to error UI
+   - Shows refresh icon for retryable errors
+   - Added "Retry" string resource (EN/ZH)
+
+4. **Progress Indication Cleanup** (TranslationListItem.kt)
+   - Removed unused TranslatedContent composable (success state now shows nothing)
+   - Removed unused TranslatedParagraph composable
+   - Progress only shows for Loading state
+
+5. **String Resources**
+   - Added `retry` string in values/strings.xml
+   - Added `retry` translation in values-zh-rCN/strings.xml
 
 ---
 
@@ -107,7 +157,8 @@ All specification documents created and approved.
 **Resources:**
 16-17. String resources for translation feature (EN/ZH)
 
-### Modified Files (10+):
+### Modified Files (15+):
+**Previous Session:**
 1. `app/src/main/java/com/nononsenseapps/feeder/archmodel/SettingsStore.kt`
 2. `app/src/main/java/com/nononsenseapps/feeder/archmodel/Repository.kt`
 3. `app/src/main/java/com/nononsenseapps/feeder/db/room/AppDatabase.kt`
@@ -118,6 +169,17 @@ All specification documents created and approved.
 8. `app/src/main/java/com/nononsenseapps/feeder/ui/compose/feedarticle/ArticleViewModel.kt`
 9. `app/src/main/java/com/nononsenseapps/feeder/ui/compose/settings/SettingsScreen.kt`
 10. `app/src/main/java/com/nononsenseapps/feeder/di/ArchModelModule.kt`
+
+**Current Session:**
+11. `app/src/main/java/com/nononsenseapps/feeder/ui/compose/settings/ProviderListScreen.kt` (LazyColumn fix)
+12. `app/src/main/java/com/nononsenseapps/feeder/MainActivity.kt` (NavHost registration)
+13. `app/src/main/java/com/nononsenseapps/feeder/db/room/TranslationDao.kt` (vararg fix)
+14. `app/src/main/java/com/nononsenseapps/feeder/ai/translation/TranslationManager.kt` (spread operator)
+15. `app/src/main/java/com/nononsenseapps/feeder/ui/compose/html/LinearArticleContent.kt` (inline display)
+16. `app/src/main/java/com/nononsenseapps/feeder/ui/compose/feedarticle/TranslationListItem.kt` (retry button, cleanup)
+17. `app/src/main/java/com/nononsenseapps/feeder/ui/compose/feedarticle/TranslatedParagraph.kt` (unused import fix)
+18. `app/src/main/res/values/strings.xml` (retry string)
+19. `app/src/main/res/values-zh-rCN/strings.xml` (retry translation)
 
 ---
 

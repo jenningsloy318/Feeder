@@ -130,6 +130,7 @@ class ArticleViewModel(
             repository.aiSettingsFlow,
             aiSummary,
             translationState,
+            repository.translationEnabled,
         ) { params ->
             val article = params[0] as Article?
             val textToDisplay = params[1] as TextToDisplay
@@ -142,9 +143,14 @@ class ArticleViewModel(
             @Suppress("UNCHECKED_CAST")
             val ttsLanguages = params[7] as List<Locale>
 
-            val showSummarize = (params[8] as AISettings).isValid && !article?.link.isNullOrEmpty()
+            val aiSettings = params[8] as AISettings
+            val showSummarize = aiSettings.isValid && !article?.link.isNullOrEmpty()
             val aiSummary = (params[9] as AISummaryState)
             val translationState = (params[10] as ArticleTranslationState)
+            val translationEnabled = (params[11] as Boolean)
+
+            // Show translate button when translation is enabled, AI provider is configured, and article exists
+            val showTranslate = translationEnabled && aiSettings.isValid && !article?.link.isNullOrEmpty()
 
             ArticleState(
                 useDetectLanguage = useDetectLanguage,
@@ -175,6 +181,7 @@ class ArticleViewModel(
                 aiSummary = aiSummary,
                 articleContent = articleContent,
                 translationState = translationState,
+                showTranslate = showTranslate,
             )
         }.stateIn(
             scope = viewModelScope,
@@ -222,6 +229,32 @@ class ArticleViewModel(
                             summarize()
                             return@collect // Only summarize on first load
                         }
+                    }
+                }
+        }
+
+        // Auto-translate article when opened if translation is enabled
+        viewModelScope.launch {
+            combine(
+                articleFlow,
+                repository.translationEnabled,
+                repository.aiSettingsFlow,
+            ) { article, translationEnabled, aiSettings ->
+                Triple(article, translationEnabled, aiSettings)
+            }.filterNotNull()
+                .collect { (article, translationEnabled, aiSettings) ->
+                    // Only auto-translate if:
+                    // 1. Translation setting is enabled
+                    // 2. AI provider is configured
+                    // 3. No translation in progress or completed
+                    // 4. Article has a link
+                    if (translationEnabled &&
+                        aiSettings.isValid &&
+                        translationState.value is ArticleTranslationState.Idle &&
+                        article?.link != null) {
+                        Log.d(LOG_TAG, "Auto-translation triggered for article ${article.id}")
+                        translate()
+                        return@collect // Only translate on first load
                     }
                 }
         }
@@ -530,6 +563,7 @@ private data class ArticleState(
     override val aiSummary: AISummaryState = AISummaryState.Empty,
     override val articleContent: LinearArticle = LinearArticle(emptyList()),
     override val translationState: ArticleTranslationState = ArticleTranslationState.Idle,
+    override val showTranslate: Boolean = false,
 ) : ArticleScreenViewState
 
 @Immutable
@@ -558,6 +592,7 @@ interface ArticleScreenViewState {
     val aiSummary: AISummaryState
     val articleContent: LinearArticle
     val translationState: ArticleTranslationState
+    val showTranslate: Boolean
 }
 
 sealed interface AISummaryState {

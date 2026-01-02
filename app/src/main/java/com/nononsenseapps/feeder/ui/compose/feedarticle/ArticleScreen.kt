@@ -25,6 +25,7 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.OpenInBrowser
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -227,6 +228,21 @@ fun ArticleScreen(
                                 Icons.AutoMirrored.Filled.Article,
                                 contentDescription = stringResource(R.string.fetch_full_article),
                             )
+                        }
+                    }
+
+                    // Translate button (conditional)
+                    if (viewState.showTranslate) {
+                        PlainTooltipBox(tooltip = { Text(stringResource(R.string.translation_title)) }) {
+                            IconButton(
+                                onClick = onTranslate,
+                                enabled = viewState.translationState !is ArticleTranslationState.Loading,
+                            ) {
+                                Icon(
+                                    Icons.Default.Translate,
+                                    contentDescription = stringResource(R.string.translation_title),
+                                )
+                            }
                         }
                     }
 

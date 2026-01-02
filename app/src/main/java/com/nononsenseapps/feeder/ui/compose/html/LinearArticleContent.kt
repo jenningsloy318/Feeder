@@ -112,6 +112,8 @@ import com.nononsenseapps.feeder.ui.compose.utils.ProvideScaledText
 import com.nononsenseapps.feeder.ui.compose.utils.WithAllPreviewProviders
 import com.nononsenseapps.feeder.ui.compose.utils.focusableInNonTouchMode
 import com.nononsenseapps.feeder.util.logDebug
+import com.nononsenseapps.feeder.ai.translation.ParagraphTranslation
+import com.nononsenseapps.feeder.ui.compose.feedarticle.ArticleTranslationState
 import kotlin.math.abs
 
 private const val LOG_TAG = "FEEDER_LINEARCON"
@@ -119,7 +121,19 @@ private const val LOG_TAG = "FEEDER_LINEARCON"
 fun LazyListScope.linearArticleContent(
     articleContent: LinearArticle,
     onLinkClick: (url: String, index: Int?) -> Unit,
+    translationState: ArticleTranslationState = ArticleTranslationState.Idle,
 ) {
+    // Extract translations map for quick lookup
+    val translationsByIndex: Map<Int, ParagraphTranslation> =
+        if (translationState is ArticleTranslationState.Success) {
+            translationState.translations.associateBy { it.index }
+        } else {
+            emptyMap()
+        }
+
+    // Track paragraph index for translation mapping
+    var currentParagraphIndex = 0
+
     items(
         count = articleContent.elements.size,
         contentType = { index -> articleContent.elements[index].lazyListContentType },
@@ -138,11 +152,17 @@ fun LazyListScope.linearArticleContent(
                     idToIndex = articleContent.idToIndex,
                     allowHorizontalScroll = true,
                     onLinkClick = onLinkClick,
+                    translation = translationsByIndex[currentParagraphIndex],
                     modifier =
                         Modifier
                             .widthIn(max = minOf(maxWidth, LocalDimens.current.maxReaderWidth))
                             .fillMaxWidth(),
                 )
+
+                // Increment paragraph index after text elements
+                if (articleContent.elements[index] is LinearText) {
+                    currentParagraphIndex++
+                }
             }
         }
     }
@@ -154,6 +174,7 @@ fun LinearElementContent(
     allowHorizontalScroll: Boolean,
     idToIndex: Map<String, Int>,
     onLinkClick: (url: String, index: Int?) -> Unit,
+    translation: ParagraphTranslation? = null,
     modifier: Modifier = Modifier,
 ) {
     when (linearElement) {
@@ -199,6 +220,7 @@ fun LinearElementContent(
                         onLinkClick = onLinkClick,
                         idToIndex = idToIndex,
                         modifier = modifier,
+                        translation = translation,
                     )
                 }
 
@@ -581,20 +603,36 @@ fun LinearTextContent(
     onLinkClick: (url: String, index: Int?) -> Unit,
     modifier: Modifier = Modifier,
     softWrap: Boolean = true,
+    translation: ParagraphTranslation? = null,
 ) {
     ProvideScaledText {
         WithBidiDeterminedLayoutDirection(linearText.text) {
             val interactionSource = remember { MutableInteractionSource() }
             val annotatedString = linearText.toAnnotatedString(idToIndex = idToIndex, onLinkClick = onLinkClick)
 
-            Text(
-                text = annotatedString,
-                softWrap = softWrap,
-                modifier =
-                    modifier
-                        .indication(interactionSource, LocalIndication.current)
-                        .focusableInNonTouchMode(interactionSource = interactionSource),
-            )
+            Column {
+                Text(
+                    text = annotatedString,
+                    softWrap = softWrap,
+                    modifier =
+                        modifier
+                            .indication(interactionSource, LocalIndication.current)
+                            .focusableInNonTouchMode(interactionSource = interactionSource),
+                )
+
+                // Show translation below original text if available
+                if (translation != null) {
+                    Text(
+                        text = translation.translated,
+                        style = LocalTextStyle.current.merge(
+                            TextStyle(
+                                color = LocalTextStyle.current.color.copy(alpha = 0.7f),
+                            ),
+                        ),
+                        modifier = Modifier.padding(top = 8.dp),
+                    )
+                }
+            }
         }
     }
 }

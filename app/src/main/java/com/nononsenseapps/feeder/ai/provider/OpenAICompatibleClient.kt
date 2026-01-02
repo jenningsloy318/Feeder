@@ -27,6 +27,16 @@ class OpenAICompatibleClient(
 ) : AIClient {
     private val client: OpenAIClientAsync by lazy { buildClient() }
 
+    override val providerName: String
+        get() = when {
+            settings.isAzure -> "Azure OpenAI"
+            settings.isPerplexity -> "Perplexity"
+            else -> "OpenAI"
+        }
+
+    override val modelName: String
+        get() = settings.modelId
+
     override suspend fun listModels(): List<String> {
         if (settings.key.isEmpty()) {
             throw AIClientException("Missing API key")
@@ -146,6 +156,77 @@ class OpenAICompatibleClient(
             )
         } catch (e: Exception) {
             AIClient.SummaryResult.Error(content = e.message ?: e.cause?.message ?: "Unknown error")
+        }
+    }
+
+    override suspend fun translate(
+        paragraph: String,
+        targetLanguage: String,
+    ): AIClient.TranslationResult {
+        if (!settings.isValid) {
+            return AIClient.TranslationResult.Error(
+                message = "Invalid settings",
+                retryable = false,
+            )
+        }
+
+        return try {
+            val languageName = com.nononsenseapps.feeder.ai.model.TargetLanguage.fromCode(targetLanguage)?.displayName
+                ?: "the target language"
+
+            val systemPrompt = """
+                You are a professional translator. Translate the following text into $languageName.
+
+                Guidelines:
+                - Maintain the original tone and style
+                - Preserve formatting (bold, links, etc.)
+                - Ensure natural, fluent phrasing
+                - Do not add or remove information
+                - Return only the translation without any explanations or metadata
+
+                Text to translate:
+            """.trimIndent()
+
+            val params = ChatCompletionCreateParams.builder()
+                .model(settings.modelId)
+                .addSystemMessage(systemPrompt)
+                .addUserMessage(paragraph)
+                .build()
+
+            val response = withContext(Dispatchers.IO) {
+                client.chat().completions().create(params).get()
+            }
+
+            // Get the first choice
+            val choice = response.choices().firstOrNull()
+                ?: return AIClient.TranslationResult.Error(
+                    message = "No response from API",
+                    retryable = true,
+                )
+
+            // Get message content - use stream API to collect text
+            val translatedText = choice.message().content().stream()
+                .map { obj -> obj.toString() }
+                .reduce { a, b -> "$a$b" }
+                .orElse("")
+
+            // Get usage info
+            val usage = response.usage().getOrNull()
+            val promptTokens = usage?.promptTokens()?.toInt() ?: 0
+            val completionTokens = usage?.completionTokens()?.toInt() ?: 0
+            val totalTokens = usage?.totalTokens()?.toInt() ?: 0
+
+            AIClient.TranslationResult.Success(
+                translatedText = translatedText,
+                promptTokens = promptTokens,
+                completionTokens = completionTokens,
+                totalTokens = totalTokens,
+            )
+        } catch (e: Exception) {
+            AIClient.TranslationResult.Error(
+                message = e.message ?: "Unknown error",
+                retryable = true,
+            )
         }
     }
 

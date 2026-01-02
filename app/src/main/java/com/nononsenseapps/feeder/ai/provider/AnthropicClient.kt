@@ -22,6 +22,12 @@ class AnthropicClient(
 ) : AIClient {
     private val client: AnthropicClientAsync by lazy { buildClient() }
 
+    override val providerName: String
+        get() = "Anthropic"
+
+    override val modelName: String
+        get() = settings.modelId
+
     override suspend fun listModels(): List<String> {
         // Anthropic doesn't provide a models endpoint and users input model ID directly
         // Return empty list - UI should not show dropdown for Anthropic
@@ -98,6 +104,70 @@ class AnthropicClient(
             )
         } catch (e: Exception) {
             AIClient.SummaryResult.Error(content = e.message ?: e.cause?.message ?: "Unknown error")
+        }
+    }
+
+    override suspend fun translate(
+        paragraph: String,
+        targetLanguage: String,
+    ): AIClient.TranslationResult {
+        if (!settings.isValid) {
+            return AIClient.TranslationResult.Error(
+                message = "Invalid settings",
+                retryable = false,
+            )
+        }
+
+        return try {
+            val languageName = com.nononsenseapps.feeder.ai.model.TargetLanguage.fromCode(targetLanguage)?.displayName
+                ?: "the target language"
+
+            val systemPrompt = """
+                You are a professional translator. Translate the following text into $languageName.
+
+                Guidelines:
+                - Maintain the original tone and style
+                - Preserve formatting (bold, links, etc.)
+                - Ensure natural, fluent phrasing
+                - Do not add or remove information
+                - Return only the translation without any explanations or metadata
+
+                Text to translate:
+            """.trimIndent()
+
+            val params = MessageCreateParams.builder()
+                .model(settings.modelId)
+                .system(systemPrompt)
+                .maxTokens(2048L)
+                .addUserMessage(paragraph)
+                .build()
+
+            val response = withContext(Dispatchers.IO) {
+                client.messages().create(params).get()
+            }
+
+            // Get content blocks from the response - iterate and collect text
+            val translatedText = response.content().joinToString("") { contentBlock ->
+                contentBlock.text().getOrNull()?.text() ?: ""
+            }
+
+            // Get usage info
+            val usage = response.usage()
+            val promptTokens = usage.inputTokens().toInt()
+            val completionTokens = usage.outputTokens().toInt()
+            val totalTokens = promptTokens + completionTokens
+
+            AIClient.TranslationResult.Success(
+                translatedText = translatedText,
+                promptTokens = promptTokens,
+                completionTokens = completionTokens,
+                totalTokens = totalTokens,
+            )
+        } catch (e: Exception) {
+            AIClient.TranslationResult.Error(
+                message = e.message ?: "Unknown error",
+                retryable = true,
+            )
         }
     }
 

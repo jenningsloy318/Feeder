@@ -42,6 +42,16 @@ interface AIClient {
     ): TranslationResult
 
     /**
+     * The name of the AI provider (e.g., "OpenAI", "Anthropic").
+     */
+    val providerName: String
+
+    /**
+     * The model ID being used (e.g., "gpt-4o", "claude-3-5-sonnet-20241022").
+     */
+    val modelName: String
+
+    /**
      * Result of a summary generation request.
      */
     sealed interface SummaryResult {

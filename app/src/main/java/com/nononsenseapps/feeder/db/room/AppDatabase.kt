@@ -50,11 +50,12 @@ private const val LOG_TAG = "FEEDER_APPDB"
         RemoteReadMark::class,
         RemoteFeed::class,
         SyncDevice::class,
+        Translation::class,
     ],
     views = [
         FeedsWithItemsForNavDrawer::class,
     ],
-    version = 38,
+    version = 39,
 )
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
@@ -73,6 +74,8 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun remoteFeedDao(): RemoteFeedDao
 
     abstract fun syncDeviceDao(): SyncDeviceDao
+
+    abstract fun translationDao(): TranslationDao
 
     companion object {
         // For Singleton instantiation
@@ -137,6 +140,7 @@ fun getAllMigrations(di: DI) =
         MigrationFrom35To36(di),
         MigrationFrom36To37(di),
         MigrationFrom37To38(di),
+        MigrationFrom38To39(di),
     )
 
 /*
@@ -199,6 +203,39 @@ class MigrationFrom37To38(
             """
             ALTER TABLE feeds ADD COLUMN summarize_on_open INTEGER NOT NULL DEFAULT 0
             """.trimIndent(),
+        )
+    }
+}
+
+class MigrationFrom38To39(
+    override val di: DI,
+) : Migration(38, 39),
+    DIAware {
+    override fun migrate(database: SupportSQLiteDatabase) {
+        // Create translations table
+        database.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS translations (
+                id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                article_id INTEGER NOT NULL,
+                target_language TEXT NOT NULL,
+                original_paragraph TEXT NOT NULL,
+                translated_paragraph TEXT NOT NULL,
+                paragraph_index INTEGER NOT NULL,
+                ai_provider TEXT NOT NULL,
+                ai_model TEXT NOT NULL,
+                created_at INTEGER NOT NULL,
+                FOREIGN KEY(article_id) REFERENCES feed_items(id) ON UPDATE NO ACTION ON DELETE CASCADE
+            )
+            """.trimIndent(),
+        )
+
+        // Create indexes for performance
+        database.execSQL(
+            "CREATE INDEX IF NOT EXISTS index_translations_article_language ON translations (article_id, target_language)",
+        )
+        database.execSQL(
+            "CREATE INDEX IF NOT EXISTS index_translations_article_id ON translations (article_id)",
         )
     }
 }

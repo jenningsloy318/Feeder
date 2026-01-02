@@ -369,6 +369,16 @@ class Repository(
 
     fun setSummaryEnabled(value: Boolean) = settingsStore.setSummaryEnabled(value)
 
+    // Translation Enabled Setting
+    val translationEnabled = settingsStore.translationEnabled
+
+    fun setTranslationEnabled(value: Boolean) = settingsStore.setTranslationEnabled(value)
+
+    // Translation Target Language Setting
+    val translationTargetLanguage = settingsStore.translationTargetLanguage
+
+    fun setTranslationTargetLanguage(value: com.nononsenseapps.feeder.ai.model.TargetLanguage) = settingsStore.setTranslationTargetLanguage(value)
+
     // Active AI Settings (based on selected provider)
     val aiSettings = settingsStore.aiSettings
 

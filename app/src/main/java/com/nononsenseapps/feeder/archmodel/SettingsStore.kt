@@ -723,6 +723,29 @@ class SettingsStore(
         sp.edit().putBoolean(PREF_SUMMARY_ENABLED, value).apply()
     }
 
+    // Translation enabled setting
+    private val _translationEnabled = MutableStateFlow(
+        sp.getBoolean(PREF_TRANSLATION_ENABLED, false)
+    )
+    val translationEnabled = _translationEnabled.asStateFlow()
+
+    fun setTranslationEnabled(value: Boolean) {
+        _translationEnabled.value = value
+        sp.edit().putBoolean(PREF_TRANSLATION_ENABLED, value).apply()
+    }
+
+    // Translation target language setting
+    private val _translationTargetLanguage = MutableStateFlow(
+        sp.getString(PREF_TRANSLATION_TARGET_LANGUAGE, null)?.let { TargetLanguage.fromCode(it) }
+            ?: TargetLanguage.ENGLISH
+    )
+    val translationTargetLanguage = _translationTargetLanguage.asStateFlow()
+
+    fun setTranslationTargetLanguage(value: TargetLanguage) {
+        _translationTargetLanguage.value = value
+        sp.edit().putString(PREF_TRANSLATION_TARGET_LANGUAGE, value.code).apply()
+    }
+
     private val _showTitleUnreadCount = MutableStateFlow(sp.getBoolean(PREF_SHOW_TITLE_UNREAD_COUNT, false))
     val showTitleUnreadCount = _showTitleUnreadCount.asStateFlow()
 
@@ -878,6 +901,16 @@ const val PREF_SUMMARY_LANGUAGE = "pref_summary_language"
  * AI summary enabled setting
  */
 const val PREF_SUMMARY_ENABLED = "pref_summary_enabled"
+
+/**
+ * AI translation enabled setting
+ */
+const val PREF_TRANSLATION_ENABLED = "pref_translation_enabled"
+
+/**
+ * AI translation target language setting
+ */
+const val PREF_TRANSLATION_TARGET_LANGUAGE = "pref_translation_target_language"
 
 /**
  * Appearance settings

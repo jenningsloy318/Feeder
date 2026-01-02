@@ -2,6 +2,7 @@ package com.nononsenseapps.feeder.ui.compose.feedarticle
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Card
@@ -16,7 +17,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.nononsenseapps.feeder.R
 import com.nononsenseapps.feeder.ai.translation.ParagraphTranslation
-import com.nononsenseapps.feeder.ui.compose.text.toAnnotatedString
 
 /**
  * Composable for displaying translated article content.
@@ -39,7 +39,7 @@ fun TranslationListItem(
         is ArticleTranslationState.Loading -> {
             TranslationLoadingIndicator(
                 progress = state.progress,
-                total = state.total,
+                total = state.total ?: 100, // Provide default if null
                 modifier = modifier,
             )
         }
@@ -146,7 +146,7 @@ private fun TranslatedParagraph(
 ) {
     Box(modifier = modifier.padding(vertical = 4.dp)) {
         Text(
-            text = translation.translated.toAnnotatedString(),
+            text = translation.translated,
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onTertiaryContainer,
         )

@@ -397,6 +397,7 @@ fun ArticleScreen(
                 screenType = ScreenType.SINGLE,
                 articleListState = articleListState,
                 onFeedTitleClick = onFeedTitleClick,
+                onTranslate = onTranslate,
                 modifier =
                     Modifier
                         .focusGroup()
@@ -415,6 +416,7 @@ fun ArticleContent(
     screenType: ScreenType,
     onFeedTitleClick: () -> Unit,
     articleListState: LazyListState,
+    onTranslate: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val toolbarColor = MaterialTheme.colorScheme.surface.toArgb()

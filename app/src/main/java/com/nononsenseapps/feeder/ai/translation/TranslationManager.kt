@@ -4,12 +4,14 @@ import com.nononsenseapps.feeder.ai.AIClient
 import com.nononsenseapps.feeder.ai.model.TargetLanguage
 import com.nononsenseapps.feeder.archmodel.Repository
 import com.nononsenseapps.feeder.db.room.Translation
+import com.nononsenseapps.feeder.db.room.TranslationDao
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
-import kotlinx.datetime.Clock
+import java.time.Instant
+import java.time.Clock as JavaClock
 
 /**
  * Manager class for orchestrating AI article translation operations.
@@ -22,6 +24,7 @@ import kotlinx.datetime.Clock
  * - State management for UI observation
  */
 class TranslationManager(
+    private val translationDao: TranslationDao,
     private val repository: Repository,
 ) {
     private val _state = MutableStateFlow<TranslationState>(TranslationState.Idle)
@@ -49,7 +52,7 @@ class TranslationManager(
         emit(TranslationState.Idle)
 
         // Check if translations already exist in cache
-        val cachedTranslations = repository.db().translationDao()
+        val cachedTranslations = translationDao
             .getTranslations(articleId, targetLanguage.code)
 
         if (cachedTranslations.isNotEmpty()) {
@@ -111,7 +114,7 @@ class TranslationManager(
                                 paragraphIndex = globalIndex,
                                 aiProvider = aiClient.providerName,
                                 aiModel = aiClient.modelName,
-                                createdAt = Clock.System.now(),
+                                createdAt = JavaClock.systemUTC().instant(),
                             )
                         )
                     }
@@ -133,7 +136,7 @@ class TranslationManager(
             }
 
             // Save batch to database
-            repository.db().translationDao().insertAll(translationEntities)
+            translationDao.insertAll(translationEntities)
             translationEntities.clear()
 
             // Emit intermediate progress
@@ -155,7 +158,7 @@ class TranslationManager(
         articleId: Long,
         targetLanguage: TargetLanguage,
     ) {
-        repository.db().translationDao().delete(articleId, targetLanguage.code)
+        translationDao.delete(articleId, targetLanguage.code)
         _state.value = TranslationState.Idle
     }
 
@@ -163,7 +166,7 @@ class TranslationManager(
      * Clears all cached translations for an article (all languages).
      */
     suspend fun clearAllTranslations(articleId: Long) {
-        repository.db().translationDao().deleteAll(articleId)
+        translationDao.deleteAll(articleId)
         _state.value = TranslationState.Idle
     }
 

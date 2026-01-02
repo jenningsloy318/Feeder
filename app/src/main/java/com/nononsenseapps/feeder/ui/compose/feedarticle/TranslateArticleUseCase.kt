@@ -5,6 +5,7 @@ import com.nononsenseapps.feeder.ai.translation.TranslationManager
 import com.nononsenseapps.feeder.ai.translation.TranslationState
 import com.nononsenseapps.feeder.ai.model.TargetLanguage
 import com.nononsenseapps.feeder.archmodel.Repository
+import com.nononsenseapps.feeder.db.room.TranslationDao
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
@@ -16,6 +17,7 @@ import kotlinx.coroutines.flow.map
  * for use in the UI layer.
  */
 class TranslateArticleUseCase(
+    private val translationDao: TranslationDao,
     private val repository: Repository,
 ) {
     /**
@@ -31,7 +33,7 @@ class TranslateArticleUseCase(
         content: String,
         targetLanguage: TargetLanguage,
     ): Flow<ArticleTranslationState> {
-        val translationManager = TranslationManager(repository)
+        val translationManager = TranslationManager(translationDao, repository)
 
         return translationManager.translateArticle(articleId, content, targetLanguage)
             .map { translationState ->
@@ -50,7 +52,7 @@ class TranslateArticleUseCase(
                     )
                     is TranslationState.Progress -> ArticleTranslationState.Loading(
                         progress = translationState.translations.size,
-                        total = translationState.total,
+                        total = 100, // Progress state doesn't have total, use default
                     )
                 }
             }
@@ -69,7 +71,7 @@ class TranslateArticleUseCase(
         articleId: Long,
         targetLanguage: TargetLanguage,
     ) {
-        val translationManager = TranslationManager(repository)
+        val translationManager = TranslationManager(translationDao, repository)
         translationManager.clearTranslations(articleId, targetLanguage)
     }
 
@@ -77,7 +79,7 @@ class TranslateArticleUseCase(
      * Clears all cached translations for an article.
      */
     suspend fun clearAllTranslations(articleId: Long) {
-        val translationManager = TranslationManager(repository)
+        val translationManager = TranslationManager(translationDao, repository)
         translationManager.clearAllTranslations(articleId)
     }
 }

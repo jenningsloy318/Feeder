@@ -25,6 +25,8 @@ import com.nononsenseapps.feeder.ui.compose.feedarticle.FeedViewModel
 import com.nononsenseapps.feeder.ui.compose.searchfeed.SearchFeedViewModel
 import com.nononsenseapps.feeder.ui.compose.settings.SettingsViewModel
 import com.nononsenseapps.feeder.ui.compose.settings.TextSettingsViewModel
+import com.nononsenseapps.feeder.ui.compose.feedarticle.TranslateArticleUseCase
+import com.nononsenseapps.feeder.db.room.TranslationDao
 import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 import org.kodein.di.bind
@@ -46,6 +48,7 @@ val archModelModule =
         bind<OPMLParserHandler>() with singleton { OPMLImporter(di) }
         // AI API with factory pattern for multiple providers
         bind<AIApi>() with singleton { AIApi(instance(), appLang = Locale.getDefault().getISO3Language()) }
+        bind<TranslateArticleUseCase>() with singleton { TranslateArticleUseCase(instance(), instance()) }
         bind<SuggestedFeedRepository>() with
             singleton {
                 SuggestedFeedRepository(

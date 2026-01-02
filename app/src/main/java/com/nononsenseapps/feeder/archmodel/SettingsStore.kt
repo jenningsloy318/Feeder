@@ -12,6 +12,7 @@ import com.nononsenseapps.feeder.ai.model.AnthropicSettings
 import com.nononsenseapps.feeder.ai.model.OpenAISettings as ModelOpenAISettings
 import com.nononsenseapps.feeder.ai.model.ProviderConfig
 import com.nononsenseapps.feeder.ai.model.SummaryLanguage
+import com.nononsenseapps.feeder.ai.model.TargetLanguage
 import com.nononsenseapps.feeder.ai.provider.AIProvider
 import kotlinx.serialization.json.Json
 import com.nononsenseapps.feeder.background.schedulePeriodicRssSync

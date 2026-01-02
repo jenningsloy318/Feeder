@@ -137,6 +137,9 @@ fun ArticleScreen(
         onSummarize = {
             viewModel.summarize()
         },
+        onTranslate = {
+            viewModel.translate()
+        },
     )
 }
 
@@ -161,6 +164,7 @@ fun ArticleScreen(
     articleListState: LazyListState,
     onNavigateUp: () -> Unit,
     onSummarize: () -> Unit,
+    onTranslate: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
@@ -331,6 +335,24 @@ fun ArticleScreen(
                                         Text(stringResource(id = R.string.read_article))
                                     },
                                 )
+
+                                // Translate
+                                DropdownMenuItem(
+                                    onClick = {
+                                        onShowToolbarMenu(false)
+                                        onTranslate()
+                                    },
+                                    leadingIcon = {
+                                        Icon(
+                                            Icons.Default.AutoFixHigh,
+                                            contentDescription = null,
+                                        )
+                                    },
+                                    text = {
+                                        Text(stringResource(id = R.string.translation_title))
+                                    },
+                                )
+
                                 // Hidden button for TalkBack
                                 DropdownMenuItem(
                                     onClick = {

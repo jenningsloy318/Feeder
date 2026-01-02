@@ -446,6 +446,31 @@ class ArticleViewModel(
         }
     }
 
+    private val translateArticleUseCase: TranslateArticleUseCase by instance()
+
+    fun translate() {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val article = articleFlow.value ?: return@launch
+                val targetLanguage = repository.translationTargetLanguage.first()
+
+                // Collect the translation flow
+                translateArticleUseCase(
+                    articleId = itemId,
+                    content = loadArticleContent(),
+                    targetLanguage = targetLanguage,
+                ).collect { translationState ->
+                    this@ArticleViewModel.translationState.value = translationState
+                }
+            } catch (e: Exception) {
+                translationState.value = ArticleTranslationState.Error(
+                    message = e.message ?: "Translation failed",
+                    retryable = true,
+                )
+            }
+        }
+    }
+
     private suspend fun loadArticleContent(): String {
         val viewState = viewState.value
         val blobFile = blobFullFile(viewState.articleId, filePathProvider.fullArticleDir)

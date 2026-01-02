@@ -201,6 +201,20 @@ fun ArticleScreen(
                     }
                 },
                 actions = {
+                    // Summarize button (conditional)
+                    if (viewState.showSummarize) {
+                        PlainTooltipBox(tooltip = { Text(stringResource(R.string.summarize)) }) {
+                            IconButton(
+                                onClick = onSummarize,
+                            ) {
+                                Icon(
+                                    Icons.Default.AutoFixHigh,
+                                    contentDescription = stringResource(R.string.summarize),
+                                )
+                            }
+                        }
+                    }
+
                     PlainTooltipBox(tooltip = { Text(stringResource(R.string.fetch_full_article)) }) {
                         IconButton(
                             onClick = onToggleFullText,
@@ -208,17 +222,6 @@ fun ArticleScreen(
                             Icon(
                                 Icons.AutoMirrored.Filled.Article,
                                 contentDescription = stringResource(R.string.fetch_full_article),
-                            )
-                        }
-                    }
-
-                    PlainTooltipBox(tooltip = { Text(stringResource(id = R.string.open_in_web_view)) }) {
-                        IconButton(
-                            onClick = onOpenInCustomTab,
-                        ) {
-                            Icon(
-                                Icons.Default.OpenInBrowser,
-                                contentDescription = stringResource(id = R.string.open_in_web_view),
                             )
                         }
                     }
@@ -258,23 +261,22 @@ fun ArticleScreen(
                                     },
                                 )
 
-                                if (viewState.showSummarize) {
-                                    DropdownMenuItem(
-                                        onClick = {
-                                            onShowToolbarMenu(false)
-                                            onSummarize()
-                                        },
-                                        leadingIcon = {
-                                            Icon(
-                                                Icons.Default.AutoFixHigh,
-                                                contentDescription = null,
-                                            )
-                                        },
-                                        text = {
-                                            Text(stringResource(id = R.string.summarize))
-                                        },
-                                    )
-                                }
+                                // Open in Web View
+                                DropdownMenuItem(
+                                    onClick = {
+                                        onShowToolbarMenu(false)
+                                        onOpenInCustomTab()
+                                    },
+                                    leadingIcon = {
+                                        Icon(
+                                            Icons.Default.OpenInBrowser,
+                                            contentDescription = null,
+                                        )
+                                    },
+                                    text = {
+                                        Text(stringResource(id = R.string.open_in_web_view))
+                                    },
+                                )
 
                                 DropdownMenuItem(
                                     onClick = {

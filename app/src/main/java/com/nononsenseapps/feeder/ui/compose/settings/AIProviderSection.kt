@@ -66,6 +66,7 @@ fun AIProviderSection(
     onEvent: (AISettingsEvent) -> Unit,
     onNavigateToProviders: () -> Unit,
     onNavigateToSummary: () -> Unit,
+    onNavigateToTranslation: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier) {
@@ -81,6 +82,13 @@ fun AIProviderSection(
         SummarySectionItem(
             summaryLanguage = state.summaryLanguage,
             onNavigateToSummary = onNavigateToSummary,
+            modifier = Modifier,
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        TranslationSectionItem(
+            onNavigateToTranslation = onNavigateToTranslation,
             modifier = Modifier,
         )
     }
@@ -198,6 +206,40 @@ private fun SummarySectionItem(
             subtitle = {
                 Text(
                     text = stringResource(R.string.summary_subtitle),
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            },
+        )
+    }
+}
+
+@Composable
+private fun TranslationSectionItem(
+    onNavigateToTranslation: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier =
+            modifier
+                .width(LocalDimens.current.maxContentWidth)
+                .clickable { onNavigateToTranslation() }
+                .semantics { role = Role.Button },
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(
+            modifier = Modifier.size(64.dp),
+            contentAlignment = Alignment.Center,
+        ) { }
+
+        TitleAndSubtitle(
+            title = {
+                Text(
+                    text = stringResource(R.string.translation_title),
+                )
+            },
+            subtitle = {
+                Text(
+                    text = stringResource(R.string.translation_subtitle),
                     style = MaterialTheme.typography.bodySmall,
                 )
             },

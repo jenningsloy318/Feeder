@@ -1,29 +1,32 @@
 package com.nononsenseapps.feeder.ai.model
 
+import androidx.annotation.StringRes
+import com.nononsenseapps.feeder.R
+
 /**
  * Supported target languages for AI translation.
  *
  * @property code ISO 639-1 language code (e.g., "en", "zh", "es")
- * @property displayName English display name for the language
- * @property nativeName Native name of the language in its own script
+ * @property displayName String resource ID for display name
+ * @property languageName Human-readable language name for prompts
  */
 enum class TargetLanguage(
     val code: String,
-    val displayName: String,
-    val nativeName: String,
+    @StringRes val displayName: Int,
+    val languageName: String,
 ) {
-    ENGLISH("en", "English", "English"),
-    CHINESE("zh", "Chinese", "中文"),
-    SPANISH("es", "Spanish", "Español"),
-    FRENCH("fr", "French", "Français"),
-    GERMAN("de", "German", "Deutsch"),
-    JAPANESE("ja", "Japanese", "日本語"),
-    KOREAN("ko", "Korean", "한국어"),
-    PORTUGUESE("pt", "Portuguese", "Português"),
-    RUSSIAN("ru", "Russian", "Русский"),
-    ITALIAN("it", "Italian", "Italiano"),
-    ARABIC("ar", "Arabic", "العربية"),
-    HINDI("hi", "Hindi", "हिन्दी"),
+    ENGLISH("en", R.string.translation_language_english, "English"),
+    CHINESE("zh", R.string.translation_language_chinese, "Chinese"),
+    SPANISH("es", R.string.translation_language_spanish, "Spanish"),
+    FRENCH("fr", R.string.translation_language_french, "French"),
+    GERMAN("de", R.string.translation_language_german, "German"),
+    JAPANESE("ja", R.string.translation_language_japanese, "Japanese"),
+    KOREAN("ko", R.string.translation_language_korean, "Korean"),
+    PORTUGUESE("pt", R.string.translation_language_portuguese, "Portuguese"),
+    RUSSIAN("ru", R.string.translation_language_russian, "Russian"),
+    ITALIAN("it", R.string.translation_language_italian, "Italian"),
+    ARABIC("ar", R.string.translation_language_arabic, "Arabic"),
+    HINDI("hi", R.string.translation_language_hindi, "Hindi"),
     ;
 
     companion object {

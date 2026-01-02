@@ -284,4 +284,23 @@
     <string name="summarize_on_open">打开时总结</string>
     <string name="feed_search_suggestions_header">建议</string>
     <string name="openai_settings_info">兼容众多 AI 提供者，但非全部</string>
+    <string name="translation_title">翻译</string>
+    <string name="translation_subtitle">配置 AI 驱动的翻译</string>
+    <string name="translation_settings_title">翻译设置</string>
+    <string name="translation_enabled_title">启用翻译</string>
+    <string name="translation_enabled_description">将文章翻译成您偏好的语言</string>
+    <string name="translation_target_language_title">目标语言</string>
+    <string name="translation_target_language_description">选择将文章翻译成的语言</string>
+    <string name="translation_language_english">英语</string>
+    <string name="translation_language_chinese">中文</string>
+    <string name="translation_language_spanish">西班牙语</string>
+    <string name="translation_language_french">法语</string>
+    <string name="translation_language_german">德语</string>
+    <string name="translation_language_japanese">日语</string>
+    <string name="translation_language_korean">韩语</string>
+    <string name="translation_language_portuguese">葡萄牙语</string>
+    <string name="translation_language_russian">俄语</string>
+    <string name="translation_language_italian">意大利语</string>
+    <string name="translation_language_arabic">阿拉伯语</string>
+    <string name="translation_language_hindi">印地语</string>
 </resources>

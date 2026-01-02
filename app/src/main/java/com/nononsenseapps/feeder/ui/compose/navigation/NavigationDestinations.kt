@@ -39,6 +39,8 @@ import com.nononsenseapps.feeder.ui.compose.settings.SummarySettingsScreen
 import com.nononsenseapps.feeder.ui.compose.settings.SummarySettingsViewModel
 import com.nononsenseapps.feeder.ui.compose.settings.TextSettingsScreen
 import com.nononsenseapps.feeder.ui.compose.settings.TextSettingsViewModel
+import com.nononsenseapps.feeder.ui.compose.settings.TranslationSettingsScreen
+import com.nononsenseapps.feeder.ui.compose.settings.TranslationSettingsViewModel
 import com.nononsenseapps.feeder.ui.compose.sync.SyncScreen
 import com.nononsenseapps.feeder.ui.compose.sync.SyncScreenViewModel
 import com.nononsenseapps.feeder.util.DEEP_LINK_BASE_URI
@@ -348,6 +350,9 @@ data object SettingsDestination : NavigationDestination(
             onNavigateToSummarySettings = {
                 SummarySettingsDestination.navigate(navController)
             },
+            onNavigateToTranslationSettings = {
+                TranslationSettingsDestination.navigate(navController)
+            },
             settingsViewModel = backStackEntry.diAwareViewModel(),
         )
     }
@@ -469,6 +474,39 @@ data object SummarySettingsDestination : NavigationDestination(
         val viewModel: SummarySettingsViewModel = backStackEntry.diAwareViewModel()
 
         SummarySettingsScreen(
+            onNavigateUp = {
+                if (!navController.popBackStack()) {
+                    SettingsDestination.navigate(navController)
+                }
+            },
+            viewModel = viewModel,
+        )
+    }
+}
+
+/**
+ * Navigation destination for the translation settings screen.
+ */
+data object TranslationSettingsDestination : NavigationDestination(
+    path = "settings/translation",
+    navArguments = emptyList(),
+    deepLinks = emptyList(),
+) {
+    fun navigate(navController: NavController) {
+        navController.navigate(path) {
+            launchSingleTop = true
+        }
+    }
+
+    @Composable
+    override fun RegisterScreen(
+        navController: NavController,
+        backStackEntry: NavBackStackEntry,
+        navDrawerListState: LazyListState,
+    ) {
+        val viewModel: TranslationSettingsViewModel = backStackEntry.diAwareViewModel()
+
+        TranslationSettingsScreen(
             onNavigateUp = {
                 if (!navController.popBackStack()) {
                     SettingsDestination.navigate(navController)

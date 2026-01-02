@@ -115,6 +115,8 @@ class ArticleViewModel(
 
     private val aiSummary: MutableStateFlow<AISummaryState> = MutableStateFlow(AISummaryState.Empty)
 
+    private val translationState: MutableStateFlow<ArticleTranslationState> = MutableStateFlow(ArticleTranslationState.Idle)
+
     val viewState: StateFlow<ArticleScreenViewState> =
         combine(
             articleFlow,
@@ -127,6 +129,7 @@ class ArticleViewModel(
             ttsStateHolder.availableLanguages,
             repository.aiSettingsFlow,
             aiSummary,
+            translationState,
         ) { params ->
             val article = params[0] as Article?
             val textToDisplay = params[1] as TextToDisplay
@@ -141,6 +144,7 @@ class ArticleViewModel(
 
             val showSummarize = (params[8] as AISettings).isValid && !article?.link.isNullOrEmpty()
             val aiSummary = (params[9] as AISummaryState)
+            val translationState = (params[10] as ArticleTranslationState)
 
             ArticleState(
                 useDetectLanguage = useDetectLanguage,
@@ -170,6 +174,7 @@ class ArticleViewModel(
                 showSummarize = showSummarize,
                 aiSummary = aiSummary,
                 articleContent = articleContent,
+                translationState = translationState,
             )
         }.stateIn(
             scope = viewModelScope,
@@ -499,6 +504,7 @@ private data class ArticleState(
     override val showSummarize: Boolean = false,
     override val aiSummary: AISummaryState = AISummaryState.Empty,
     override val articleContent: LinearArticle = LinearArticle(emptyList()),
+    override val translationState: ArticleTranslationState = ArticleTranslationState.Idle,
 ) : ArticleScreenViewState
 
 @Immutable
@@ -526,6 +532,7 @@ interface ArticleScreenViewState {
     val showSummarize: Boolean
     val aiSummary: AISummaryState
     val articleContent: LinearArticle
+    val translationState: ArticleTranslationState
 }
 
 sealed interface AISummaryState {
@@ -536,6 +543,24 @@ sealed interface AISummaryState {
     data class Result(
         val value: com.nononsenseapps.feeder.ai.AIClient.SummaryResult,
     ) : AISummaryState
+}
+
+sealed interface ArticleTranslationState {
+    data object Idle : ArticleTranslationState
+
+    data class Loading(
+        val progress: Int,
+        val total: Int,
+    ) : ArticleTranslationState
+
+    data class Success(
+        val translations: List<com.nononsenseapps.feeder.ai.translation.ParagraphTranslation>,
+    ) : ArticleTranslationState
+
+    data class Error(
+        val message: String,
+        val retryable: Boolean = true,
+    ) : ArticleTranslationState
 }
 
 interface ArticleItemKeyHolder {

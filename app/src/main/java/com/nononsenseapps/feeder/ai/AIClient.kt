@@ -30,6 +30,18 @@ interface AIClient {
     ): SummaryResult
 
     /**
+     * Translate a paragraph of text to a target language.
+     *
+     * @param paragraph The text paragraph to translate
+     * @param targetLanguage The target language code (e.g., "zh", "es")
+     * @return TranslationResult containing the translated text or error information
+     */
+    suspend fun translate(
+        paragraph: String,
+        targetLanguage: String,
+    ): TranslationResult
+
+    /**
      * Result of a summary generation request.
      */
     sealed interface SummaryResult {
@@ -55,6 +67,32 @@ interface AIClient {
         data class Error(
             override val content: String,
         ) : SummaryResult
+    }
+
+    /**
+     * Result of a translation request.
+     */
+    sealed interface TranslationResult {
+        /**
+         * Successful translation with metadata.
+         */
+        data class Success(
+            val translatedText: String,
+            val promptTokens: Int,
+            val completionTokens: Int,
+            val totalTokens: Int,
+        ) : TranslationResult
+
+        /**
+         * Error during translation.
+         *
+         * @property message Error message describing what went wrong
+         * @property retryable Whether the operation can be retried (e.g., network error vs invalid API key)
+         */
+        data class Error(
+            val message: String,
+            val retryable: Boolean = true,
+        ) : TranslationResult
     }
 
     /**

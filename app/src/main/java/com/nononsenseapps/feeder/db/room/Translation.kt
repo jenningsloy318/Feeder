@@ -2,12 +2,10 @@ package com.nononsenseapps.feeder.db.room
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
-import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import com.nononsenseapps.feeder.db.COL_FEEDID
 import com.nononsenseapps.feeder.db.COL_ID
-import kotlinx.datetime.Instant
+import java.time.Instant
 
 /**
  * Room entity for storing AI-powered translations of article paragraphs.
@@ -30,14 +28,6 @@ import kotlinx.datetime.Instant
     indices = [
         Index(value = ["article_id", "target_language"]),
         Index(value = ["article_id"]),
-    ],
-    foreignKeys = [
-        ForeignKey(
-            entity = FeedItem::class,
-            parentColumns = [COL_ID],
-            childColumns = ["article_id"],
-            onDelete = ForeignKey.CASCADE,
-        ),
     ],
 )
 data class Translation(

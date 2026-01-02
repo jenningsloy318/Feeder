@@ -467,6 +467,17 @@ fun ArticleContent(
                 SummarySection(viewState.aiSummary)
             }
         }
+
+        if (viewState.translationState !is ArticleTranslationState.Idle) {
+            offsetCounter++
+            item {
+                TranslationListItem(
+                    state = viewState.translationState,
+                    onRetry = onTranslate,
+                )
+            }
+        }
+
         // Can take a composition or two before viewstate is set to its actual values
         if (viewState.articleId > ID_UNSET) {
             when (viewState.textToDisplay) {

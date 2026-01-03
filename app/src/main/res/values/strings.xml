@@ -272,7 +272,7 @@
   <string name="openai_settings_info">Compatible with many AI providers, but not all</string>
   <string name="ai_provider">AI Provider</string>
   <string name="ai_provider_openai_compatible">OpenAI-compatible</string>
-  <string name="ai_provider_anthropic">Anthropic (Claude)</string>
+  <string name="ai_provider_anthropic_compatible">Anthropic-compatible</string>
   <string name="api_key">API key</string>
   <string name="model_id">Model Id</string>
   <string name="summary_language_title">Summary Language</string>

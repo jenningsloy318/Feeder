@@ -224,7 +224,7 @@ fun ProviderEditForm(
                         id =
                             when (uiState.providerType) {
                                 AIProvider.OPENAI_COMPATIBLE -> R.string.ai_provider_openai_compatible
-                                AIProvider.ANTHROPIC -> R.string.ai_provider_anthropic
+                                AIProvider.ANTHROPIC -> R.string.ai_provider_anthropic_compatible
                             },
                     ),
                 onValueChange = {},
@@ -260,7 +260,7 @@ fun ProviderEditForm(
                                     id =
                                         when (provider) {
                                             AIProvider.OPENAI_COMPATIBLE -> R.string.ai_provider_openai_compatible
-                                            AIProvider.ANTHROPIC -> R.string.ai_provider_anthropic
+                                            AIProvider.ANTHROPIC -> R.string.ai_provider_anthropic_compatible
                                         },
                                 ),
                             )

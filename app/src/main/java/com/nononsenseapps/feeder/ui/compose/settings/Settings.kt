@@ -112,6 +112,7 @@ fun SettingsScreen(
     onNavigateToTextSettingsScreen: () -> Unit,
     onNavigateToProviderListScreen: () -> Unit = {},
     onNavigateToSummarySettings: () -> Unit = {},
+    onNavigateToTranslationSettings: () -> Unit = {},
     settingsViewModel: SettingsViewModel,
     modifier: Modifier = Modifier,
 ) {
@@ -211,6 +212,7 @@ fun SettingsScreen(
             onOpenAIEvent = settingsViewModel::onOpenAISettingsEvent,
             onNavigateToProviderList = onNavigateToProviderListScreen,
             onNavigateToSummary = onNavigateToSummarySettings,
+            onNavigateToTranslation = onNavigateToTranslationSettings,
             isOpenDrawerOnFab = viewState.isOpenDrawerOnFab,
             onOpenDrawerOnFab = settingsViewModel::setOpenDrawerOnFab,
             onTextSettings = onNavigateToTextSettingsScreen,
@@ -363,6 +365,7 @@ fun SettingsList(
     onOpenAIEvent: (AISettingsEvent) -> Unit,
     onNavigateToProviderList: () -> Unit = {},
     onNavigateToSummary: () -> Unit = {},
+    onNavigateToTranslation: () -> Unit = {},
     isOpenDrawerOnFab: Boolean,
     onOpenDrawerOnFab: (Boolean) -> Unit,
     currentFontSelection: FontSelection,
@@ -746,6 +749,7 @@ fun SettingsList(
                 onEvent = onOpenAIEvent,
                 onNavigateToProviders = onNavigateToProviderList,
                 onNavigateToSummary = onNavigateToSummary,
+                onNavigateToTranslation = onNavigateToTranslation,
             )
         }
 

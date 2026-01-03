@@ -25,6 +25,7 @@ import com.nononsenseapps.feeder.ui.compose.feedarticle.FeedViewModel
 import com.nononsenseapps.feeder.ui.compose.searchfeed.SearchFeedViewModel
 import com.nononsenseapps.feeder.ui.compose.settings.SettingsViewModel
 import com.nononsenseapps.feeder.ui.compose.settings.TextSettingsViewModel
+import com.nononsenseapps.feeder.ui.compose.settings.TranslationSettingsViewModel
 import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 import org.kodein.di.bind
@@ -69,4 +70,5 @@ val archModelModule =
         bindWithComposableViewModelScope<FeedViewModel>()
         bindWithComposableViewModelScope<NavigationDeepLinkViewModel>()
         bindWithComposableViewModelScope<TextSettingsViewModel>()
+        bindWithComposableViewModelScope<TranslationSettingsViewModel>()
     }

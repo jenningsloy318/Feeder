@@ -369,6 +369,16 @@ class Repository(
 
     fun setSummaryEnabled(value: Boolean) = settingsStore.setSummaryEnabled(value)
 
+    // Translation Language Setting
+    val translationLanguage = settingsStore.translationLanguage
+
+    fun setTranslationLanguage(value: com.nononsenseapps.feeder.ai.model.TranslationLanguage) = settingsStore.setTranslationLanguage(value)
+
+    // Translation Enabled Setting
+    val translationEnabled = settingsStore.translationEnabled
+
+    fun setTranslationEnabled(value: Boolean) = settingsStore.setTranslationEnabled(value)
+
     // Active AI Settings (based on selected provider)
     // FIXED: Use custom getter to always get current value from settingsStore
     // instead of caching the value at initialization time

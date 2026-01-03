@@ -314,8 +314,8 @@
     <string name="summary_title">摘要</string>
     <string name="summary_subtitle">AI 驱动的文章摘要</string>
     <string name="summary_settings_title">摘要设置</string>
-    <string name="summary_enabled_title">已启用摘要</string>
-    <string name="summary_enabled_description">为文章生成 AI 摘要</string>
+    <string name="summary_enabled_title">启用自动摘要</string>
+    <string name="summary_enabled_description">为文章自动生成 AI 摘要</string>
 
     <!-- Provider Management -->
     <string name="provider_list_title">AI 提供者</string>

@@ -91,6 +91,33 @@ class AIApi(
     }
 
     /**
+     * Translate paragraphs to the configured target language.
+     *
+     * This is a dummy implementation that prefixes each paragraph with the target language name.
+     * In a future update, this will call a real AI translation API.
+     *
+     * @param paragraphs List of paragraphs to translate
+     * @return TranslationResult with translated paragraphs or error
+     */
+    suspend fun translate(paragraphs: List<String>): AIClient.TranslationResult {
+        return try {
+            // Get target language from settings
+            val language = repository.translationLanguage.first()
+
+            if (paragraphs.isEmpty()) {
+                return AIClient.TranslationResult.Error(content = "No translatable content found in this article")
+            }
+
+            // DUMMY IMPLEMENTATION: Prefix each paragraph with language name
+            // TODO: Replace with real AI translation in future update
+            val translatedParagraphs = client.translate(paragraphs)
+            translatedParagraphs
+        } catch (e: Exception) {
+            AIClient.TranslationResult.Error(content = e.message ?: e.cause?.message ?: "Translation failed")
+        }
+    }
+
+    /**
      * Parse the summary response to extract language and content.
      */
     private fun parseSummaryResponse(content: String): SummaryResponse {

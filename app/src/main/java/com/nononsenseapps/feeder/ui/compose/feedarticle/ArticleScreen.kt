@@ -26,6 +26,14 @@ import androidx.compose.material.icons.filled.OpenInBrowser
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.filled.Translate
+import androidx.compose.material.icons.outlined.ErrorOutline
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import com.nononsenseapps.feeder.ai.AIClient
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -137,6 +145,9 @@ fun ArticleScreen(
         onSummarize = {
             viewModel.summarize()
         },
+        onTranslate = {
+            viewModel.translate()
+        },
     )
 }
 
@@ -161,6 +172,7 @@ fun ArticleScreen(
     articleListState: LazyListState,
     onNavigateUp: () -> Unit,
     onSummarize: () -> Unit,
+    onTranslate: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
@@ -210,6 +222,26 @@ fun ArticleScreen(
                                 Icon(
                                     Icons.Default.AutoFixHigh,
                                     contentDescription = stringResource(R.string.summarize),
+                                )
+                            }
+                        }
+                    }
+
+                    // Translate button (conditional)
+                    if (viewState.showSummarize) {
+                        PlainTooltipBox(tooltip = { Text(stringResource(R.string.translate)) }) {
+                            val isLoading = viewState.translation is TranslationState.Loading
+                            IconButton(
+                                onClick = onTranslate,
+                                enabled = !isLoading,
+                            ) {
+                                Icon(
+                                    Icons.Default.Translate,
+                                    contentDescription = if (isLoading) {
+                                        "Translating article, please wait"
+                                    } else {
+                                        stringResource(R.string.translate_article_content_description)
+                                    },
                                 )
                             }
                         }
@@ -445,12 +477,33 @@ fun ArticleContent(
                 SummarySection(viewState.aiSummary)
             }
         }
+
+        // Translation status section (loading or error)
+        if (viewState.translation !is TranslationState.Empty) {
+            offsetCounter++
+            item {
+                TranslationStatusSection(viewState.translation)
+            }
+        }
+
         // Can take a composition or two before viewstate is set to its actual values
         if (viewState.articleId > ID_UNSET) {
             when (viewState.textToDisplay) {
                 TextToDisplay.CONTENT -> {
+                    // Extract translated paragraphs if available
+                    val translatedParagraphs =
+                        when (val translation = viewState.translation) {
+                            is TranslationState.Result ->
+                                when (val result = translation.value) {
+                                    is AIClient.TranslationResult.Success -> result.paragraphs
+                                    else -> null
+                                }
+                            else -> null
+                        }
+
                     linearArticleContent(
                         articleContent = viewState.articleContent,
+                        translatedParagraphs = translatedParagraphs,
                         onLinkClick = { link, index ->
                             if (index != null) {
                                 coroutineScope.launch {
@@ -514,6 +567,80 @@ private fun SummarySection(summary: AISummaryState) {
                     modifier = Modifier.padding(8.dp),
                     text = summary.value.content,
                 )
+        }
+    }
+}
+
+/**
+ * Displays the translation status section in the article content.
+ *
+ * Handles three states:
+ * - Empty: Shows nothing
+ * - Loading: Shows progress indicator
+ * - Result: Delegates to TranslationErrorSection for errors, or returns nothing for success
+ * (success translations are displayed inline with paragraphs)
+ */
+@Composable
+private fun TranslationStatusSection(translation: TranslationState) {
+    when (translation) {
+        TranslationState.Empty -> {}
+        TranslationState.Loading ->
+            OutlinedCard(
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                LinearProgressIndicator(
+                    modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                )
+            }
+        is TranslationState.Result ->
+            when (val result = translation.value) {
+                is AIClient.TranslationResult.Error ->
+                    TranslationErrorSection(errorMessage = result.content)
+                is AIClient.TranslationResult.Success -> {
+                    // Success - translations will be displayed inline with paragraphs
+                    // Nothing to show here
+                }
+            }
+    }
+}
+
+/**
+ * Displays an error message when translation fails.
+ *
+ * Note: There is no retry button. Users tap the translate button again to retry.
+ */
+@Composable
+private fun TranslationErrorSection(errorMessage: String) {
+    OutlinedCard(
+        modifier = Modifier.fillMaxWidth(),
+        border = BorderStroke(
+            1.dp,
+            MaterialTheme.colorScheme.error,
+        ),
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.ErrorOutline,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.error,
+            )
+            Column(
+                modifier = Modifier.weight(1f),
+            ) {
+                Text(
+                    text = stringResource(R.string.translation_error),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.error,
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = errorMessage,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
         }
     }
 }

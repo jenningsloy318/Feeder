@@ -149,6 +149,28 @@ class OpenAICompatibleClient(
         }
     }
 
+    /**
+     * Dummy translation implementation.
+     *
+     * Prefixes each paragraph with "[Translated to <language>]" to simulate translation.
+     * This will be replaced with real AI translation in a future update.
+     */
+    override suspend fun translate(
+        paragraphs: List<String>,
+    ): AIClient.TranslationResult {
+        return try {
+            // DUMMY IMPLEMENTATION: Prefix each paragraph
+            // TODO: Replace with real AI translation in future update
+            val translated = paragraphs.mapIndexed { index, text ->
+                "[Translated Paragraph ${index + 1}] $text"
+            }
+
+            AIClient.TranslationResult.Success(paragraphs = translated)
+        } catch (e: Exception) {
+            AIClient.TranslationResult.Error(content = e.message ?: "Translation failed")
+        }
+    }
+
     private fun buildClient(): OpenAIClientAsync {
         val builder = OpenAIOkHttpClientAsync.builder()
             .apiKey(settings.key)

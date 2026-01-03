@@ -12,7 +12,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyListScope
@@ -118,12 +120,29 @@ private const val LOG_TAG = "FEEDER_LINEARCON"
 
 fun LazyListScope.linearArticleContent(
     articleContent: LinearArticle,
+    translatedParagraphs: List<String>? = null,
     onLinkClick: (url: String, index: Int?) -> Unit,
 ) {
+    // Track the index of text elements to match with translations
+    var textElementIndex = 0
+
     items(
         count = articleContent.elements.size,
         contentType = { index -> articleContent.elements[index].lazyListContentType },
     ) { index ->
+        val element = articleContent.elements[index]
+
+        // Get translation for this element if it's a LinearText
+        val translation =
+            when {
+                translatedParagraphs != null && element is LinearText -> {
+                    val idx = textElementIndex
+                    textElementIndex++
+                    translatedParagraphs.getOrNull(idx)
+                }
+                else -> null
+            }
+
         ProvideTextStyle(
             MaterialTheme.typography.bodyLarge.merge(
                 TextStyle(color = MaterialTheme.colorScheme.onBackground),
@@ -134,7 +153,8 @@ fun LazyListScope.linearArticleContent(
                 contentAlignment = Alignment.Center,
             ) {
                 LinearElementContent(
-                    linearElement = articleContent.elements[index],
+                    linearElement = element,
+                    translation = translation,
                     idToIndex = articleContent.idToIndex,
                     allowHorizontalScroll = true,
                     onLinkClick = onLinkClick,
@@ -151,6 +171,7 @@ fun LazyListScope.linearArticleContent(
 @Composable
 fun LinearElementContent(
     linearElement: LinearElement,
+    translation: String? = null,
     allowHorizontalScroll: Boolean,
     idToIndex: Map<String, Int>,
     onLinkClick: (url: String, index: Int?) -> Unit,
@@ -196,6 +217,7 @@ fun LinearElementContent(
                 LinearTextBlockStyle.TEXT -> {
                     LinearTextContent(
                         linearText = linearElement,
+                        translation = translation,
                         onLinkClick = onLinkClick,
                         idToIndex = idToIndex,
                         modifier = modifier,
@@ -577,24 +599,43 @@ private fun LinearImage.getBestImageForMaxSize(
 @Composable
 fun LinearTextContent(
     linearText: LinearText,
+    translation: String? = null,
     idToIndex: Map<String, Int>,
     onLinkClick: (url: String, index: Int?) -> Unit,
     modifier: Modifier = Modifier,
     softWrap: Boolean = true,
 ) {
     ProvideScaledText {
-        WithBidiDeterminedLayoutDirection(linearText.text) {
-            val interactionSource = remember { MutableInteractionSource() }
-            val annotatedString = linearText.toAnnotatedString(idToIndex = idToIndex, onLinkClick = onLinkClick)
+        Column(modifier = modifier) {
+            // Original text
+            WithBidiDeterminedLayoutDirection(linearText.text) {
+                val interactionSource = remember { MutableInteractionSource() }
+                val annotatedString = linearText.toAnnotatedString(idToIndex = idToIndex, onLinkClick = onLinkClick)
 
-            Text(
-                text = annotatedString,
-                softWrap = softWrap,
-                modifier =
-                    modifier
-                        .indication(interactionSource, LocalIndication.current)
-                        .focusableInNonTouchMode(interactionSource = interactionSource),
-            )
+                Text(
+                    text = annotatedString,
+                    softWrap = softWrap,
+                    modifier =
+                        Modifier
+                            .indication(interactionSource, LocalIndication.current)
+                            .focusableInNonTouchMode(interactionSource = interactionSource),
+                )
+            }
+
+            // Translation below original text
+            if (translation != null) {
+                Spacer(modifier = Modifier.height(8.dp))
+                WithBidiDeterminedLayoutDirection(translation) {
+                    Text(
+                        text = translation,
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontStyle = FontStyle.Italic,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(start = 16.dp),
+                        softWrap = softWrap,
+                    )
+                }
+            }
         }
     }
 }

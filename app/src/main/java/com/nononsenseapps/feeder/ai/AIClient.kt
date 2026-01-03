@@ -58,6 +58,49 @@ interface AIClient {
     }
 
     /**
+     * Result of a translation request.
+     *
+     * Contains translated paragraphs that correspond 1:1 with the input paragraphs.
+     */
+    sealed interface TranslationResult {
+        /**
+         * Error message if translation failed.
+         */
+        val content: String
+
+        /**
+         * Successful translation with paragraph-by-paragraph results.
+         *
+         * @param paragraphs List of translated paragraphs in the same order as input
+         */
+        data class Success(
+            val paragraphs: List<String>,
+        ) : TranslationResult {
+            override val content: String
+                get() = paragraphs.joinToString("\n\n")
+        }
+
+        /**
+         * Error during translation.
+         *
+         * @param content Error message describing what went wrong
+         */
+        data class Error(
+            override val content: String,
+        ) : TranslationResult
+    }
+
+    /**
+     * Generate translations for the given paragraphs.
+     *
+     * @param paragraphs List of text paragraphs to translate
+     * @return TranslationResult containing translated paragraphs or error information
+     */
+    suspend fun translate(
+        paragraphs: List<String>,
+    ): TranslationResult
+
+    /**
      * Result of a model listing request.
      */
     sealed interface ModelsResult {

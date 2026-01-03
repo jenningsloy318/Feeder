@@ -115,6 +115,8 @@ class ArticleViewModel(
 
     private val aiSummary: MutableStateFlow<AISummaryState> = MutableStateFlow(AISummaryState.Empty)
 
+    private val translationState: MutableStateFlow<TranslationState> = MutableStateFlow(TranslationState.Empty)
+
     val viewState: StateFlow<ArticleScreenViewState> =
         combine(
             articleFlow,
@@ -127,6 +129,7 @@ class ArticleViewModel(
             ttsStateHolder.availableLanguages,
             repository.aiSettingsFlow,
             aiSummary,
+            translationState,
         ) { params ->
             val article = params[0] as Article?
             val textToDisplay = params[1] as TextToDisplay
@@ -141,6 +144,7 @@ class ArticleViewModel(
 
             val showSummarize = (params[8] as AISettings).isValid && !article?.link.isNullOrEmpty()
             val aiSummary = (params[9] as AISummaryState)
+            val translation = (params[10] as TranslationState)
 
             ArticleState(
                 useDetectLanguage = useDetectLanguage,
@@ -169,6 +173,7 @@ class ArticleViewModel(
                 image = article?.image,
                 showSummarize = showSummarize,
                 aiSummary = aiSummary,
+                translation = translation,
                 articleContent = articleContent,
             )
         }.stateIn(
@@ -441,6 +446,65 @@ class ArticleViewModel(
         }
     }
 
+    /**
+     * Initiates article translation.
+     *
+     * Extracts translatable paragraphs from the article content and calls the AI API
+     * to translate them. Results are displayed paragraph-by-paragraph below the original text.
+     *
+     * Users can tap the translate button again to retry if translation fails.
+     */
+    fun translate() {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                translationState.value = TranslationState.Loading
+                Log.d(LOG_TAG, "Starting translation for article $itemId")
+
+                // Extract translatable paragraphs from article content
+                val paragraphs = extractTranslatableParagraphs()
+                Log.d(LOG_TAG, "Extracted ${paragraphs.size} paragraphs for translation")
+
+                if (paragraphs.isEmpty()) {
+                    translationState.value =
+                        TranslationState.Result(
+                            value = com.nononsenseapps.feeder.ai.AIClient.TranslationResult.Error(
+                                content = "No translatable content found",
+                            ),
+                        )
+                    return@launch
+                }
+
+                // Call AI API to translate paragraphs
+                val result = aiApi.translate(paragraphs)
+                translationState.value = TranslationState.Result(value = result)
+                Log.d(LOG_TAG, "Translation completed with result: $result")
+            } catch (e: Exception) {
+                Log.e(LOG_TAG, "Translation failed", e)
+                translationState.value =
+                    TranslationState.Result(
+                        value = com.nononsenseapps.feeder.ai.AIClient.TranslationResult.Error(
+                            content = e.message ?: "Translation failed",
+                        ),
+                    )
+            }
+        }
+    }
+
+    /**
+     * Extracts translatable text paragraphs from the article content.
+     *
+     * Only includes LinearText elements, excluding images, links, and other non-text elements.
+     *
+     * @return List of paragraph strings to translate
+     */
+    private fun extractTranslatableParagraphs(): List<String> {
+        val content = viewState.value.articleContent
+        return content.elements
+            .filterIsInstance<com.nononsenseapps.feeder.model.html.LinearText>()
+            .map { it.text }
+            .filter { it.isNotBlank() }
+    }
+
     private suspend fun loadArticleContent(): String {
         val viewState = viewState.value
         val blobFile = blobFullFile(viewState.articleId, filePathProvider.fullArticleDir)
@@ -498,6 +562,7 @@ private data class ArticleState(
     override val image: ThumbnailImage? = null,
     override val showSummarize: Boolean = false,
     override val aiSummary: AISummaryState = AISummaryState.Empty,
+    override val translation: TranslationState = TranslationState.Empty,
     override val articleContent: LinearArticle = LinearArticle(emptyList()),
 ) : ArticleScreenViewState
 
@@ -525,6 +590,7 @@ interface ArticleScreenViewState {
     val image: ThumbnailImage?
     val showSummarize: Boolean
     val aiSummary: AISummaryState
+    val translation: TranslationState
     val articleContent: LinearArticle
 }
 
@@ -536,6 +602,27 @@ sealed interface AISummaryState {
     data class Result(
         val value: com.nononsenseapps.feeder.ai.AIClient.SummaryResult,
     ) : AISummaryState
+}
+
+/**
+ * Sealed interface representing the state of article translation.
+ *
+ * States:
+ * - Empty: No translation has been requested
+ * - Loading: Translation is in progress
+ * - Result: Translation completed (success or error)
+ */
+sealed interface TranslationState {
+    /** No translation has been requested */
+    data object Empty : TranslationState
+
+    /** Translation is in progress */
+    data object Loading : TranslationState
+
+    /** Translation completed with result */
+    data class Result(
+        val value: com.nononsenseapps.feeder.ai.AIClient.TranslationResult,
+    ) : TranslationState
 }
 
 interface ArticleItemKeyHolder {

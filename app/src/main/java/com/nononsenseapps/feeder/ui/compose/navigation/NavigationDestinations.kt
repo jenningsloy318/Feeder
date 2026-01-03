@@ -438,8 +438,11 @@ data object ProviderEditDestination : NavigationDestination(
 
         ProviderEditScreen(
             onNavigateUp = {
-                // Always navigate back to provider list screen
-                ProviderListDestination.navigate(navController)
+                // Try to pop back to provider list first, only navigate if back stack is empty
+                // This prevents creating duplicate provider list destinations
+                if (!navController.popBackStack()) {
+                    ProviderListDestination.navigate(navController)
+                }
             },
             viewModel = viewModel,
         )

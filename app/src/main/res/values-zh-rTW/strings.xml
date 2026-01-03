@@ -270,7 +270,7 @@
     <!-- AI Provider -->
     <string name="ai_provider">AI 提供者</string>
     <string name="ai_provider_openai_compatible">OpenAI 相容</string>
-    <string name="ai_provider_anthropic">Anthropic</string>
+    <string name="ai_provider_anthropic_compatible">Anthropic 相容</string>
 
     <!-- Summary Language -->
     <string name="summary_language_title">摘要語言</string>

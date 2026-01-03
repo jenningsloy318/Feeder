@@ -257,7 +257,7 @@ fun AIProviderSectionEdit(
                 value =
                     when (current.providerType) {
                         AIProvider.OPENAI_COMPATIBLE -> stringResource(R.string.ai_provider_openai_compatible)
-                        AIProvider.ANTHROPIC -> stringResource(R.string.ai_provider_anthropic)
+                        AIProvider.ANTHROPIC -> stringResource(R.string.ai_provider_anthropic_compatible)
                     },
                 onValueChange = {},
                 label = {
@@ -285,7 +285,7 @@ fun AIProviderSectionEdit(
                             Text(
                                 when (provider) {
                                     AIProvider.OPENAI_COMPATIBLE -> stringResource(R.string.ai_provider_openai_compatible)
-                                    AIProvider.ANTHROPIC -> stringResource(R.string.ai_provider_anthropic)
+                                    AIProvider.ANTHROPIC -> stringResource(R.string.ai_provider_anthropic_compatible)
                                 },
                             )
                         },

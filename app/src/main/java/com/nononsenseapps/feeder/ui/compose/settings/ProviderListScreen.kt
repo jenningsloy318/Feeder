@@ -289,7 +289,7 @@ fun ProviderItemContent(
                         id =
                             when (provider.providerType) {
                                 com.nononsenseapps.feeder.ai.provider.AIProvider.OPENAI_COMPATIBLE -> R.string.ai_provider_openai_compatible
-                                com.nononsenseapps.feeder.ai.provider.AIProvider.ANTHROPIC -> R.string.ai_provider_anthropic
+                                com.nononsenseapps.feeder.ai.provider.AIProvider.ANTHROPIC -> R.string.ai_provider_anthropic_compatible
                             },
                     ),
                 style = MaterialTheme.typography.bodyMedium,

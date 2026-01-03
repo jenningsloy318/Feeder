@@ -57,6 +57,7 @@ import com.nononsenseapps.feeder.ai.model.AISettings
 import com.nononsenseapps.feeder.ai.model.AnthropicSettings
 import com.nononsenseapps.feeder.ai.model.OpenAISettings
 import com.nononsenseapps.feeder.ai.model.SummaryLanguage
+import com.nononsenseapps.feeder.ai.model.TranslationLanguage
 import com.nononsenseapps.feeder.ai.provider.AIProvider
 import com.nononsenseapps.feeder.ui.compose.theme.LocalDimens
 
@@ -66,6 +67,7 @@ fun AIProviderSection(
     onEvent: (AISettingsEvent) -> Unit,
     onNavigateToProviders: () -> Unit,
     onNavigateToSummary: () -> Unit,
+    onNavigateToTranslation: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier) {
@@ -81,6 +83,14 @@ fun AIProviderSection(
         SummarySectionItem(
             summaryLanguage = state.summaryLanguage,
             onNavigateToSummary = onNavigateToSummary,
+            modifier = Modifier,
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        TranslationSectionItem(
+            translationLanguage = state.translationLanguage,
+            onNavigateToTranslation = onNavigateToTranslation,
             modifier = Modifier,
         )
     }
@@ -198,6 +208,41 @@ private fun SummarySectionItem(
             subtitle = {
                 Text(
                     text = stringResource(R.string.summary_subtitle),
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            },
+        )
+    }
+}
+
+@Composable
+private fun TranslationSectionItem(
+    translationLanguage: TranslationLanguage,
+    onNavigateToTranslation: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier =
+            modifier
+                .width(LocalDimens.current.maxContentWidth)
+                .clickable { onNavigateToTranslation() }
+                .semantics { role = Role.Button },
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(
+            modifier = Modifier.size(64.dp),
+            contentAlignment = Alignment.Center,
+        ) { }
+
+        TitleAndSubtitle(
+            title = {
+                Text(
+                    text = stringResource(R.string.translation_title),
+                )
+            },
+            subtitle = {
+                Text(
+                    text = stringResource(R.string.translation_subtitle),
                     style = MaterialTheme.typography.bodySmall,
                 )
             },
@@ -631,6 +676,7 @@ data class AISettingsState(
     val isEditMode: Boolean = false,
     val showModelsError: Boolean = false,
     val summaryLanguage: SummaryLanguage = SummaryLanguage.AUTO_DETECT,
+    val translationLanguage: TranslationLanguage = TranslationLanguage.DEVICE_DEFAULT,
 )
 
 sealed interface ModelsState {

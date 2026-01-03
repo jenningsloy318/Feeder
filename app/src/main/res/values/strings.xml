@@ -294,6 +294,25 @@
   <string name="summary_settings_title">Summary Settings</string>
   <string name="summary_enabled_title">Enable Auto Summary</string>
   <string name="summary_enabled_description">Automatically generate AI summaries for articles</string>
+  <string name="translation_title">Translation</string>
+  <string name="translation_subtitle">Configure AI-powered translation</string>
+  <string name="translation_settings_title">Translation Settings</string>
+  <string name="translation_enabled_title">Enable Auto Translation</string>
+  <string name="translation_enabled_description">Automatically translate foreign language articles</string>
+  <string name="translation_target_language_title">Target Language</string>
+  <string name="translation_provider_title">AI Provider</string>
+  <string name="translation_language_device_default">Device Default</string>
+  <string name="translation_language_english">English</string>
+  <string name="translation_language_chinese">Chinese</string>
+  <string name="translation_language_spanish">Spanish</string>
+  <string name="translation_language_french">French</string>
+  <string name="translation_language_german">German</string>
+  <string name="translation_language_japanese">Japanese</string>
+  <string name="translation_language_korean">Korean</string>
+  <string name="translation_language_portuguese">Portuguese</string>
+  <string name="translation_language_russian">Russian</string>
+  <string name="translation_language_arabic">Arabic</string>
+  <string name="translation_language_hindi">Hindi</string>
   <string name="azure_api_version">Azure API version</string>
   <string name="touch_to_play_audio">Touch to play audio</string>
   <string name="title_unread_count" translatable="false">(%1$d)</string>

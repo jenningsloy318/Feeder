@@ -12,6 +12,7 @@ import com.nononsenseapps.feeder.ai.model.AnthropicSettings
 import com.nononsenseapps.feeder.ai.model.OpenAISettings as ModelOpenAISettings
 import com.nononsenseapps.feeder.ai.model.ProviderConfig
 import com.nononsenseapps.feeder.ai.model.SummaryLanguage
+import com.nononsenseapps.feeder.ai.model.TranslationLanguage
 import com.nononsenseapps.feeder.ai.provider.AIProvider
 import kotlinx.serialization.json.Json
 import com.nononsenseapps.feeder.background.schedulePeriodicRssSync
@@ -760,6 +761,26 @@ class SettingsStore(
         sp.edit().putBoolean(PREF_SUMMARY_ENABLED, value).apply()
     }
 
+    // Translation language setting
+    private val _translationLanguage = MutableStateFlow(
+        TranslationLanguage.fromCode(sp.getString(PREF_TRANSLATION_LANGUAGE, null)),
+    )
+    val translationLanguage = _translationLanguage.asStateFlow()
+
+    fun setTranslationLanguage(value: TranslationLanguage) {
+        _translationLanguage.value = value
+        sp.edit().putString(PREF_TRANSLATION_LANGUAGE, value.code).apply()
+    }
+
+    // Translation enabled setting
+    private val _translationEnabled = MutableStateFlow(sp.getBoolean(PREF_TRANSLATION_ENABLED, false))
+    val translationEnabled = _translationEnabled.asStateFlow()
+
+    fun setTranslationEnabled(value: Boolean) {
+        _translationEnabled.value = value
+        sp.edit().putBoolean(PREF_TRANSLATION_ENABLED, value).apply()
+    }
+
     private val _showTitleUnreadCount = MutableStateFlow(sp.getBoolean(PREF_SHOW_TITLE_UNREAD_COUNT, false))
     val showTitleUnreadCount = _showTitleUnreadCount.asStateFlow()
 
@@ -915,6 +936,16 @@ const val PREF_SUMMARY_LANGUAGE = "pref_summary_language"
  * AI summary enabled setting
  */
 const val PREF_SUMMARY_ENABLED = "pref_summary_enabled"
+
+/**
+ * AI translation language setting
+ */
+const val PREF_TRANSLATION_LANGUAGE = "pref_translation_language"
+
+/**
+ * AI translation enabled setting
+ */
+const val PREF_TRANSLATION_ENABLED = "pref_translation_enabled"
 
 /**
  * Appearance settings

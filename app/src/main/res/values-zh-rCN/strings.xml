@@ -316,6 +316,25 @@
     <string name="summary_settings_title">摘要设置</string>
     <string name="summary_enabled_title">启用自动摘要</string>
     <string name="summary_enabled_description">为文章自动生成 AI 摘要</string>
+    <string name="translation_title">翻译</string>
+    <string name="translation_subtitle">配置 AI 驱动的翻译</string>
+    <string name="translation_settings_title">翻译设置</string>
+    <string name="translation_enabled_title">启用自动翻译</string>
+    <string name="translation_enabled_description">自动翻译外语文章</string>
+    <string name="translation_target_language_title">目标语言</string>
+    <string name="translation_provider_title">AI 提供者</string>
+    <string name="translation_language_device_default">设备默认</string>
+    <string name="translation_language_english">英语</string>
+    <string name="translation_language_chinese">中文</string>
+    <string name="translation_language_spanish">西班牙语</string>
+    <string name="translation_language_french">法语</string>
+    <string name="translation_language_german">德语</string>
+    <string name="translation_language_japanese">日语</string>
+    <string name="translation_language_korean">韩语</string>
+    <string name="translation_language_portuguese">葡萄牙语</string>
+    <string name="translation_language_russian">俄语</string>
+    <string name="translation_language_arabic">阿拉伯语</string>
+    <string name="translation_language_hindi">印地语</string>
 
     <!-- Provider Management -->
     <string name="provider_list_title">AI 提供者</string>

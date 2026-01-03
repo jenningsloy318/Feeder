@@ -284,4 +284,57 @@
     <string name="summarize_on_open">打开时总结</string>
     <string name="feed_search_suggestions_header">建议</string>
     <string name="openai_settings_info">兼容众多 AI 提供者，但非全部</string>
+
+    <!-- Auto Fetch Full Article -->
+    <string name="setting_auto_fetch_full_article">自动获取完整文章</string>
+    <string name="setting_auto_fetch_full_article_description">同步时自动获取完整文章</string>
+
+    <!-- AI Provider -->
+    <string name="ai_provider">AI 提供者</string>
+    <string name="ai_provider_openai_compatible">OpenAI 兼容</string>
+    <string name="ai_provider_anthropic">Anthropic</string>
+
+    <!-- Summary Language -->
+    <string name="summary_language_title">摘要语言</string>
+    <string name="summary_language_description">选择 AI 生成摘要的语言</string>
+    <string name="summary_language_auto_detect">自动检测</string>
+    <string name="summary_language_english">英语</string>
+    <string name="summary_language_chinese">中文</string>
+    <string name="summary_language_spanish">西班牙语</string>
+    <string name="summary_language_french">法语</string>
+    <string name="summary_language_german">德语</string>
+    <string name="summary_language_japanese">日语</string>
+    <string name="summary_language_korean">韩语</string>
+    <string name="summary_language_portuguese">葡萄牙语</string>
+    <string name="summary_language_russian">俄语</string>
+    <string name="summary_language_arabic">阿拉伯语</string>
+    <string name="summary_language_hindi">印地语</string>
+
+    <!-- Summary Settings -->
+    <string name="summary_title">摘要</string>
+    <string name="summary_subtitle">AI 驱动的文章摘要</string>
+    <string name="summary_settings_title">摘要设置</string>
+    <string name="summary_enabled_title">已启用摘要</string>
+    <string name="summary_enabled_description">为文章生成 AI 摘要</string>
+
+    <!-- Provider Management -->
+    <string name="provider_list_title">AI 提供者</string>
+    <string name="add_provider">添加提供者</string>
+    <string name="edit">编辑</string>
+    <string name="delete">删除</string>
+    <string name="edit_provider">编辑提供者</string>
+    <string name="delete_provider">删除提供者</string>
+    <string name="delete_provider_confirmation">确定要删除"%s"吗？</string>
+    <string name="no_providers_configured">未配置提供者</string>
+    <string name="provider_configured">已配置提供者</string>
+    <string name="add_provider_to_get_started">添加提供者以开始使用</string>
+    <string name="active_provider">活跃提供者</string>
+    <string name="provider_name">提供者名称</string>
+    <string name="provider_name_hint">输入提供者名称</string>
+    <string name="provider_name_required">提供者名称必填</string>
+    <string name="api_key_required">API 密钥必填</string>
+    <string name="provider_saved">已保存提供者</string>
+    <string name="save_provider">保存提供者</string>
+    <string name="cancel">取消</string>
+    <string name="set_as_default_provider">设为默认</string>
 </resources>

@@ -1,0 +1,47 @@
+{
+  "featureName": "Fix Provider Duplicate Name Bug",
+  "startedAt": "2026-01-03T15:30:00Z",
+  "phases": [
+    { "id": 0, "name": "Apply Dev Rules", "status": "complete", "startedAt": "2026-01-03T15:30:00Z", "completedAt": "2026-01-03T15:30:00Z" },
+    { "id": 1, "name": "Specification Setup", "status": "complete", "startedAt": "2026-01-03T15:30:00Z", "completedAt": "2026-01-03T15:31:00Z" },
+    { "id": 2, "name": "Requirements Clarification", "status": "complete", "startedAt": "2026-01-03T15:31:00Z", "completedAt": "2026-01-03T15:32:00Z" },
+    { "id": 3, "name": "Research", "status": "complete", "startedAt": "2026-01-03T15:32:00Z", "completedAt": "2026-01-03T15:33:00Z" },
+    { "id": 4, "name": "Debug Analysis", "status": "complete", "startedAt": "2026-01-03T15:33:00Z", "completedAt": "2026-01-03T15:34:00Z" },
+    { "id": 5, "name": "Code Assessment", "status": "complete", "startedAt": "2026-01-03T15:34:00Z", "completedAt": "2026-01-03T15:36:00Z" },
+    { "id": 6, "name": "Specification Writing", "status": "complete", "startedAt": "2026-01-03T15:36:00Z", "completedAt": "2026-01-03T15:38:00Z" },
+    { "id": 7, "name": "Specification Review", "status": "complete", "startedAt": "2026-01-03T15:38:00Z", "completedAt": "2026-01-03T15:39:00Z" },
+    { "id": 8, "name": "Execution & QA", "status": "in_progress", "startedAt": "2026-01-03T15:39:00Z", "completedAt": null },
+    { "id": 9, "name": "Code Review", "status": "pending", "startedAt": null, "completedAt": null },
+    { "id": 10, "name": "Documentation Update", "status": "pending", "startedAt": null, "completedAt": null },
+    { "id": 11, "name": "Cleanup", "status": "pending", "startedAt": null, "completedAt": null },
+    { "id": 12, "name": "Commit & Push", "status": "pending", "startedAt": null, "completedAt": null },
+    { "id": 13, "name": "Final Verification", "status": "pending", "startedAt": null, "completedAt": null }
+  ],
+  "tasks": [
+    { "id": "T1.1", "phase": 1, "description": "Create spec directory and tracking file", "status": "complete", "files": ["workflow-tracking.json"], "updatedAt": "2026-01-03T15:30:00Z" },
+    { "id": "T2.1", "phase": 2, "description": "Gather requirements about duplicate provider name bug", "status": "complete", "files": ["01-requirement.md"], "updatedAt": "2026-01-03T15:32:00Z" },
+    { "id": "T3.1", "phase": 3, "description": "Research best practices for unique validation", "status": "complete", "files": ["02-research-report.md"], "updatedAt": "2026-01-03T15:33:00Z" },
+    { "id": "T4.1", "phase": 4, "description": "Analyze root cause using grep/ast-grep", "status": "complete", "files": ["03-debug-analysis.md"], "updatedAt": "2026-01-03T15:34:00Z" },
+    { "id": "T5.1", "phase": 5, "description": "Assess codebase for provider validation logic", "status": "complete", "files": ["04-code-assessment.md"], "updatedAt": "2026-01-03T15:36:00Z" },
+    { "id": "T6.1", "phase": 6, "description": "Write technical specification", "status": "complete", "files": ["05-specification.md"], "updatedAt": "2026-01-03T15:37:00Z" },
+    { "id": "T6.2", "phase": 6, "description": "Write implementation plan", "status": "complete", "files": ["06-implementation-plan.md"], "updatedAt": "2026-01-03T15:38:00Z" },
+    { "id": "T6.3", "phase": 6, "description": "Write task list", "status": "complete", "files": ["07-task-list.md"], "updatedAt": "2026-01-03T15:38:00Z" },
+    { "id": "T7.1", "phase": 7, "description": "Review all specification documents", "status": "complete", "files": ["08-specification-review.md"], "updatedAt": "2026-01-03T15:39:00Z" },
+    { "id": "T8.1", "phase": 8, "description": "Execute development tasks", "status": "in_progress", "files": [], "updatedAt": "2026-01-03T15:39:00Z" },
+    { "id": "T8.2", "phase": 8, "description": "Execute QA testing", "status": "pending", "files": [], "updatedAt": null },
+    { "id": "T9.1", "phase": 9, "description": "Perform code review", "status": "pending", "files": [], "updatedAt": null },
+    { "id": "T10.1", "phase": 10, "description": "Update documentation", "status": "pending", "files": [], "updatedAt": null },
+    { "id": "T11.1", "phase": 11, "description": "Clean up temporary files", "status": "pending", "files": [], "updatedAt": null },
+    { "id": "T12.1", "phase": 12, "description": "Commit and push changes", "status": "pending", "files": [], "updatedAt": null },
+    { "id": "T13.1", "phase": 13, "description": "Final verification", "status": "pending", "files": [], "updatedAt": null }
+  ],
+  "iteration": {
+    "loops": 0,
+    "lastReviewVerdict": null
+  },
+  "status": {
+    "allPhasesComplete": false,
+    "allTasksComplete": false,
+    "workflowDone": false
+  }
+}

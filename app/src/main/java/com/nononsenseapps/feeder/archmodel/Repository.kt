@@ -370,7 +370,10 @@ class Repository(
     fun setSummaryEnabled(value: Boolean) = settingsStore.setSummaryEnabled(value)
 
     // Active AI Settings (based on selected provider)
-    val aiSettings = settingsStore.aiSettings
+    // FIXED: Use custom getter to always get current value from settingsStore
+    // instead of caching the value at initialization time
+    val aiSettings: com.nononsenseapps.feeder.ai.model.AISettings
+        get() = settingsStore.aiSettings
 
     val aiSettingsFlow = settingsStore.aiSettingsFlow
 

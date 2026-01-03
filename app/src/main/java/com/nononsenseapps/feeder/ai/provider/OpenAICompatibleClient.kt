@@ -3,12 +3,14 @@ package com.nononsenseapps.feeder.ai.provider
 import com.nononsenseapps.feeder.ai.AIClient
 import com.nononsenseapps.feeder.ai.model.OpenAISettings
 import com.nononsenseapps.feeder.ai.model.SummaryLanguage
+import com.nononsenseapps.feeder.ai.model.TranslationLanguage
 import com.openai.client.OpenAIClientAsync
 import com.openai.client.okhttp.OpenAIOkHttpClientAsync
 import com.openai.models.chat.completions.ChatCompletion
 import com.openai.models.chat.completions.ChatCompletionCreateParams
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.net.SocketTimeoutException
 import java.time.Duration
 import kotlin.jvm.optionals.getOrNull
 
@@ -150,24 +152,58 @@ class OpenAICompatibleClient(
     }
 
     /**
-     * Dummy translation implementation.
+     * Translates article paragraphs using OpenAI-compatible API.
      *
-     * Prefixes each paragraph with "[Translated to <language>]" to simulate translation.
-     * This will be replaced with real AI translation in a future update.
+     * Sends all paragraphs in a single request with numbered indexing to maintain
+     * paragraph structure. Parses the response to extract translated paragraphs.
+     *
+     * @param paragraphs List of text paragraphs to translate
+     * @param targetLanguage Target language for translation
+     * @return TranslationResult containing translated paragraphs or error
      */
     override suspend fun translate(
         paragraphs: List<String>,
+        targetLanguage: TranslationLanguage,
     ): AIClient.TranslationResult {
+        if (paragraphs.isEmpty()) {
+            return AIClient.TranslationResult.Error(
+                content = "No translatable content found in this article"
+            )
+        }
+
         return try {
-            // DUMMY IMPLEMENTATION: Prefix each paragraph
-            // TODO: Replace with real AI translation in future update
-            val translated = paragraphs.mapIndexed { index, text ->
-                "[Translated Paragraph ${index + 1}] $text"
+            val prompt = buildTranslationPrompt(paragraphs, targetLanguage)
+
+            val params = ChatCompletionCreateParams.builder()
+                .model(settings.modelId)
+                .temperature(0.3)
+                .addUserMessage(prompt)
+                .build()
+
+            val response = withContext(Dispatchers.IO) {
+                client.chat().completions().create(params).get()
             }
 
-            AIClient.TranslationResult.Success(paragraphs = translated)
+            // Get the first choice
+            val choice = response.choices().firstOrNull()
+                ?: return AIClient.TranslationResult.Error(content = "No response from API")
+
+            // Get message content
+            val translatedText = choice.message().content().stream()
+                .map { obj -> obj.toString() }
+                .reduce { a, b -> "$a$b" }
+                .orElse("")
+
+            val translatedParagraphs = parseTranslationResponse(
+                translatedText,
+                paragraphs.size
+            )
+
+            AIClient.TranslationResult.Success(paragraphs = translatedParagraphs)
         } catch (e: Exception) {
-            AIClient.TranslationResult.Error(content = e.message ?: "Translation failed")
+            AIClient.TranslationResult.Error(
+                content = handleTranslationError(e)
+            )
         }
     }
 
@@ -197,6 +233,87 @@ class OpenAICompatibleClient(
             content.trim()
         }
         return lang to summary
+    }
+
+    /**
+     * Builds a translation prompt with numbered paragraphs for indexing.
+     */
+    private fun buildTranslationPrompt(
+        paragraphs: List<String>,
+        targetLanguage: TranslationLanguage,
+    ): String {
+        val numberedParagraphs = paragraphs.mapIndexed { index, text ->
+            "[${index + 1}] $text"
+        }.joinToString("\n\n")
+
+        return """
+            You are a professional translator. Translate the following article to ${targetLanguage.languageName}.
+
+            $numberedParagraphs
+
+            Provide your translation in the same numbered format:
+            [1] (translation of paragraph 1)
+            [2] (translation of paragraph 2)
+            ...
+
+            Guidelines:
+            - Maintain the numbered format [N] for each paragraph
+            - Translate only the content, not the numbers
+            - Preserve the meaning and tone
+            - Use natural, fluent expressions
+            - Return only the numbered translations
+        """.trimIndent()
+    }
+
+    /**
+     * Parses the translation response to extract numbered paragraphs.
+     */
+    private fun parseTranslationResponse(
+        response: String,
+        expectedParagraphs: Int,
+    ): List<String> {
+        val paragraphPattern = Regex(
+            "\\[(\\d+)\\]\\s*(.+?)(?=\\[\\d+\\]|\\Z)",
+            RegexOption.DOT_MATCHES_ALL
+        )
+
+        val translations = paragraphPattern.findAll(response)
+            .associate { it.groupValues[1].toInt() to it.groupValues[2].trim() }
+            .toSortedMap()
+            .values
+            .toList()
+
+        if (translations.size != expectedParagraphs) {
+            throw AIClientException(
+                "Expected $expectedParagraphs paragraphs, got ${translations.size}"
+            )
+        }
+
+        return translations
+    }
+
+    /**
+     * Handles translation errors with user-friendly messages.
+     */
+    private fun handleTranslationError(e: Exception): String {
+        return when {
+            e.message?.contains("rate limit", ignoreCase = true) == true ->
+                "Rate limit exceeded. Please try again later."
+
+            e.message?.contains("invalid api key", ignoreCase = true) == true ->
+                "Invalid API key. Check your AI provider settings."
+
+            e.message?.contains("timeout", ignoreCase = true) == true ||
+            e is SocketTimeoutException ->
+                "Translation timed out. Please check your connection."
+
+            e.message?.contains("insufficient quota", ignoreCase = true) == true ||
+            e.message?.contains("quota exceeded", ignoreCase = true) == true ->
+                "API quota exceeded. Please check your account."
+
+            else ->
+                "Translation failed: ${e.message ?: "Unknown error"}"
+        }
     }
 
     private class AIClientException(

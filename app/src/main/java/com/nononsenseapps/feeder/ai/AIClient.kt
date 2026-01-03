@@ -94,10 +94,12 @@ interface AIClient {
      * Generate translations for the given paragraphs.
      *
      * @param paragraphs List of text paragraphs to translate
+     * @param targetLanguage Target language for translation
      * @return TranslationResult containing translated paragraphs or error information
      */
     suspend fun translate(
         paragraphs: List<String>,
+        targetLanguage: com.nononsenseapps.feeder.ai.model.TranslationLanguage,
     ): TranslationResult
 
     /**

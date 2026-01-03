@@ -93,8 +93,8 @@ class AIApi(
     /**
      * Translate paragraphs to the configured target language.
      *
-     * This is a dummy implementation that prefixes each paragraph with the target language name.
-     * In a future update, this will call a real AI translation API.
+     * Uses AI provider (OpenAI-compatible or Anthropic) to translate article content.
+     * Sends all paragraphs in a single API request with paragraph indexing for efficient translation.
      *
      * @param paragraphs List of paragraphs to translate
      * @return TranslationResult with translated paragraphs or error
@@ -108,9 +108,8 @@ class AIApi(
                 return AIClient.TranslationResult.Error(content = "No translatable content found in this article")
             }
 
-            // DUMMY IMPLEMENTATION: Prefix each paragraph with language name
-            // TODO: Replace with real AI translation in future update
-            val translatedParagraphs = client.translate(paragraphs)
+            // Call AI provider to translate paragraphs
+            val translatedParagraphs = client.translate(paragraphs, language)
             translatedParagraphs
         } catch (e: Exception) {
             AIClient.TranslationResult.Error(content = e.message ?: e.cause?.message ?: "Translation failed")

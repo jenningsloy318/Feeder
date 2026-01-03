@@ -236,60 +236,176 @@ class OpenAICompatibleClient(
     }
 
     /**
-     * Builds a translation prompt with numbered paragraphs for indexing.
+     * Builds a JSON-structured translation prompt for accurate, professional translation.
+     *
+     * Based on research of best practices for AI translation prompts, including:
+     * - Professional role assignment
+     * - Clear translation guidelines
+     * - JSON structured input/output for reliable parsing
+     * - Context preservation for technical accuracy
      */
     private fun buildTranslationPrompt(
         paragraphs: List<String>,
         targetLanguage: TranslationLanguage,
     ): String {
-        val numberedParagraphs = paragraphs.mapIndexed { index, text ->
-            "[${index + 1}] $text"
-        }.joinToString("\n\n")
+        // Build JSON array of paragraphs with indices
+        val paragraphsJson = paragraphs.mapIndexed { index, text ->
+            """        {"index": ${index + 1}, "text": ${jsonEscape(text)}}"""
+        }.joinToString(",\n")
 
         return """
-            You are a professional translator. Translate the following article to ${targetLanguage.languageName}.
+You are a distinguished professional translator and bilingual scholar specializing in ${targetLanguage.languageName}. Your expertise encompasses accurately and elegantly translating texts while meticulously considering all linguistic complexities, nuances, and cultural contexts.
 
-            $numberedParagraphs
+## Translation Task
 
-            Provide your translation in the same numbered format:
-            [1] (translation of paragraph 1)
-            [2] (translation of paragraph 2)
-            ...
+Translate the following article paragraphs from JSON format to ${targetLanguage.languageName}.
 
-            Guidelines:
-            - Maintain the numbered format [N] for each paragraph
-            - Translate only the content, not the numbers
-            - Preserve the meaning and tone
-            - Use natural, fluent expressions
-            - Return only the numbered translations
-        """.trimIndent()
+## Input Format (JSON)
+```json
+{
+  "targetLanguage": "${targetLanguage.languageName}",
+  "paragraphs": [
+$paragraphsJson
+  ]
+}
+```
+
+## Output Requirements
+
+Respond with a JSON object in the following exact format:
+```json
+{
+  "targetLanguage": "${targetLanguage.languageName}",
+  "translations": [
+    {"index": 1, "translation": "..."},
+    {"index": 2, "translation": "..."}
+  ]
+}
+```
+
+## Translation Guidelines
+
+1. **Accuracy & Precision**: Maintain technical accuracy while ensuring the translation flows naturally in ${targetLanguage.languageName}
+
+2. **Cultural Adaptation**: Adapt expressions and cultural references to ${targetLanguage.languageName} language conventions
+
+3. **Tone Preservation**: Preserve the author's style, tone, and intent
+
+4. **Technical Terms**: Keep technical terminology, code, variable names, and commands untranslated
+
+5. **Format Preservation**: Maintain the original paragraph structure, numbering, and layout
+
+6. **Quality**: Provide fluent, professional translations that read naturally to native speakers
+
+7. **Consistency**: Use consistent terminology throughout the translation
+
+8. **Completeness**: Translate ALL paragraphs. Return exactly ${paragraphs.size} translations.
+
+## Important
+
+- Return ONLY the JSON object, no additional text or explanations
+- Ensure the JSON is valid and can be parsed
+- Match each index exactly from the input (1 to ${paragraphs.size})
+- Do not omit any paragraphs
+- Do not add any conversational filler
+
+Now, translate the above JSON input.
+""".trimIndent()
     }
 
     /**
-     * Parses the translation response to extract numbered paragraphs.
+     * Parses JSON-structured translation response.
+     *
+     * Expected format:
+     * ```json
+     * {
+     *   "translations": [
+     *     {"index": 1, "translation": "..."},
+     *     {"index": 2, "translation": "..."}
+     *   ]
+     * }
+     * ```
      */
     private fun parseTranslationResponse(
         response: String,
         expectedParagraphs: Int,
     ): List<String> {
-        val paragraphPattern = Regex(
-            "\\[(\\d+)\\]\\s*(.+?)(?=\\[\\d+\\]|\\Z)",
-            RegexOption.DOT_MATCHES_ALL
-        )
+        // Extract JSON from markdown code blocks if present
+        val jsonContent = extractJsonFromResponse(response)
 
-        val translations = paragraphPattern.findAll(response)
-            .associate { it.groupValues[1].toInt() to it.groupValues[2].trim() }
-            .toSortedMap()
-            .values
-            .toList()
+        try {
+            // Parse JSON using regex for simplicity (avoiding additional JSON library dependency)
+            val translationPattern = Regex(
+                """"index"\s*:\s*(\d+)\s*,\s*"translation"\s*:\s*"((?:[^"\\]|\\.)*)""""
+            )
 
-        if (translations.size != expectedParagraphs) {
+            val translations = translationPattern.findAll(jsonContent)
+                .associate { match ->
+                    val index = match.groupValues[1].toInt()
+                    val translation = unescapeJson(match.groupValues[2])
+                    index to translation
+                }
+                .toSortedMap()
+                .values
+                .toList()
+
+            if (translations.size != expectedParagraphs) {
+                throw AIClientException(
+                    "Expected $expectedParagraphs paragraphs, got ${translations.size}"
+                )
+            }
+
+            return translations
+        } catch (e: Exception) {
             throw AIClientException(
-                "Expected $expectedParagraphs paragraphs, got ${translations.size}"
+                "Failed to parse translation response: ${e.message}. Response: $response"
             )
         }
+    }
 
-        return translations
+    /**
+     * Extracts JSON content from response, handling markdown code blocks.
+     */
+    private fun extractJsonFromResponse(response: String): String {
+        // Try to extract JSON from markdown code blocks
+        val codeBlockPattern = Regex("""```(?:json)?\s*([\s\S]*?)\s*```""")
+        val match = codeBlockPattern.find(response)
+        if (match != null) {
+            return match.groupValues[1].trim()
+        }
+
+        // Try to find JSON object boundaries
+        val firstBrace = response.indexOf('{')
+        val lastBrace = response.lastIndexOf('}')
+        if (firstBrace != -1 && lastBrace != -1 && lastBrace > firstBrace) {
+            return response.substring(firstBrace, lastBrace + 1)
+        }
+
+        return response.trim()
+    }
+
+    /**
+     * Escapes text for JSON string literal.
+     */
+    private fun jsonEscape(text: String): String {
+        return text
+            .replace("\\", "\\\\")
+            .replace("\"", "\\\"")
+            .replace("\n", "\\n")
+            .replace("\r", "\\r")
+            .replace("\t", "\\t")
+    }
+
+    /**
+     * Unescapes JSON string literal.
+     */
+    private fun unescapeJson(text: String): String {
+        return text
+            .replace("\\n", "\n")
+            .replace("\\r", "\r")
+            .replace("\\t", "\t")
+            .replace("\\\"", "\"")
+            .replace("\\\\", "\\")
     }
 
     /**

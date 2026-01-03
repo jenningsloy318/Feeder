@@ -638,12 +638,49 @@ class SettingsStore(
         sp.edit().putString(KEY_PROVIDER_LIST, jsonString).apply()
     }
 
+    /**
+     * Checks if a provider name already exists (case-insensitive, trimmed).
+     *
+     * @param name The name to check
+     * @param excludeId Optional provider ID to exclude from check (for updates)
+     * @return true if duplicate exists, false otherwise
+     */
+    fun isProviderNameDuplicate(name: String, excludeId: String? = null): Boolean {
+        val trimmedName = name.trim()
+        return _providers.value.any { provider ->
+            provider.id != excludeId &&
+                provider.name.trim().equals(trimmedName, ignoreCase = true)
+        }
+    }
+
+    /**
+     * Exception thrown when attempting to add/update a provider with a duplicate name.
+     */
+    class DuplicateProviderNameException(
+        message: String,
+        val duplicateName: String,
+    ) : Exception(message)
+
     fun addProvider(provider: ProviderConfig) {
+        // Check for duplicate names
+        if (isProviderNameDuplicate(provider.name)) {
+            throw DuplicateProviderNameException(
+                "Provider with name '${provider.name}' already exists",
+                duplicateName = provider.name,
+            )
+        }
         val updated = _providers.value + provider
         saveProviders(updated)
     }
 
     fun updateProvider(provider: ProviderConfig) {
+        // Check for duplicate names, excluding current provider
+        if (isProviderNameDuplicate(provider.name, excludeId = provider.id)) {
+            throw DuplicateProviderNameException(
+                "Provider with name '${provider.name}' already exists",
+                duplicateName = provider.name,
+            )
+        }
         val updated = _providers.value.map {
             if (it.id == provider.id) provider else it
         }

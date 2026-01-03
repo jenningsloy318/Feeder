@@ -280,6 +280,17 @@ class ProviderEditViewModel(
                 }
 
                 _internalState.value = _internalState.value.copy(isSaving = false, saveResult = Result.success(Unit))
+            } catch (e: com.nononsenseapps.feeder.archmodel.SettingsStore.DuplicateProviderNameException) {
+                // Handle duplicate name exception with user-friendly message
+                _internalState.value = _internalState.value.copy(
+                    isSaving = false,
+                    saveResult = Result.failure(
+                        IllegalArgumentException(
+                            "A provider with the name '${e.duplicateName}' already exists. Please choose a different name.",
+                            e,
+                        ),
+                    ),
+                )
             } catch (e: Exception) {
                 _internalState.value = _internalState.value.copy(isSaving = false, saveResult = Result.failure(e))
             }

@@ -225,6 +225,26 @@ class ArticleViewModel(
                     }
                 }
         }
+
+        // Auto-translate if enabled
+        viewModelScope.launch {
+            combine(
+                articleFlow,
+                repository.translationEnabled
+            ) { article, translationEnabled ->
+                article to translationEnabled
+            }.filterNotNull()
+                .collect { (article, translationEnabled) ->
+                    // Only auto-translate once when setting is enabled and state is empty
+                    if (translationEnabled &&
+                        translationState.value is TranslationState.Empty &&
+                        article?.link != null) {
+                        Log.d(LOG_TAG, "Auto-translate triggered for article ${article.id}")
+                        translate()
+                        return@collect // Only translate on first load
+                    }
+                }
+        }
     }
 
     private suspend fun parseArticleContent(

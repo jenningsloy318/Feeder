@@ -281,20 +281,75 @@ Now, translate the above JSON input.
         val jsonContent = extractJsonFromResponse(response)
 
         try {
-            // Parse JSON using regex for simplicity (avoiding additional JSON library dependency)
-            val translationPattern = Regex(
-                """"index"\s*:\s*(\d+)\s*,\s*"translation"\s*:\s*"((?:[^"\\]|\\.)*)""""
-            )
+            // Find the translations array
+            val translationsStart = jsonContent.indexOf("\"translations\":")
+            if (translationsStart == -1) {
+                throw AIClientException("Translations array not found in response")
+            }
 
-            val translations = translationPattern.findAll(jsonContent)
-                .associate { match ->
-                    val index = match.groupValues[1].toInt()
-                    val translation = unescapeJson(match.groupValues[2])
-                    index to translation
+            // Find the array start after "translations":
+            val arrayStart = jsonContent.indexOf('[', translationsStart)
+            if (arrayStart == -1) {
+                throw AIClientException("Translations array start not found")
+            }
+
+            // Find matching closing bracket
+            var depth = 0
+            var inString = false
+            var escaped = false
+            var arrayEnd = -1
+
+            for (i in arrayStart until jsonContent.length) {
+                val c = jsonContent[i]
+
+                if (escaped) {
+                    escaped = false
+                    continue
                 }
-                .toSortedMap()
-                .values
-                .toList()
+
+                when (c) {
+                    '\\' -> escaped = true
+                    '"' -> inString = !inString
+                    '[', '{' -> if (!inString) depth++
+                    ']', '}' -> {
+                        if (!inString) {
+                            depth--
+                            if (depth == 0 && c == ']') {
+                                arrayEnd = i
+                                break
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (arrayEnd == -1) {
+                throw AIClientException("Translations array end not found")
+            }
+
+            // Extract just the array content and parse each object
+            val arrayContent = jsonContent.substring(arrayStart + 1, arrayEnd).trim()
+
+            val translations = mutableMapOf<Int, String>()
+
+            // Split by }, { to get individual objects
+            val objects = arrayContent.split(Regex("""\}\s*,\s*\{"""))
+
+            for (obj in objects) {
+                // Clean up the object string (remove surrounding braces if present)
+                val cleanObj = obj.trim().removeSurrounding("{", "}")
+
+                // Extract index
+                val indexMatch = Regex(""""index"\s*:\s*(\d+)""").find(cleanObj)
+                // Extract translation - handle newlines and escaped characters
+                val translationMatch = Regex(""""translation"\s*:\s*"((?:[^"\\]|\\.)*)""", RegexOption.DOT_MATCHES_ALL).find(cleanObj)
+
+                if (indexMatch != null && translationMatch != null) {
+                    val index = indexMatch.groupValues[1].toInt()
+                    val translation = unescapeJson(translationMatch.groupValues[1])
+                    translations[index] = translation
+                }
+            }
 
             if (translations.size != expectedParagraphs) {
                 throw AIClientException(
@@ -302,7 +357,7 @@ Now, translate the above JSON input.
                 )
             }
 
-            return translations
+            return translations.toSortedMap().values.toList()
         } catch (e: Exception) {
             throw AIClientException(
                 "Failed to parse translation response: ${e.message}. Response: $response"

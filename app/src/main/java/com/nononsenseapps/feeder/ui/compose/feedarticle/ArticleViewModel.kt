@@ -225,6 +225,32 @@ class ArticleViewModel(
                     }
                 }
         }
+
+        // Auto-translate if enabled
+        // Only triggers once per article when conditions are met
+        viewModelScope.launch {
+            combine(
+                articleFlow,
+                articleContentFlow,
+                repository.translationEnabled
+            ) { article, articleContent, translationEnabled ->
+                Triple(article, articleContent, translationEnabled)
+            }.filterNotNull()
+                .collect { (article, articleContent, translationEnabled) ->
+                    // Only auto-translate once when:
+                    // 1. Setting is enabled
+                    // 2. Translation state is empty (not already loading/done)
+                    // 3. Article has content (not empty elements list)
+                    if (translationEnabled &&
+                        translationState.value is TranslationState.Empty &&
+                        article?.link != null &&
+                        articleContent.elements.isNotEmpty()) {
+                        Log.d(LOG_TAG, "Auto-translate triggered for article ${article.id} with ${articleContent.elements.size} elements")
+                        translate()
+                        return@collect // Only translate on first load
+                    }
+                }
+        }
     }
 
     private suspend fun parseArticleContent(
@@ -493,16 +519,50 @@ class ArticleViewModel(
     /**
      * Extracts translatable text paragraphs from the article content.
      *
-     * Only includes LinearText elements, excluding images, links, and other non-text elements.
+     * Each paragraph from HTML (<p> tags) creates a separate LinearText element.
+     * List items (<li> tags) are also included as separate translation units.
+     *
+     * This respects the actual HTML structure where each <p> is already a
+     * separate paragraph, avoiding incorrect merging of distinct paragraphs.
      *
      * @return List of paragraph strings to translate
      */
     private fun extractTranslatableParagraphs(): List<String> {
         val content = viewState.value.articleContent
-        return content.elements
-            .filterIsInstance<com.nononsenseapps.feeder.model.html.LinearText>()
-            .map { it.text }
-            .filter { it.isNotBlank() }
+        val paragraphs = mutableListOf<String>()
+
+        for (element in content.elements) {
+            when (element) {
+                is com.nononsenseapps.feeder.model.html.LinearText -> {
+                    // Only translate regular text (not code blocks or pre-formatted text)
+                    if (element.blockStyle == com.nononsenseapps.feeder.model.html.LinearTextBlockStyle.TEXT) {
+                        val text = element.text
+                        if (text.isNotBlank()) {
+                            paragraphs.add(text.trim())
+                        }
+                    }
+                    // Skip PRE_FORMATTED and CODE_BLOCK
+                }
+                is com.nononsenseapps.feeder.model.html.LinearListItem -> {
+                    // Extract text from list item content
+                    // List items can contain nested elements, but typically have one LinearText
+                    val listItemText = element.content
+                        .filterIsInstance<com.nononsenseapps.feeder.model.html.LinearText>()
+                        .filter { it.blockStyle == com.nononsenseapps.feeder.model.html.LinearTextBlockStyle.TEXT }
+                        .map { it.text.trim() }
+                        .filter { it.isNotBlank() }
+                        .joinToString(" ")
+
+                    if (listItemText.isNotBlank()) {
+                        paragraphs.add(listItemText)
+                    }
+                }
+                // Skip other element types (images, videos, tables, blockquotes, etc.)
+                else -> {}
+            }
+        }
+
+        return paragraphs
     }
 
     private suspend fun loadArticleContent(): String {

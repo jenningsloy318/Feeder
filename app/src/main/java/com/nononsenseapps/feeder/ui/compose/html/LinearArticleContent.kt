@@ -115,33 +115,99 @@ import com.nononsenseapps.feeder.ui.compose.utils.WithAllPreviewProviders
 import com.nononsenseapps.feeder.ui.compose.utils.focusableInNonTouchMode
 import com.nononsenseapps.feeder.util.logDebug
 import kotlin.math.abs
+import kotlin.sequences.filterIsInstance
 
 private const val LOG_TAG = "FEEDER_LINEARCON"
+
+/**
+ * Computes which element positions should display which paragraph translations.
+ * Matches the logic in ArticleViewModel.extractTranslatableParagraphs().
+ *
+ * Each translatable element (LinearText with blockStyle=TEXT, or LinearListItem)
+ * gets its own translation index.
+ *
+ * Returns a map where:
+ * - Key: element index in the elements array
+ * - Value: paragraph index to translate (null if this position shouldn't show translation)
+ */
+private fun computeParagraphIndices(
+    elements: List<LinearElement>,
+    translatedParagraphs: List<String>?,
+): Map<Int, Int?> {
+    if (translatedParagraphs == null) {
+        return emptyMap()
+    }
+
+    val result = mutableMapOf<Int, Int?>()
+    var paragraphIndex = 0
+
+    elements.forEachIndexed { index, element ->
+        when (element) {
+            is LinearText -> {
+                // Only translate regular text (not code blocks or pre-formatted text)
+                if (element.blockStyle == LinearTextBlockStyle.TEXT && element.text.isNotBlank()) {
+                    result[index] = paragraphIndex++
+                } else {
+                    result[index] = null
+                }
+            }
+            is LinearListItem -> {
+                // Check if list item has translatable text content
+                val hasText = element.content
+                    .filterIsInstance<LinearText>()
+                    .filter { it.blockStyle == LinearTextBlockStyle.TEXT }
+                    .any { it.text.isNotBlank() }
+
+                if (hasText) {
+                    result[index] = paragraphIndex++
+                } else {
+                    result[index] = null
+                }
+            }
+            // Other element types don't get translations
+            else -> {
+                result[index] = null
+            }
+        }
+    }
+
+    return result
+}
 
 fun LazyListScope.linearArticleContent(
     articleContent: LinearArticle,
     translatedParagraphs: List<String>? = null,
     onLinkClick: (url: String, index: Int?) -> Unit,
 ) {
-    // Track the index of text elements to match with translations
-    var textElementIndex = 0
+    // Pre-compute paragraph indices for each element position
+    // -1 means no translation for this position
+    // >= 0 is the index into translatedParagraphs array
+    val paragraphIndexForPosition = computeParagraphIndices(articleContent.elements, translatedParagraphs)
 
     items(
         count = articleContent.elements.size,
+        key = { index ->
+            // Create a stable key for each element to prevent recomposition issues during scroll
+            val element = articleContent.elements[index]
+            when (element) {
+                is LinearText -> "text_${index}_${element.text.take(20)}"
+                is LinearImage -> "image_${index}_${element.sources.firstOrNull()?.imgUri?.hashCode() ?: index}"
+                is LinearVideo -> "video_${index}_${element.firstSource.link.hashCode()}"
+                is LinearAudio -> "audio_${index}_${element.firstSource.uri.hashCode()}"
+                is LinearTable -> "table_${index}_${element.rowCount}x${element.colCount}"
+                is LinearBlockQuote -> "blockquote_${index}_${element.cite?.hashCode() ?: index}"
+                is LinearListItem -> "listitem_${index}_${element.orderedIndex ?: "bullet"}_${index}"
+                else -> "element_${index}"
+            }
+        },
         contentType = { index -> articleContent.elements[index].lazyListContentType },
     ) { index ->
         val element = articleContent.elements[index]
 
-        // Get translation for this element if it's a LinearText
-        val translation =
-            when {
-                translatedParagraphs != null && element is LinearText -> {
-                    val idx = textElementIndex
-                    textElementIndex++
-                    translatedParagraphs.getOrNull(idx)
-                }
-                else -> null
-            }
+        // Get translation for this element position (only at paragraph endings)
+        val translation = paragraphIndexForPosition[index]?.let { paragraphIndex ->
+            translatedParagraphs?.getOrNull(paragraphIndex)
+        }
 
         ProvideTextStyle(
             MaterialTheme.typography.bodyLarge.merge(
@@ -189,6 +255,7 @@ fun LinearElementContent(
         is LinearListItem ->
             LinearListItemContent(
                 listItem = linearElement,
+                translation = translation,
                 allowHorizontalScroll = allowHorizontalScroll,
                 onLinkClick = onLinkClick,
                 modifier = modifier,
@@ -424,6 +491,7 @@ fun LinearListContent(
 @Composable
 fun LinearListItemContent(
     listItem: LinearListItem,
+    translation: String? = null,
     allowHorizontalScroll: Boolean,
     idToIndex: Map<String, Int>,
     onLinkClick: (url: String, index: Int?) -> Unit,
@@ -449,6 +517,7 @@ fun LinearListItemContent(
             listItem.content.forEach { element ->
                 LinearElementContent(
                     linearElement = element,
+                    translation = translation,
                     allowHorizontalScroll = allowHorizontalScroll,
                     onLinkClick = onLinkClick,
                     idToIndex = idToIndex,
@@ -628,8 +697,6 @@ fun LinearTextContent(
                 WithBidiDeterminedLayoutDirection(translation) {
                     Text(
                         text = translation,
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontStyle = FontStyle.Italic,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(start = 16.dp),
                         softWrap = softWrap,

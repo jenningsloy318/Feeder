@@ -16,7 +16,7 @@ import com.nononsenseapps.feeder.R
  */
 enum class TranslationLanguage(
     val code: String,
-    @StringRes val displayName: Int,
+    @param:StringRes val displayName: Int,
     val languageName: String,
 ) {
     /**

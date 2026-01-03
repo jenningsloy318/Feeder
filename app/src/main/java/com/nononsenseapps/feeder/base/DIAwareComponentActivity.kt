@@ -19,7 +19,8 @@ abstract class DIAwareComponentActivity :
     override val di: DI by DI.lazy {
         extend(parentDI)
         bind<MenuInflater>() with provider { menuInflater }
-        bind<DIAwareComponentActivity>() with instance(this@DIAwareComponentActivity)
+        // Use provider to avoid memory leak - holds factory function, not strong reference
+        bind<DIAwareComponentActivity>() with provider { this@DIAwareComponentActivity }
         bind<ActivityLauncher>() with
             singleton {
                 ActivityLauncher(

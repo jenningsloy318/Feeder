@@ -1,0 +1,46 @@
+{
+  "featureName": "Fix Memory Leak in Kodein DI Container",
+  "startedAt": "2026-01-03T21:30:00Z",
+  "phases": [
+    { "id": 0, "name": "Apply Dev Rules", "status": "complete", "startedAt": "2026-01-03T21:30:00Z", "completedAt": "2026-01-03T21:30:30Z" },
+    { "id": 1, "name": "Specification Setup", "status": "complete", "startedAt": "2026-01-03T21:30:31Z", "completedAt": "2026-01-03T21:30:40Z" },
+    { "id": 2, "name": "Requirements Clarification", "status": "complete", "startedAt": "2026-01-03T21:30:41Z", "completedAt": "2026-01-03T21:31:00Z" },
+    { "id": 3, "name": "Research", "status": "complete", "startedAt": "2026-01-03T21:31:01Z", "completedAt": "2026-01-03T21:32:00Z" },
+    { "id": 4, "name": "Debug Analysis", "status": "complete", "startedAt": "2026-01-03T21:32:01Z", "completedAt": "2026-01-03T21:33:00Z" },
+    { "id": 5, "name": "Code Assessment", "status": "complete", "startedAt": "2026-01-03T21:33:01Z", "completedAt": "2026-01-03T21:34:00Z" },
+    { "id": 5.3, "name": "Architecture Design", "status": "complete", "startedAt": "2026-01-03T21:34:01Z", "completedAt": "2026-01-03T21:35:00Z" },
+    { "id": 6, "name": "Specification Writing", "status": "complete", "startedAt": "2026-01-03T21:35:01Z", "completedAt": "2026-01-03T21:36:00Z" },
+    { "id": 7, "name": "Specification Review", "status": "complete", "startedAt": "2026-01-03T21:36:01Z", "completedAt": "2026-01-03T21:36:30Z" },
+    { "id": 8, "name": "Execution & QA", "status": "in_progress", "startedAt": "2026-01-03T21:36:31Z", "completedAt": null },
+    { "id": 9, "name": "Code Review", "status": "pending", "startedAt": null, "completedAt": null },
+    { "id": 10, "name": "Documentation Update", "status": "pending", "startedAt": null, "completedAt": null },
+    { "id": 11, "name": "Cleanup", "status": "pending", "startedAt": null, "completedAt": null },
+    { "id": 12, "name": "Commit & Push", "status": "pending", "startedAt": null, "completedAt": null },
+    { "id": 13, "name": "Final Verification", "status": "pending", "startedAt": null, "completedAt": null }
+  ],
+  "tasks": [
+    { "id": "T1.1", "phase": 1, "description": "Create spec directory structure", "status": "complete", "files": ["specification/012-fix-memory-leak-kodein-di/"], "updatedAt": "2026-01-03T21:30:35Z" },
+    { "id": "T2.1", "phase": 2, "description": "Confirm requirements and fix approach", "status": "complete", "files": ["01-requirements.md"], "updatedAt": "2026-01-03T21:31:00Z" },
+    { "id": "T3.1", "phase": 3, "description": "Research DI memory leak best practices", "status": "complete", "files": ["02-research-report.md"], "updatedAt": "2026-01-03T21:32:00Z" },
+    { "id": "T4.1", "phase": 4, "description": "Validate leak with grep/ast-grep analysis", "status": "complete", "files": ["03-debug-analysis.md"], "updatedAt": "2026-01-03T21:33:00Z" },
+    { "id": "T5.1", "phase": 5, "description": "Assess existing codebase DI patterns", "status": "complete", "files": ["04-assessment.md"], "updatedAt": "2026-01-03T21:34:00Z" },
+    { "id": "T5.3.1", "phase": 5.3, "description": "Document DI architecture decision", "status": "complete", "files": ["05-architecture-decision.md"], "updatedAt": "2026-01-03T21:35:00Z" },
+    { "id": "T6.1", "phase": 6, "description": "Create specification document", "status": "complete", "files": ["06-specification.md"], "updatedAt": "2026-01-03T21:36:00Z" },
+    { "id": "T6.2", "phase": 6, "description": "Create implementation plan", "status": "complete", "files": ["07-implementation-plan.md"], "updatedAt": "2026-01-03T21:36:00Z" },
+    { "id": "T6.3", "phase": 6, "description": "Create task list", "status": "complete", "files": ["08-task-list.md"], "updatedAt": "2026-01-03T21:36:00Z" },
+    { "id": "T7.1", "phase": 7, "description": "Review all specification documents", "status": "complete", "files": ["workflow-tracking.json"], "updatedAt": "2026-01-03T21:36:30Z" },
+    { "id": "T8.1", "phase": 8, "description": "Implement memory leak fix", "status": "pending", "files": [], "updatedAt": null },
+    { "id": "T8.2", "phase": 8, "description": "Create and run tests", "status": "pending", "files": [], "updatedAt": null },
+    { "id": "T10.1", "phase": 10, "description": "Update documentation", "status": "pending", "files": [], "updatedAt": null },
+    { "id": "T12.1", "phase": 12, "description": "Commit and push changes", "status": "pending", "files": [], "updatedAt": null }
+  ],
+  "iteration": {
+    "loops": 0,
+    "lastReviewVerdict": null
+  },
+  "status": {
+    "allPhasesComplete": false,
+    "allTasksComplete": false,
+    "workflowDone": false
+  }
+}

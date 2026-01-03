@@ -6,6 +6,7 @@ import org.kodein.di.DIAware
 import org.kodein.di.android.closestDI
 import org.kodein.di.bind
 import org.kodein.di.instance
+import org.kodein.di.provider
 
 abstract class DIAwareJobService :
     JobService(),
@@ -13,6 +14,7 @@ abstract class DIAwareJobService :
     private val parentDI: DI by closestDI()
     override val di: DI by DI.lazy {
         extend(parentDI)
-        bind<DIAwareJobService>() with instance(this@DIAwareJobService)
+        // Use provider to avoid memory leak - holds factory function, not strong reference
+        bind<DIAwareJobService>() with provider { this@DIAwareJobService }
     }
 }

@@ -72,9 +72,11 @@ fun ProviderEditScreen(
         LaunchedEffect(uiState.saveResult) {
             uiState.saveResult?.let { result ->
                 if (result.isSuccess) {
-                    snackbarHostState.showSnackbar(message = successMessage)
-                    viewModel.clearSaveResult()
+                    // Navigate immediately without waiting for snackbar
                     onNavigateUp()
+                    viewModel.clearSaveResult()
+                    // Show snackbar in background after navigation
+                    snackbarHostState.showSnackbar(message = successMessage)
                 } else {
                     snackbarHostState.showSnackbar(message = errorMessage)
                     viewModel.clearSaveResult()

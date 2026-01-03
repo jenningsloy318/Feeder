@@ -350,6 +350,9 @@ data object SettingsDestination : NavigationDestination(
             onNavigateToSummarySettings = {
                 SummarySettingsDestination.navigate(navController)
             },
+            onNavigateToTranslationSettings = {
+                TranslationSettingsDestination.navigate(navController)
+            },
             settingsViewModel = backStackEntry.diAwareViewModel(),
         )
     }

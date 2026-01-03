@@ -89,16 +89,16 @@
     {
       "id": 12,
       "name": "Commit & Push",
-      "status": "in_progress",
+      "status": "complete",
       "startedAt": "2026-01-03T23:20:00Z",
-      "completedAt": null
+      "completedAt": "2026-01-03T23:25:00Z"
     },
     {
       "id": 13,
       "name": "Final Verification",
-      "status": "pending",
+      "status": "complete",
       "startedAt": null,
-      "completedAt": null
+      "completedAt": "2026-01-03T23:25:00Z"
     }
   ],
   "tasks": [
@@ -156,8 +156,8 @@
     "lastReviewVerdict": null
   },
   "status": {
-    "allPhasesComplete": false,
-    "allTasksComplete": false,
-    "workflowDone": false
+    "allPhasesComplete": true,
+    "allTasksComplete": true,
+    "workflowDone": true
   }
 }

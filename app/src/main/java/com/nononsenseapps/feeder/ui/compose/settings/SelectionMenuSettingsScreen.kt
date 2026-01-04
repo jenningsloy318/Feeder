@@ -10,9 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.DragHandle
@@ -28,6 +25,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -36,9 +34,13 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.ernestoyaquello.dragdropswipelazycolumn.DragDropSwipeLazyColumn
+import com.ernestoyaquello.dragdropswipelazycolumn.DraggableSwipeableItem
+import com.ernestoyaquello.dragdropswipelazycolumn.OrderedItem
 import com.nononsenseapps.feeder.R
 import com.nononsenseapps.feeder.ui.compose.theme.LocalDimens
 import com.nononsenseapps.feeder.ui.compose.theme.SensibleTopAppBar
+import kotlinx.collections.immutable.persistentListOf
 
 /**
  * Main screen for Selection Menu Configuration.
@@ -136,9 +138,10 @@ private fun SelectionMenuContent(
 }
 
 /**
- * Menu list with toggle functionality.
+ * Menu list with toggle and drag-to-reorder functionality.
  *
- * Note: Drag-to-reorder will be added in a future update.
+ * Uses DragDropSwipeLazyColumn to enable drag-and-drop reordering of menu items.
+ * Follows Moon+ Reader pattern: single flat list with cross-section reordering.
  *
  * @param items List of menu items to display
  * @param onEvent Callback for user events
@@ -148,15 +151,23 @@ private fun MenuList(
     items: List<SelectionMenuItem>,
     onEvent: (SelectionMenuEvent) -> Unit,
 ) {
-    val listState = rememberLazyListState()
+    DragDropSwipeLazyColumn(
+        items = persistentListOf(*items.toTypedArray()),
+        key = { item -> item.id },
+        onIndicesChangedViaDragAndDrop = { reorderedItems: List<OrderedItem<SelectionMenuItem>> ->
+            // Find the item that was moved (first item with changed index)
+            val movedItem = reorderedItems.firstOrNull { orderedItem ->
+                val originalIndex = items.indexOfFirst { it.id == orderedItem.value.id }
+                originalIndex != orderedItem.newIndex
+            }
 
-    LazyColumn(
-        state = listState,
-    ) {
-        items(
-            items = items,
-            key = { it.id },
-        ) { item ->
+            if (movedItem != null) {
+                val originalIndex = items.indexOfFirst { it.id == movedItem.value.id }
+                onEvent(SelectionMenuEvent.ReorderMenu(originalIndex, movedItem.newIndex))
+            }
+        },
+    ) { index, item ->
+        DraggableSwipeableItem {
             MenuItemRow(
                 item = item,
                 onToggle = { onEvent(SelectionMenuEvent.ToggleItem(item.id)) },
@@ -169,6 +180,8 @@ private fun MenuList(
  * Single menu item row with toggle switch.
  *
  * Layout: [Switch] [Icon] [Name + Description]
+ *
+ * Note: DragDropSwipeLazyColumn automatically makes items draggable.
  *
  * @param item The menu item to display
  * @param onToggle Callback when toggle is clicked

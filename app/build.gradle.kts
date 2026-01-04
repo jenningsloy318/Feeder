@@ -268,6 +268,12 @@ dependencies {
     // Markdown
     implementation(libs.jetbrains.markdown)
 
+    // Drag and drop for reorderable lists
+    implementation("com.ernestoyaquello.dragdropswipelazycolumn:drag-drop-swipe-lazycolumn:0.10.1")
+
+    // Immutable collections for DragDropSwipeLazyColumn
+    implementation("org.jetbrains.kotlinx:kotlinx-collections-immutable:0.3.8")
+
     // Only for debug
     debugImplementation("com.squareup.leakcanary:leakcanary-android:3.0-alpha-8")
 

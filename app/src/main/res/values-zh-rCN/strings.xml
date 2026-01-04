@@ -356,4 +356,24 @@
     <string name="save_provider">保存提供者</string>
     <string name="cancel">取消</string>
     <string name="set_as_default_provider">设为默认</string>
+
+    <!-- Selection Menu -->
+    <string name="selection_menu_title">选择菜单</string>
+    <string name="selection_menu_empty">未配置选择菜单。</string>
+    <string name="selection_menu_empty_hint">此功能将允许您配置全局选择菜单。</string>
+    <string name="selection_menu_read_aloud">朗读</string>
+    <string name="selection_menu_read_aloud_description">朗读选中的文本</string>
+    <string name="selection_menu_translate">翻译</string>
+    <string name="selection_menu_translate_description">翻译选中的文本</string>
+    <string name="selection_menu_copy_description">复制选中的文本到剪贴板</string>
+    <string name="selection_menu_paste_description">从剪贴板粘贴文本</string>
+    <string name="selection_menu_cut_description">剪切选中的文本</string>
+    <string name="selection_menu_select_all_description">全选文本</string>
+    <string name="selection_menu_third_party_description">在 %s 中打开</string>
+    <string name="selection_menu_no_items">没有可用的菜单项</string>
+    <string name="selection_menu_no_items_hint">请稍后再试或检查您的设备设置</string>
+    <string name="selection_menu_drag_to_reorder">拖动以重新排序</string>
+    <string name="selection_menu_toggle_visibility">切换可见性</string>
+    <string name="selection_menu_visible">可见</string>
+    <string name="selection_menu_hidden">隐藏</string>
 </resources>

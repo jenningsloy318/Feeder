@@ -1,6 +1,7 @@
 package com.nononsenseapps.feeder.ui.compose.settings
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,6 +11,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.DragHandle
@@ -29,18 +33,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.ernestoyaquello.dragdropswipelazycolumn.DragDropSwipeLazyColumn
-import com.ernestoyaquello.dragdropswipelazycolumn.DraggableSwipeableItem
-import com.ernestoyaquello.dragdropswipelazycolumn.OrderedItem
+import sh.calvin.reorderable.ReorderableItem
+import sh.calvin.reorderable.rememberReorderableLazyListState
+import sh.calvin.reorderable.ReorderableCollectionItemScope
 import com.nononsenseapps.feeder.R
 import com.nononsenseapps.feeder.ui.compose.theme.LocalDimens
 import com.nononsenseapps.feeder.ui.compose.theme.SensibleTopAppBar
-import kotlinx.collections.immutable.persistentListOf
 
 /**
  * Main screen for Selection Menu Configuration.
@@ -140,7 +144,7 @@ private fun SelectionMenuContent(
 /**
  * Menu list with toggle and drag-to-reorder functionality.
  *
- * Uses DragDropSwipeLazyColumn to enable drag-and-drop reordering of menu items.
+ * Uses Calvin-LL/Reorderable library to enable drag-and-drop reordering of menu items.
  * Follows Moon+ Reader pattern: single flat list with cross-section reordering.
  *
  * @param items List of menu items to display
@@ -151,27 +155,27 @@ private fun MenuList(
     items: List<SelectionMenuItem>,
     onEvent: (SelectionMenuEvent) -> Unit,
 ) {
-    DragDropSwipeLazyColumn(
-        items = persistentListOf(*items.toTypedArray()),
-        key = { item -> item.id },
-        onIndicesChangedViaDragAndDrop = { reorderedItems: List<OrderedItem<SelectionMenuItem>> ->
-            // Find the item that was moved (first item with changed index)
-            val movedItem = reorderedItems.firstOrNull { orderedItem ->
-                val originalIndex = items.indexOfFirst { it.id == orderedItem.value.id }
-                originalIndex != orderedItem.newIndex
-            }
+    val lazyListState = rememberLazyListState()
+    val reorderableState = rememberReorderableLazyListState(
+        lazyListState = lazyListState,
+        onMove = { from, to ->
+            onEvent(SelectionMenuEvent.ReorderMenu(from.index, to.index))
+        }
+    )
 
-            if (movedItem != null) {
-                val originalIndex = items.indexOfFirst { it.id == movedItem.value.id }
-                onEvent(SelectionMenuEvent.ReorderMenu(originalIndex, movedItem.newIndex))
+    LazyColumn(
+        state = lazyListState,
+        modifier = Modifier.fillMaxSize()
+    ) {
+        items(items, key = { it.id }) { item ->
+            ReorderableItem(state = reorderableState, key = item.id) { isDragging ->
+                MenuItemRow(
+                    item = item,
+                    onToggle = { onEvent(SelectionMenuEvent.ToggleItem(item.id)) },
+                    isDragging = isDragging,
+                    dragHandleScope = this,
+                )
             }
-        },
-    ) { index, item ->
-        DraggableSwipeableItem {
-            MenuItemRow(
-                item = item,
-                onToggle = { onEvent(SelectionMenuEvent.ToggleItem(item.id)) },
-            )
         }
     }
 }
@@ -181,20 +185,31 @@ private fun MenuList(
  *
  * Layout: [Switch] [Icon] [Name + Description] [DragHandle]
  *
- * Note: DragDropSwipeLazyColumn automatically makes items draggable.
+ * Note: ReorderableItem provides drag-to-reorder functionality.
+ * Long-press on the drag handle initiates drag.
  *
  * @param item The menu item to display
  * @param onToggle Callback when toggle is clicked
+ * @param isDragging Whether this item is currently being dragged
+ * @param dragHandleScope Scope for the drag handle modifier
  */
 @Composable
 private fun MenuItemRow(
     item: SelectionMenuItem,
     onToggle: () -> Unit,
+    isDragging: Boolean,
+    dragHandleScope: ReorderableCollectionItemScope,
 ) {
+    val elevation = if (isDragging) 8.dp else 0.dp
+
     Row(
         modifier =
             Modifier
                 .fillMaxWidth()
+                .background(
+                    if (isDragging) MaterialTheme.colorScheme.secondaryContainer
+                    else MaterialTheme.colorScheme.surface
+                )
                 .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -239,11 +254,17 @@ private fun MenuItemRow(
             }
         }
 
-        // Drag handle (indicates item can be dragged)
+        // Drag handle - THIS IS THE KEY FIX
+        // Using draggableHandle() modifier to designate drag area
+        // This prevents touch conflicts with the Switch component
         Icon(
             imageVector = Icons.Filled.DragHandle,
             contentDescription = stringResource(R.string.selection_menu_drag_to_reorder),
-            modifier = Modifier.size(24.dp),
+            modifier = with(dragHandleScope) {
+                Modifier
+                    .size(24.dp)
+                    .draggableHandle()
+            },
             tint = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }

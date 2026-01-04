@@ -31,6 +31,7 @@ import com.nononsenseapps.feeder.ui.compose.navigation.FeedDestination
 import com.nononsenseapps.feeder.ui.compose.navigation.ProviderEditDestination
 import com.nononsenseapps.feeder.ui.compose.navigation.ProviderListDestination
 import com.nononsenseapps.feeder.ui.compose.navigation.SearchFeedDestination
+import com.nononsenseapps.feeder.ui.compose.navigation.SelectionMenuSettingsDestination
 import com.nononsenseapps.feeder.ui.compose.navigation.SettingsDestination
 import com.nononsenseapps.feeder.ui.compose.navigation.SummarySettingsDestination
 import com.nononsenseapps.feeder.ui.compose.navigation.SyncScreenDestination
@@ -131,6 +132,8 @@ class MainActivity : DIAwareComponentActivity() {
             SummarySettingsDestination.register(this, navController, navDrawerListState)
             // Translation settings
             TranslationSettingsDestination.register(this, navController, navDrawerListState)
+            // Selection menu settings
+            SelectionMenuSettingsDestination.register(this, navController, navDrawerListState)
             // Sync settings
             SyncScreenDestination.register(this, navController, navDrawerListState)
             // Add Fonts

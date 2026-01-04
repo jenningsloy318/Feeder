@@ -41,6 +41,8 @@ import com.nononsenseapps.feeder.ui.compose.settings.TextSettingsScreen
 import com.nononsenseapps.feeder.ui.compose.settings.TextSettingsViewModel
 import com.nononsenseapps.feeder.ui.compose.settings.TranslationSettingsScreen
 import com.nononsenseapps.feeder.ui.compose.settings.TranslationSettingsViewModel
+import com.nononsenseapps.feeder.ui.compose.settings.SelectionMenuSettingsScreen
+import com.nononsenseapps.feeder.ui.compose.settings.SelectionMenuSettingsViewModel
 import com.nononsenseapps.feeder.ui.compose.sync.SyncScreen
 import com.nononsenseapps.feeder.ui.compose.sync.SyncScreenViewModel
 import com.nononsenseapps.feeder.util.DEEP_LINK_BASE_URI
@@ -353,6 +355,9 @@ data object SettingsDestination : NavigationDestination(
             onNavigateToTranslationSettings = {
                 TranslationSettingsDestination.navigate(navController)
             },
+            onNavigateToSelectionMenuSettings = {
+                SelectionMenuSettingsDestination.navigate(navController)
+            },
             settingsViewModel = backStackEntry.diAwareViewModel(),
         )
     }
@@ -510,6 +515,39 @@ data object TranslationSettingsDestination : NavigationDestination(
         val viewModel: TranslationSettingsViewModel = backStackEntry.diAwareViewModel()
 
         TranslationSettingsScreen(
+            onNavigateUp = {
+                if (!navController.popBackStack()) {
+                    SettingsDestination.navigate(navController)
+                }
+            },
+            viewModel = viewModel,
+        )
+    }
+}
+
+/**
+ * Navigation destination for the selection menu configuration screen.
+ */
+data object SelectionMenuSettingsDestination : NavigationDestination(
+    path = "settings/selection-menu",
+    navArguments = emptyList(),
+    deepLinks = emptyList(),
+) {
+    fun navigate(navController: NavController) {
+        navController.navigate(path) {
+            launchSingleTop = true
+        }
+    }
+
+    @Composable
+    override fun RegisterScreen(
+        navController: NavController,
+        backStackEntry: NavBackStackEntry,
+        navDrawerListState: LazyListState,
+    ) {
+        val viewModel: SelectionMenuSettingsViewModel = backStackEntry.diAwareViewModel()
+
+        SelectionMenuSettingsScreen(
             onNavigateUp = {
                 if (!navController.popBackStack()) {
                     SettingsDestination.navigate(navController)

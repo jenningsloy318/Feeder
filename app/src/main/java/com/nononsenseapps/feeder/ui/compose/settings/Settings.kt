@@ -113,6 +113,7 @@ fun SettingsScreen(
     onNavigateToProviderListScreen: () -> Unit = {},
     onNavigateToSummarySettings: () -> Unit = {},
     onNavigateToTranslationSettings: () -> Unit = {},
+    onNavigateToSelectionMenuSettings: () -> Unit = {},
     settingsViewModel: SettingsViewModel,
     modifier: Modifier = Modifier,
 ) {
@@ -213,6 +214,7 @@ fun SettingsScreen(
             onNavigateToProviderList = onNavigateToProviderListScreen,
             onNavigateToSummary = onNavigateToSummarySettings,
             onNavigateToTranslation = onNavigateToTranslationSettings,
+            onNavigateToSelectionMenu = onNavigateToSelectionMenuSettings,
             isOpenDrawerOnFab = viewState.isOpenDrawerOnFab,
             onOpenDrawerOnFab = settingsViewModel::setOpenDrawerOnFab,
             onTextSettings = onNavigateToTextSettingsScreen,
@@ -366,6 +368,7 @@ fun SettingsList(
     onNavigateToProviderList: () -> Unit = {},
     onNavigateToSummary: () -> Unit = {},
     onNavigateToTranslation: () -> Unit = {},
+    onNavigateToSelectionMenu: () -> Unit = {},
     isOpenDrawerOnFab: Boolean,
     onOpenDrawerOnFab: (Boolean) -> Unit,
     currentFontSelection: FontSelection,
@@ -482,6 +485,11 @@ fun SettingsList(
                 currentUiFontOption.name,
                 title = stringResource(R.string.text_settings),
                 onClick = onTextSettings,
+            )
+            ExternalSetting(
+                currentValue = "",
+                title = stringResource(R.string.selection_menu_title),
+                onClick = onNavigateToSelectionMenu,
             )
         }
 

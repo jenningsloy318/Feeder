@@ -1,0 +1,32 @@
+{
+  "featureName": "Selection Menu Configuration Feature",
+  "startedAt": "2026-01-04T16:55:00Z",
+  "phases": [
+    { "id": 0, "name": "Apply Dev Rules", "status": "complete", "startedAt": "2026-01-04T16:55:00Z", "completedAt": "2026-01-04T17:10:00Z" },
+    { "id": 1, "name": "Specification Setup", "status": "complete", "startedAt": "2026-01-04T17:10:00Z", "completedAt": "2026-01-04T17:12:00Z" },
+    { "id": 2, "name": "Requirements Clarification", "status": "complete", "startedAt": "2026-01-04T17:12:00Z", "completedAt": "2026-01-04T17:15:00Z" },
+    { "id": 3, "name": "Research", "status": "complete", "startedAt": "2026-01-04T17:15:00Z", "completedAt": "2026-01-04T17:20:00Z" },
+    { "id": 4, "name": "Debug Analysis", "status": "skipped", "startedAt": null, "completedAt": null },
+    { "id": 5, "name": "Code Assessment", "status": "complete", "startedAt": "2026-01-04T17:20:00Z", "completedAt": "2026-01-04T17:30:00Z" },
+    { "id": 5.3, "name": "Architecture Design", "status": "complete", "startedAt": "2026-01-04T17:30:00Z", "completedAt": "2026-01-04T18:00:00Z" },
+    { "id": 5.5, "name": "UI/UX Design", "status": "complete", "startedAt": "2026-01-04T18:00:00Z", "completedAt": "2026-01-04T18:30:00Z" },
+    { "id": 6, "name": "Specification Writing", "status": "pending", "startedAt": null, "completedAt": null },
+    { "id": 7, "name": "Specification Review", "status": "pending", "startedAt": null, "completedAt": null },
+    { "id": 8, "name": "Execution & QA", "status": "pending", "startedAt": null, "completedAt": null },
+    { "id": 9, "name": "Code Review", "status": "pending", "startedAt": null, "completedAt": null },
+    { "id": 10, "name": "Documentation Update", "status": "pending", "startedAt": null, "completedAt": null },
+    { "id": 11, "name": "Cleanup", "status": "pending", "startedAt": null, "completedAt": null },
+    { "id": 12, "name": "Commit & Push", "status": "pending", "startedAt": null, "completedAt": null },
+    { "id": 13, "name": "Final Verification", "status": "pending", "startedAt": null, "completedAt": null }
+  ],
+  "tasks": [],
+  "iteration": {
+    "loops": 0,
+    "lastReviewVerdict": null
+  },
+  "status": {
+    "allPhasesComplete": false,
+    "allTasksComplete": false,
+    "workflowDone": false
+  }
+}

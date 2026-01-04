@@ -1279,5 +1279,109 @@ private fun migrateMenuOrderToConfig(): MenuConfig {
 
 **Specification Complete**: 2026-01-04
 **Version**: 2.0 (Moon+ Reader Pattern)
-**Status**: Pending User Confirmation
-**Next Phase**: Implementation (after approval)
+**Status**: ✅ Implementation Complete
+**Implementation Summary**: See `11-implementation-summary.md`
+
+---
+
+## 14. Implementation Status
+
+### 14.1 Final Implementation Details
+
+**Implementation Date**: 2026-01-04
+**Status**: ✅ Complete and Functional
+
+### 14.2 Library Choice (UPDATED)
+
+**Final Library**: `sh.calvin.reorderable:reorderable:2.4.0`
+
+| Aspect | Initial Choice (v0.9.6) | Final Choice (v2.4.0) |
+|--------|-------------------------|----------------------|
+| Package | `org.burnoutcrew.composereorderable` | `sh.calvin.reorderable` |
+| Maintenance Status | ❌ Abandoned (Nov 2022) | ✅ Active (Aug 2025) |
+| Drag Handle API | ❌ Missing | ✅ `draggableHandle()` |
+| Touch Event Isolation | ❌ Broken with Switch | ✅ Working |
+| Compose Compatibility | Issues with 1.5+ | ✅ Modern Compose |
+
+**Reason for Change**: The v0.9.6 library was abandoned and had critical issues with touch event conflicts when using Switch components inside draggable items. The v2.4.0 library provides `Modifier.draggableHandle()` which designates a specific drag area and prevents touch conflicts.
+
+### 14.3 Key Implementation Changes from Spec
+
+#### Drag Handle Modifier (CRITICAL)
+
+The specification didn't originally include the drag handle modifier, but it's essential for functionality:
+
+```kotlin
+Icon(
+    Icons.Filled.DragHandle,
+    modifier = with(dragHandleScope) {
+        Modifier
+            .size(24.dp)
+            .draggableHandle()  // ← CRITICAL: Prevents Switch touch conflicts
+    }
+)
+```
+
+**Why This Matters**: Without `draggableHandle()`, the Switch component consumes all touch events, preventing drag detection. The modifier explicitly designates the drag handle as the drag trigger area.
+
+#### API Parameter Order
+
+The `rememberReorderableLazyListState` function requires specific parameter order:
+
+```kotlin
+val reorderableState = rememberReorderableLazyListState(
+    lazyListState = lazyListState,  // ← Must be first
+    onMove = { from, to -> ... }     // ← onMove callback
+)
+```
+
+#### ReorderableItem Scope
+
+The `ReorderableItem` lambda provides a scope needed for the drag handle modifier:
+
+```kotlin
+ReorderableItem(state = reorderableState, key = item.id) { isDragging ->
+    MenuItemRow(
+        item = item,
+        isDragging = isDragging,
+        dragHandleScope = this,  // ← Pass scope to MenuItemRow
+    )
+}
+```
+
+### 14.4 Internationalization
+
+Added Simplified Chinese (zh-rCN) translations:
+
+| String Resource | English | 简体中文 |
+|----------------|---------|----------|
+| `selection_menu_title` | Selection Menu | 选择菜单 |
+| `selection_menu_drag_to_reorder` | Drag to reorder | 拖动以重新排序 |
+| `selection_menu_read_aloud` | Read Aloud | 朗读 |
+| `selection_menu_translate` | Translate | 翻译 |
+
+### 14.5 Commits
+
+| Commit Hash | Description |
+|------------|-------------|
+| `e10c3246` | Implement Global Menu Configuration with Moon+ Reader pattern |
+| `dc2ccf86` | Implement drag-and-drop reordering for menu items |
+| `2894851b` | Fix: Add visible drag handle icon to menu items |
+| `c721e385` | Fix: Implement working drag-to-reorder with modern Reorderable library |
+
+### 14.6 Known Limitations
+
+1. **Drag handle required** - Users must long-press the drag handle icon (⋮⋮), not the text area
+2. **Switch consumes tap** - Short taps on Switch toggle visibility, don't initiate drag
+3. **Emulator issues** - Touch sensitivity problems may occur in emulators; physical device recommended
+
+### 14.7 Testing Verification
+
+Tested and verified on:
+- ✅ Physical device (drag-to-reorder works)
+- ✅ Toggle switches work independently
+- ✅ Persistence across app restarts
+- ✅ Visual feedback during drag (background color change)
+- ✅ Cross-section reordering (any item can go anywhere)
+
+---

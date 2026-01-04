@@ -179,7 +179,7 @@ private fun MenuList(
 /**
  * Single menu item row with toggle switch.
  *
- * Layout: [Switch] [Icon] [Name + Description]
+ * Layout: [Switch] [Icon] [Name + Description] [DragHandle]
  *
  * Note: DragDropSwipeLazyColumn automatically makes items draggable.
  *
@@ -238,6 +238,14 @@ private fun MenuItemRow(
                 )
             }
         }
+
+        // Drag handle (indicates item can be dragged)
+        Icon(
+            imageVector = Icons.Filled.DragHandle,
+            contentDescription = stringResource(R.string.selection_menu_drag_to_reorder),
+            modifier = Modifier.size(24.dp),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }
 

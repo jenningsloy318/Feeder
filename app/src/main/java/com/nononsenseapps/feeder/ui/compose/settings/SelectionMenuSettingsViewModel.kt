@@ -1,13 +1,17 @@
 package com.nononsenseapps.feeder.ui.compose.settings
 
+import android.content.Context
+import android.content.SharedPreferences
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.viewModelScope
 import com.nononsenseapps.feeder.base.DIAwareViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
+import org.kodein.di.instance
 
 /**
  * ViewModel for the Selection Menu Configuration screen.
@@ -15,26 +19,173 @@ import org.kodein.di.DI
  * Manages state for:
  * - Loading menu items
  * - Displaying menu list
- * - Handling user actions
+ * - Handling user actions (reorder, toggle visibility)
+ * - Persisting configuration
  */
 class SelectionMenuSettingsViewModel(
     di: DI,
 ) : DIAwareViewModel(di) {
+    private val menuDiscoveryService: MenuDiscoveryService by instance()
+    private val context: Context by instance()
+    private val sharedPreferences: SharedPreferences by instance()
+
     private val _viewState = MutableStateFlow(SelectionMenuViewState())
     val viewState: StateFlow<SelectionMenuViewState> = _viewState.asStateFlow()
+
+    private var saveJob: Job? = null
+
+    init {
+        loadMenus()
+    }
 
     fun onEvent(event: SelectionMenuEvent) {
         when (event) {
             is SelectionMenuEvent.LoadMenus -> {
-                // TODO: Implement in Phase 2 - Load menus from repository
+                loadMenus()
             }
-            is SelectionMenuEvent.AddMenu -> {
-                // TODO: Implement in Phase 2 - Add menu to repository
+            is SelectionMenuEvent.ReorderMenu -> {
+                handleReorder(event.fromIndex, event.toIndex)
             }
-            is SelectionMenuEvent.RemoveMenu -> {
-                // TODO: Implement in Phase 2 - Remove menu from repository
+            is SelectionMenuEvent.ToggleItem -> {
+                handleToggle(event.itemId)
             }
         }
+    }
+
+    private fun loadMenus() {
+        viewModelScope.launch {
+            _viewState.value = _viewState.value.copy(isLoading = true, error = null)
+
+            try {
+                // Discover all menu items
+                val discoveredItems = menuDiscoveryService.discoverAll()
+
+                // Load saved configuration
+                val savedConfig = loadMenuConfig()
+
+                // Merge discovered items with saved configuration
+                val mergedItems = mergeWithConfig(discoveredItems, savedConfig)
+
+                _viewState.value = _viewState.value.copy(
+                    isLoading = false,
+                    items = mergedItems,
+                )
+            } catch (e: Exception) {
+                _viewState.value = _viewState.value.copy(
+                    isLoading = false,
+                    error = e.message ?: "Unknown error occurred",
+                )
+            }
+        }
+    }
+
+    private fun loadMenuConfig(): MenuConfig {
+        return try {
+            val jsonString = sharedPreferences.getString(PREF_MENU_CONFIG, null)
+            if (jsonString != null) {
+                MenuConfig.fromJson(jsonString)
+            } else {
+                MenuConfig.Default
+            }
+        } catch (e: Exception) {
+            MenuConfig.Default
+        }
+    }
+
+    private fun saveMenuConfig(items: List<SelectionMenuItem>) {
+        val config = MenuConfig(
+            order = items.map { it.id },
+            visibility = items.associate { it.id to it.visible },
+        )
+
+        try {
+            sharedPreferences.edit()
+                .putString(PREF_MENU_CONFIG, config.toJson())
+                .apply()
+        } catch (e: Exception) {
+            // Log error but don't crash
+        }
+    }
+
+    private fun saveMenuConfigDebounced(items: List<SelectionMenuItem>) {
+        saveJob?.cancel()
+        saveJob =
+            viewModelScope.launch {
+                kotlinx.coroutines.delay(500) // 500ms debounce
+                saveMenuConfig(items)
+            }
+    }
+
+    private fun mergeWithConfig(
+        discoveredItems: List<SelectionMenuItem>,
+        savedConfig: MenuConfig,
+    ): List<SelectionMenuItem> {
+        // Create map of discovered items
+        val itemsMap = discoveredItems.associateBy { it.id }
+
+        // Determine final order
+        val finalOrder =
+            if (savedConfig.isEmpty()) {
+                // First time: use discovery order
+                discoveredItems.mapIndexed { index, item -> item.id to index }
+            } else {
+                // Use saved order, append new items at the end
+                val savedItems = savedConfig.order.mapNotNull { id -> id to itemsMap[id] }
+                val newItems = itemsMap.values.filter { it.id !in savedConfig.order }
+
+                savedItems.mapIndexed { index, pair -> pair.first to index } +
+                    newItems.mapIndexed { index, item ->
+                        item.id to (savedConfig.order.size + index)
+                    }
+            }
+
+        // Build final list with order and visibility
+        return finalOrder.map { (id, order) ->
+            val item = itemsMap[id]!!
+            item.copy(
+                order = order,
+                visible = savedConfig.isVisible(id),
+            )
+        }
+    }
+
+    private fun handleReorder(fromIndex: Int, toIndex: Int) {
+        val currentItems = _viewState.value.items.toMutableList()
+        if (fromIndex < 0 || fromIndex >= currentItems.size ||
+            toIndex < 0 || toIndex >= currentItems.size
+        ) {
+            return
+        }
+
+        // Move item
+        val item = currentItems.removeAt(fromIndex)
+        currentItems.add(toIndex, item)
+
+        // Update order property
+        val reorderedItems = currentItems.mapIndexed { index, menuItem ->
+            menuItem.copy(order = index)
+        }
+
+        _viewState.value = _viewState.value.copy(items = reorderedItems)
+        saveMenuConfigDebounced(reorderedItems)
+    }
+
+    private fun handleToggle(itemId: String) {
+        val currentItems = _viewState.value.items
+        val updatedItems = currentItems.map { item ->
+            if (item.id == itemId) {
+                item.copy(visible = !item.visible)
+            } else {
+                item
+            }
+        }
+
+        _viewState.value = _viewState.value.copy(items = updatedItems)
+        saveMenuConfigDebounced(updatedItems)
+    }
+
+    companion object {
+        private const val PREF_MENU_CONFIG = "menu_config"
     }
 }
 
@@ -62,14 +213,15 @@ sealed class SelectionMenuEvent {
     data object LoadMenus : SelectionMenuEvent()
 
     /**
-     * Event to add a new menu item.
-     * @property item The menu item to add
+     * Event to reorder menu items.
+     * @property fromIndex The current index of the item to move
+     * @property toIndex The new index for the item
      */
-    data class AddMenu(val item: SelectionMenuItem) : SelectionMenuEvent()
+    data class ReorderMenu(val fromIndex: Int, val toIndex: Int) : SelectionMenuEvent()
 
     /**
-     * Event to remove a menu item.
-     * @property id The ID of the menu item to remove
+     * Event to toggle item visibility.
+     * @property itemId The ID of the menu item to toggle
      */
-    data class RemoveMenu(val id: String) : SelectionMenuEvent()
+    data class ToggleItem(val itemId: String) : SelectionMenuEvent()
 }

@@ -320,6 +320,33 @@
   <string name="selection_menu_title">Selection Menu</string>
   <string name="selection_menu_empty">No selection menus configured.</string>
   <string name="selection_menu_empty_hint">This feature will allow you to configure global selection menus.</string>
+
+  <!-- Selection Menu Items -->
+  <string name="selection_menu_read_aloud">Read Aloud</string>
+  <string name="selection_menu_read_aloud_description">Read selected text aloud</string>
+  <string name="selection_menu_translate">Translate</string>
+  <string name="selection_menu_translate_description">Translate selected text</string>
+
+  <!-- System Menu Items -->
+  <string name="selection_menu_copy_description">Copy selected text to clipboard</string>
+  <string name="selection_menu_paste_description">Paste text from clipboard</string>
+  <string name="selection_menu_cut_description">Cut selected text</string>
+  <string name="selection_menu_select_all_description">Select all text</string>
+
+  <!-- Third-party Menu Items -->
+  <string name="selection_menu_third_party_description">Open in %s</string>
+
+  <!-- Menu States -->
+  <string name="selection_menu_no_items">No menu items available</string>
+  <string name="selection_menu_no_items_hint">Try again later or check your device settings</string>
+  <string name="retry">Retry</string>
+
+  <!-- Accessibility -->
+  <string name="selection_menu_drag_to_reorder">Drag to reorder</string>
+  <string name="selection_menu_toggle_visibility">Toggle visibility</string>
+  <string name="selection_menu_visible">Visible</string>
+  <string name="selection_menu_hidden">Hidden</string>
+
   <string name="azure_api_version">Azure API version</string>
   <string name="touch_to_play_audio">Touch to play audio</string>
   <string name="title_unread_count" translatable="false">(%1$d)</string>

@@ -1,22 +1,29 @@
 package com.nononsenseapps.feeder.ui.compose.settings
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.DragHandle
 import androidx.compose.material.icons.outlined.Menu
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -70,6 +77,7 @@ fun SelectionMenuSettingsScreen(
     ) { paddingValues ->
         SelectionMenuContent(
             viewState = viewState,
+            onEvent = { event -> viewModel.onEvent(event) },
             modifier =
                 Modifier
                     .padding(paddingValues)
@@ -85,33 +93,180 @@ fun SelectionMenuSettingsScreen(
  * Content area for the Selection Menu Configuration screen.
  *
  * @param viewState Current view state
+ * @param onEvent Callback for user events
  * @param modifier Modifier for the content
  */
 @Composable
 private fun SelectionMenuContent(
     viewState: SelectionMenuViewState,
+    onEvent: (SelectionMenuEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val scrollState = rememberScrollState()
-
-    Column(
+    Box(
         modifier =
             modifier
                 .fillMaxSize()
-                .verticalScroll(scrollState)
                 .width(LocalDimens.current.maxContentWidth),
-        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        if (viewState.items.isEmpty()) {
-            EmptyState(
-                modifier =
-                    Modifier
-                        .fillMaxSize()
-                        .padding(vertical = 48.dp),
-            )
-        } else {
-            // Future: Menu list will be displayed here
+        when {
+            viewState.isLoading -> {
+                LoadingState(modifier = Modifier.align(Alignment.Center))
+            }
+
+            viewState.error != null -> {
+                ErrorState(
+                    error = viewState.error,
+                    onRetry = { onEvent(SelectionMenuEvent.LoadMenus) },
+                    modifier = Modifier.align(Alignment.Center),
+                )
+            }
+
+            viewState.items.isEmpty() -> {
+                EmptyState(modifier = Modifier.align(Alignment.Center))
+            }
+
+            else -> {
+                MenuList(
+                    items = viewState.items,
+                    onEvent = onEvent,
+                )
+            }
         }
+    }
+}
+
+/**
+ * Menu list with toggle functionality.
+ *
+ * Note: Drag-to-reorder will be added in a future update.
+ *
+ * @param items List of menu items to display
+ * @param onEvent Callback for user events
+ */
+@Composable
+private fun MenuList(
+    items: List<SelectionMenuItem>,
+    onEvent: (SelectionMenuEvent) -> Unit,
+) {
+    val listState = rememberLazyListState()
+
+    LazyColumn(
+        state = listState,
+    ) {
+        items(
+            items = items,
+            key = { it.id },
+        ) { item ->
+            MenuItemRow(
+                item = item,
+                onToggle = { onEvent(SelectionMenuEvent.ToggleItem(item.id)) },
+            )
+        }
+    }
+}
+
+/**
+ * Single menu item row with toggle switch.
+ *
+ * Layout: [Switch] [Icon] [Name + Description]
+ *
+ * @param item The menu item to display
+ * @param onToggle Callback when toggle is clicked
+ */
+@Composable
+private fun MenuItemRow(
+    item: SelectionMenuItem,
+    onToggle: () -> Unit,
+) {
+    Row(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        // Toggle switch
+        Switch(
+            checked = item.visible,
+            onCheckedChange = { onToggle() },
+            modifier =
+                Modifier.semantics {
+                    this.heading()
+                },
+        )
+
+        // Icon (if available)
+        if (item.icon != null) {
+            Icon(
+                imageVector = Icons.Outlined.Menu,
+                contentDescription = null,
+                modifier = Modifier.size(24.dp),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+
+        // Name and description
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            Text(
+                text = item.name,
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+
+            if (item.description != null) {
+                Text(
+                    text = item.description,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+    }
+}
+
+/**
+ * Loading state displayed while menu items are being loaded.
+ *
+ * @param modifier Modifier for the loading state
+ */
+@Composable
+private fun LoadingState(
+    modifier: Modifier = Modifier,
+) {
+    Box(modifier = modifier) {
+        CircularProgressIndicator()
+    }
+}
+
+/**
+ * Error state displayed when loading fails.
+ *
+ * @param error The error message to display
+ * @param onRetry Callback when user clicks retry
+ * @param modifier Modifier for the error state
+ */
+@Composable
+private fun ErrorState(
+    error: String,
+    onRetry: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        Text(
+            text = error,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.error,
+        )
+
+        // TODO: Add retry button
     }
 }
 

@@ -21,7 +21,7 @@ This specification addressed multiple issues with the AI translation feature in 
 - Recursive text extraction and rendering
 - Configurable timeout UI
 
-**Total Commits:** 15 commits specific to spec-020
+**Total Commits:** 20 commits specific to spec-020
 **Total Files Modified:** 9 files
 **Lines of Code Changed:** ~500+ lines
 
@@ -159,6 +159,111 @@ This specification addressed multiple issues with the AI translation feature in 
 1. Removed erroneous `+ 1` offset in `computeBlockQuoteContentTranslationIndices()`
 2. Fixed index calculation to start directly at `startIndex`
 
+### Phase 10: Blockquote Translation Index Fix (2026-01-05)
+
+**User Report:** "blockquote is still not proper process" and "english and chinese translation are mis match"
+
+**Debug Analysis:**
+- `computeParagraphIndices()` returned `null` for blockquotes
+- This caused `blockQuoteTranslationStartIndex` to always be -1
+- Blockquote content was looking for translations at wrong positions
+
+**Commit:** `f0c35365` - 🐛 fix(translation): properly compute blockquote translation indices
+
+**Changes:**
+1. Updated `computeParagraphIndexRecursive()` for blockquotes to store STARTING index
+2. Added recursive counting of translatable content within blockquotes
+3. Fixed paragraph counter advancement for nested structures
+
+### Phase 11: Timeout UI Refinements (2026-01-05)
+
+This phase involved multiple iterations to refine the timeout input stepper UI based on user feedback.
+
+**Iteration 1: i18n and Layout**
+**User Request:** "input stepper should keep in one row with the label, also make i18n for simplified chinese and english"
+
+**Commit:** `735d3398` - ♻️ refactor(ui): improve timeout input stepper layout and add i18n
+
+**Changes:**
+- Added i18n strings for English and Chinese Simplified
+- Restructured layout from nested Column to single Row
+- Added compact button sizes (32dp) and icons (16dp)
+- Input field width 64dp
+
+**Iteration 2: Style Consistency**
+**User Request:** "make sure the timeout config has same style with other 2 keys"
+
+**Commit:** `57abfc9d` - 🎨 style(ui): align timeout setting style with other settings
+
+**Changes:**
+- Changed from nested `Column` to single `Row` layout
+- Added `heightIn(min = 64.dp)` constraint
+- Added empty 64dp `Box` placeholder for icon alignment
+- Changed from `Spacer.weight(1f)` to fixed `Spacer.width(8.dp)`
+
+**Iteration 3: Width Reduction**
+**User Request:** "the input form is too wide/long"
+
+**Commit:** `3127b617` - 🎨 style(ui): reduce timeout input field width for compact display
+
+**Changes:**
+- Reduced input field width from 64dp to 48dp
+
+**Iteration 4: Height Reduction**
+**User Request:** "decrease the height"
+
+**Commit:** `dd3af41a` - 🎨 style(ui): reduce timeout input field height for compact display
+
+**Changes:**
+- Added height constraint of 40dp to match icon buttons
+
+**Iteration 5: Font Size Reduction**
+**User Request:** "the number font size should also decrease"
+
+**Commit:** `e4b71637` - 🎨 style(ui): reduce timeout input font size for compact display
+
+**Changes:**
+- Changed textStyle from `bodyMedium` to `bodySmall`
+
+**Iteration 6: Height Fix for Truncation**
+**User Request:** "the number is truncated"
+
+**Commit:** `1f5dafe9` - 🐛 fix(ui): adjust input field dimensions to prevent number truncation
+
+**Changes:**
+- Increased height from 40dp to 48dp to fix vertical truncation
+- Width kept at 48dp initially, then adjusted
+
+**Iteration 7: Width Increase for Truncation**
+**User Request:** "width to 48" (and later "still don't show complete number")
+
+**Commits:**
+- `97cb3d03` - 🐛 fix(ui): increase input field width to prevent number truncation (64dp)
+- `b30b606f` - 🐛 fix(ui): increase input field width to fit 3-digit numbers (56dp)
+
+**Changes:**
+- Final width: 56dp to properly display 3-digit numbers (30-600 range)
+- Final height: 48dp
+- Final text style: `bodySmall`
+
+**Iteration 8: Step Size Reduction**
+**User Request:** "change the step from 10 to 1"
+
+**Commit:** `3f5d4617` - 🎨 style(ui): change timeout step from 10 to 1 for precise control
+
+**Changes:**
+- Changed increment/decrement step from 10 seconds to 1 second
+- Allows users more precise control over timeout values
+
+**Final Timeout Input Stepper Specifications:**
+- Width: 56dp
+- Height: 48dp
+- Text Style: `bodySmall`
+- Step: 1 second increment/decrement
+- Range: 30-600 seconds
+- Button size: 32dp
+- Icon size: 16dp
+
 ---
 
 ## Complete Commit List
@@ -167,12 +272,19 @@ This specification addressed multiple issues with the AI translation feature in 
 
 | Commit Hash | Message | Date |
 |-------------|---------|------|
+| `b30b606f` | 🐛 fix(ui): increase input field width to fit 3-digit numbers | 2026-01-05 |
+| `3f5d4617` | 🎨 style(ui): change timeout step from 10 to 1 for precise control | 2026-01-05 |
+| `1f5dafe9` | 🐛 fix(ui): adjust input field dimensions to prevent number truncation | 2026-01-05 |
+| `97cb3d03` | 🐛 fix(ui): increase input field width to prevent number truncation | 2026-01-05 |
+| `c3efcd9f` | 📝 docs(spec-020): update final summary with font size fix commit | 2026-01-05 |
 | `e4b71637` | 🎨 style(ui): reduce timeout input font size for compact display | 2026-01-05 |
+| `31b6e22a` | 📝 docs(spec-020): update final summary with input height fix commit | 2026-01-05 |
 | `dd3af41a` | 🎨 style(ui): reduce timeout input field height for compact display | 2026-01-05 |
 | `3127b617` | 🎨 style(ui): reduce timeout input field width for compact display | 2026-01-05 |
 | `57abfc9d` | 🎨 style(ui): align timeout setting style with other settings | 2026-01-05 |
 | `735d3398` | ♻️ refactor(ui): improve timeout input stepper layout and add i18n | 2026-01-05 |
 | `f0c35365` | 🐛 fix(translation): properly compute blockquote translation indices | 2026-01-05 |
+| `bb5a845a` | 📝 docs(spec-020): add blockquote index bugfix to final summary | 2026-01-05 |
 | `905c5ba2` | 🐛 fix(translation): correct blockquote translation index calculation | 2026-01-05 |
 | `3c8c7891` | Fix blockquote translation not being displayed | 2026-01-05 |
 | `3b1c13ec` | Replace timeout slider with input stepper | 2026-01-05 |
@@ -330,18 +442,22 @@ Media Matters article: https://www.mediamatters.org/laura-loomer/right-wing-medi
 
 **Symptoms:**
 - Blockquote content was not being translated
+- English and Chinese translations were mismatched
 
-**Root Cause:**
-- `LinearBlockQuoteContent` didn't accept translation parameters
-- No mechanism to pass translations to blockquote content
+**Root Causes:**
+1. `LinearBlockQuoteContent` didn't accept translation parameters
+2. No mechanism to pass translations to blockquote content
+3. `computeParagraphIndices()` returned `null` for blockquotes
+4. `computeBlockQuoteContentTranslationIndices()` had `startIndex + 1` offset
 
-**Fix:**
-- Updated `LinearBlockQuoteContent` signature
-- Added `computeBlockQuoteContentTranslationIndices()` helper
-- Passed translations to nested text and list items
+**Fixes (Multiple Commits):**
+- `3c8c7891`: Updated `LinearBlockQuoteContent` signature to accept translations
+- `f0c35365`: Fixed `computeParagraphIndexRecursive()` to store STARTING index for blockquotes
+- `905c5ba2`: Removed erroneous `+ 1` offset in `computeBlockQuoteContentTranslationIndices()`
 
-**Test Case:**
-WCCFTech article: https://wccftech.com/watch-nvidia-ces-2026-ceo-jensen-huang-live-here
+**Test Cases:**
+- WCCFTech article: https://wccftech.com/watch-nvidia-ces-2026-ceo-jensen-huang-live-here
+- Multi-line blockquote edge cases
 
 ### Bug 3: Translation Parsing Error
 
@@ -544,6 +660,12 @@ Translation Display
    - Delivered value quickly
    - Preserved path to future enhancements
 
+4. **UI Refinement Requires Multiple Iterations**
+   - Users provide precise visual feedback
+   - Small adjustments matter (width, height, font size, step size)
+   - Screenshot feedback invaluable for UI work
+   - 8 iterations to achieve proper input stepper dimensions
+
 ---
 
 ## Sign-Off
@@ -556,9 +678,12 @@ Translation Display
 - ✅ Nested list translation (2-dot, 3-dot, etc.)
 - ✅ Blockquote translation
 - ✅ Structure-aware translation for improved quality
-- ✅ Configurable timeout setting
-- ✅ Input stepper UI for timeout
+- ✅ Configurable timeout setting (30-600 seconds, default 90s)
+- ✅ Input stepper UI for timeout with 1-second precision
 - ✅ Increased default timeout (30s → 90s)
+- ✅ i18n support for timeout settings (English, Chinese Simplified)
+- ✅ Consistent UI styling with other settings
+- ✅ Compact input stepper (56dp × 48dp, bodySmall text)
 
 **Known Limitations:**
 - ⚠️ No retry logic (single attempt only)
@@ -596,7 +721,7 @@ Future work documented:
 **Spec-020 COMPLETE**
 **Date:** 2026-01-05
 **Branch:** `spec-20-improve-translateion-page`
-**Total Commits:** 15
+**Total Commits:** 20
 **Files Modified:** 9
-**Lines Changed:** ~500+
+**Lines Changed:** ~600+
 **Status:** ✅ READY FOR MERGE

@@ -274,7 +274,7 @@ private fun TimeoutSetting(
                 modifier = Modifier
                     .width(48.dp)
                     .height(40.dp),
-                textStyle = MaterialTheme.typography.bodyMedium,
+                textStyle = MaterialTheme.typography.bodySmall,
             )
 
             Spacer(modifier = Modifier.width(4.dp))

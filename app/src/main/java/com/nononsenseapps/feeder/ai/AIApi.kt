@@ -91,25 +91,28 @@ class AIApi(
     }
 
     /**
-     * Translate paragraphs to the configured target language.
+     * Translate paragraphs with structure context to the configured target language.
      *
      * Uses AI provider (OpenAI-compatible or Anthropic) to translate article content.
-     * Sends all paragraphs in a single API request with paragraph indexing for efficient translation.
+     * Sends all paragraphs with structure information in a single API request for efficient translation.
      *
-     * @param paragraphs List of paragraphs to translate
+     * The structure context (element type, nesting level) helps the AI produce better translations
+     * by understanding the document hierarchy.
+     *
+     * @param translatableTexts List of translatable texts with structure metadata
      * @return TranslationResult with translated paragraphs or error
      */
-    suspend fun translate(paragraphs: List<String>): AIClient.TranslationResult {
+    suspend fun translate(translatableTexts: List<TranslatableText>): AIClient.TranslationResult {
         return try {
             // Get target language from settings
             val language = repository.translationLanguage.first()
 
-            if (paragraphs.isEmpty()) {
+            if (translatableTexts.isEmpty()) {
                 return AIClient.TranslationResult.Error(content = "No translatable content found in this article")
             }
 
-            // Call AI provider to translate paragraphs
-            val translatedParagraphs = client.translate(paragraphs, language)
+            // Call AI provider to translate with structure context
+            val translatedParagraphs = client.translate(translatableTexts, language)
             translatedParagraphs
         } catch (e: Exception) {
             AIClient.TranslationResult.Error(content = e.message ?: e.cause?.message ?: "Translation failed")

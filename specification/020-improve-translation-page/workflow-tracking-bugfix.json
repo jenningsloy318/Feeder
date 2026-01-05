@@ -1,0 +1,41 @@
+{
+  "featureName": "Fix Translation Parsing - Incomplete Response Handling",
+  "startedAt": "2026-01-05T18:52:54",
+  "phases": [
+    { "id": 0, "name": "Apply Dev Rules", "status": "complete", "startedAt": "2026-01-05T18:52:54", "completedAt": "2026-01-05T18:52:54" },
+    { "id": 1, "name": "Specification Setup", "status": "in_progress", "startedAt": "2026-01-05T18:52:54", "completedAt": null },
+    { "id": 4, "name": "Debug Analysis", "status": "pending", "startedAt": null, "completedAt": null },
+    { "id": 5, "name": "Code Assessment", "status": "pending", "startedAt": null, "completedAt": null },
+    { "id": 6, "name": "Specification Writing", "status": "pending", "startedAt": null, "completedAt": null },
+    { "id": 8, "name": "Execution & QA", "status": "pending", "startedAt": null, "completedAt": null },
+    { "id": 9, "name": "Code Review", "status": "pending", "startedAt": null, "completedAt": null },
+    { "id": 10, "name": "Documentation Update", "status": "pending", "startedAt": null, "completedAt": null },
+    { "id": 13, "name": "Final Verification", "status": "pending", "startedAt": null, "completedAt": null }
+  ],
+  "tasks": [
+    { "id": "T1.1", "phase": 1, "description": "Create workflow tracking file", "status": "complete", "files": ["workflow-tracking-bugfix.json"], "updatedAt": "2026-01-05T18:52:54" },
+    { "id": "T4.1", "phase": 4, "description": "Analyze root cause of 'translation array end not found' error", "status": "pending", "files": [], "updatedAt": null },
+    { "id": "T4.2", "phase": 4, "description": "Identify where incomplete responses occur", "status": "pending", "files": [], "updatedAt": null },
+    { "id": "T4.3", "phase": 4, "description": "Document scenarios causing incomplete responses", "status": "pending", "files": [], "updatedAt": null },
+    { "id": "T5.1", "phase": 5, "description": "Assess current error handling mechanisms", "status": "pending", "files": [], "updatedAt": null },
+    { "id": "T5.2", "phase": 5, "description": "Evaluate retry logic implementation", "status": "pending", "files": [], "updatedAt": null },
+    { "id": "T5.3", "phase": 5, "description": "Check timeout handling", "status": "pending", "files": [], "updatedAt": null },
+    { "id": "T6.1", "phase": 6, "description": "Write specification for robust error handling", "status": "pending", "files": [], "updatedAt": null },
+    { "id": "T6.2", "phase": 6, "description": "Design retry logic with exponential backoff", "status": "pending", "files": [], "updatedAt": null },
+    { "id": "T6.3", "phase": 6, "description": "Design partial response recovery strategy", "status": "pending", "files": [], "updatedAt": null },
+    { "id": "T8.1", "phase": 8, "description": "Implement retry logic with exponential backoff", "status": "pending", "files": [], "updatedAt": null },
+    { "id": "T8.2", "phase": 8, "description": "Implement partial response handling", "status": "pending", "files": [], "updatedAt": null },
+    { "id": "T8.3", "phase": 8, "description": "Add better error messages", "status": "pending", "files": [], "updatedAt": null },
+    { "id": "T8.4", "phase": 8, "description": "Implement graceful degradation", "status": "pending", "files": [], "updatedAt": null },
+    { "id": "T9.1", "phase": 9, "description": "Review implementation for correctness", "status": "pending", "files": [], "updatedAt": null }
+  ],
+  "iteration": {
+    "loops": 0,
+    "lastReviewVerdict": null
+  },
+  "status": {
+    "allPhasesComplete": false,
+    "allTasksComplete": false,
+    "workflowDone": false
+  }
+}

@@ -206,6 +206,7 @@ private fun TimeoutSetting(
     modifier: Modifier = Modifier,
 ) {
     val dimens = LocalDimens.current
+    var inputValue by remember(timeoutSeconds) { mutableStateOf(timeoutSeconds.toString()) }
 
     Column(
         modifier =
@@ -213,8 +214,10 @@ private fun TimeoutSetting(
                 .width(dimens.maxContentWidth)
                 .padding(vertical = 8.dp),
     ) {
+        // Title and description on first row
         Row(
             modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             TitleAndSubtitle(
                 title = {
@@ -227,88 +230,77 @@ private fun TimeoutSetting(
                     )
                 },
             )
-        }
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.weight(1f))
 
-        // Input Stepper
-        var inputValue by remember(timeoutSeconds) { mutableStateOf(timeoutSeconds.toString()) }
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center,
-        ) {
-            // Minus button
-            IconButton(
-                onClick = {
-                    val newValue = (timeoutSeconds - 10).coerceAtLeast(30)
-                    inputValue = newValue.toString()
-                    onTimeoutChange(newValue)
-                },
-                enabled = timeoutSeconds > 30,
+            // Compact input stepper on the right
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.End,
             ) {
-                Icon(Icons.Filled.Remove, contentDescription = "Decrease timeout")
+                // Minus button
+                IconButton(
+                    onClick = {
+                        val newValue = (timeoutSeconds - 10).coerceAtLeast(30)
+                        inputValue = newValue.toString()
+                        onTimeoutChange(newValue)
+                    },
+                    enabled = timeoutSeconds > 30,
+                    modifier = Modifier.importSize(32.dp),
+                ) {
+                    Icon(
+                        Icons.Filled.Remove,
+                        contentDescription = null,
+                        modifier = Modifier.importSize(16.dp),
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(4.dp))
+
+                // Input field (compact)
+                OutlinedTextField(
+                    value = inputValue,
+                    onValueChange = { newValue ->
+                        inputValue = newValue
+                        newValue.toIntOrNull()?.let { parsed ->
+                            val clamped = parsed.coerceIn(30, 600)
+                            onTimeoutChange(clamped)
+                        }
+                    },
+                    keyboardOptions = KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number),
+                    singleLine = true,
+                    modifier = Modifier.width(64.dp),
+                    textStyle = MaterialTheme.typography.bodyMedium,
+                )
+
+                Spacer(modifier = Modifier.width(4.dp))
+
+                // Plus button
+                IconButton(
+                    onClick = {
+                        val newValue = (timeoutSeconds + 10).coerceAtMost(600)
+                        inputValue = newValue.toString()
+                        onTimeoutChange(newValue)
+                    },
+                    enabled = timeoutSeconds < 600,
+                    modifier = Modifier.importSize(32.dp),
+                ) {
+                    Icon(
+                        Icons.Filled.Add,
+                        contentDescription = null,
+                        modifier = Modifier.importSize(16.dp),
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(4.dp))
+
+                // Seconds label
+                Text(
+                    text = stringResource(id = R.string.translation_timeout_seconds_label),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
-
-            Spacer(modifier = Modifier.width(16.dp))
-
-            // Input field
-            OutlinedTextField(
-                value = inputValue,
-                onValueChange = { newValue ->
-                    inputValue = newValue
-                    newValue.toIntOrNull()?.let { parsed ->
-                        val clamped = parsed.coerceIn(30, 600)
-                        onTimeoutChange(clamped)
-                    }
-                },
-                keyboardOptions = KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number),
-                singleLine = true,
-                modifier = Modifier.width(100.dp),
-                textStyle = MaterialTheme.typography.bodyLarge,
-            )
-
-            Spacer(modifier = Modifier.width(16.dp))
-
-            // Plus button
-            IconButton(
-                onClick = {
-                    val newValue = (timeoutSeconds + 10).coerceAtMost(600)
-                    inputValue = newValue.toString()
-                    onTimeoutChange(newValue)
-                },
-                enabled = timeoutSeconds < 600,
-            ) {
-                Icon(Icons.Filled.Add, contentDescription = "Increase timeout")
-            }
-
-            Spacer(modifier = Modifier.width(8.dp))
-
-            Text(
-                text = "seconds",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // Range labels
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
-            Text(
-                text = "Min: 30s",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Text(
-                text = "Max: 600s",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
         }
     }
 }

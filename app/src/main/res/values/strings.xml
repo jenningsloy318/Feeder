@@ -320,6 +320,7 @@
   <string name="translation_timeout_title">Translation Timeout</string>
   <string name="translation_timeout_description">Maximum time to wait for translation (30–600 seconds)</string>
   <string name="translation_timeout_seconds">%d seconds</string>
+  <string name="translation_timeout_seconds_label">seconds</string>
   <string name="selection_menu_title">Selection Menu</string>
   <string name="selection_menu_empty">No selection menus configured.</string>
   <string name="selection_menu_empty_hint">This feature will allow you to configure global selection menus.</string>

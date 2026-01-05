@@ -335,6 +335,10 @@
     <string name="translation_language_russian">俄语</string>
     <string name="translation_language_arabic">阿拉伯语</string>
     <string name="translation_language_hindi">印地语</string>
+    <string name="translation_timeout_title">翻译超时</string>
+    <string name="translation_timeout_description">翻译最大等待时间（30–600 秒）</string>
+    <string name="translation_timeout_seconds">%d 秒</string>
+    <string name="translation_timeout_seconds_label">秒</string>
 
     <!-- Provider Management -->
     <string name="provider_list_title">AI 提供者</string>

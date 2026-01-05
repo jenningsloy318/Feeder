@@ -282,6 +282,7 @@
     <string name="time_out_validation_error">超时时间必须在 30 到 600 秒之间</string>
     <string name="time_out_placeholder">AI 请求的超时时间</string>
     <string name="summarize_on_open">打开时总结</string>
+    <string name="summarizing_progress">总结中...</string>
     <string name="feed_search_suggestions_header">建议</string>
     <string name="openai_settings_info">兼容众多 AI 提供者，但非全部</string>
 
@@ -318,6 +319,7 @@
     <string name="summary_enabled_description">为文章自动生成 AI 摘要</string>
     <string name="translation_title">翻译</string>
     <string name="translation_subtitle">配置 AI 驱动的翻译</string>
+    <string name="translating_progress">翻译中...</string>
     <string name="translation_settings_title">翻译设置</string>
     <string name="translation_enabled_title">启用自动翻译</string>
     <string name="translation_enabled_description">自动翻译外语文章</string>

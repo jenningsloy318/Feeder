@@ -70,11 +70,15 @@ fun TextSelectionMenuPopup(
         (enabledItems.size * 80).dp.toPx()  // Approx 80dp per item
     }.toInt()
 
+    // Calculate gap and popup height using proper density
+    val gapAbove = with(LocalDensity.current) { 16.dp.toPx() }.toInt()
+    val popupHeight = with(LocalDensity.current) { 48.dp.toPx() }.toInt()
+
     Popup(
         alignment = androidx.compose.ui.Alignment.TopStart,
         offset = IntOffset(
             x = (offset.x - toolbarWidth / 2),
-            y = offset.y - 96  // 96dp above first line
+            y = offset.y - gapAbove - popupHeight  // Position above with gap
         ),
         onDismissRequest = {
             menuState.value = null

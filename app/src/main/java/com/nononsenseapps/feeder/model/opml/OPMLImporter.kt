@@ -129,7 +129,7 @@ open class OPMLImporter(
                 settingsStore.openAISettings.value.copy(azureDeploymentId = value),
             )
             UserSettings.SETTING_OPENAI_REQUEST_TIMEOUT_SECONDS -> settingsStore.setOpenAISettings(
-                settingsStore.openAISettings.value.copy(timeoutSeconds = value.toIntOrNull() ?: 30),
+                settingsStore.openAISettings.value.copy(timeoutSeconds = value.toIntOrNull() ?: 90),
             )
 
             // Anthropic settings
@@ -143,7 +143,7 @@ open class OPMLImporter(
                 settingsStore.anthropicSettings.value.copy(baseUrl = value),
             )
             UserSettings.SETTING_ANTHROPIC_REQUEST_TIMEOUT_SECONDS -> settingsStore.setAnthropicSettings(
-                settingsStore.anthropicSettings.value.copy(timeoutSeconds = value.toIntOrNull() ?: 30),
+                settingsStore.anthropicSettings.value.copy(timeoutSeconds = value.toIntOrNull() ?: 90),
             )
 
             // Summary settings

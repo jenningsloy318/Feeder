@@ -7,8 +7,8 @@
     { "id": 4, "name": "Debug Analysis", "status": "complete", "startedAt": "2026-01-05T18:52:54", "completedAt": "2026-01-05T18:55:00" },
     { "id": 5, "name": "Code Assessment", "status": "complete", "startedAt": "2026-01-05T18:55:00", "completedAt": "2026-01-05T19:00:00" },
     { "id": 6, "name": "Specification Writing", "status": "complete", "startedAt": "2026-01-05T19:00:00", "completedAt": "2026-01-05T19:15:00" },
-    { "id": 8, "name": "Execution & QA", "status": "pending", "startedAt": null, "completedAt": null },
-    { "id": 9, "name": "Code Review", "status": "pending", "startedAt": null, "completedAt": null },
+    { "id": 8, "name": "Execution & QA", "status": "complete", "startedAt": "2026-01-05T19:30:00", "completedAt": "2026-01-05T19:35:00" },
+    { "id": 9, "name": "Code Review", "status": "complete", "startedAt": "2026-01-05T19:35:00", "completedAt": "2026-01-05T19:40:00" },
     { "id": 10, "name": "Documentation Update", "status": "pending", "startedAt": null, "completedAt": null },
     { "id": 13, "name": "Final Verification", "status": "pending", "startedAt": null, "completedAt": null }
   ],
@@ -23,11 +23,11 @@
     { "id": "T6.1", "phase": 6, "description": "Write specification for robust error handling", "status": "complete", "files": ["17-specification-robust-error-handling.md"], "updatedAt": "2026-01-05T19:15:00" },
     { "id": "T6.2", "phase": 6, "description": "Design retry logic with exponential backoff", "status": "complete", "files": ["17-specification-robust-error-handling.md"], "updatedAt": "2026-01-05T19:15:00" },
     { "id": "T6.3", "phase": 6, "description": "Design partial response recovery strategy", "status": "complete", "files": ["17-specification-robust-error-handling.md"], "updatedAt": "2026-01-05T19:15:00" },
-    { "id": "T8.1", "phase": 8, "description": "Implement retry logic with exponential backoff", "status": "pending", "files": [], "updatedAt": null },
-    { "id": "T8.2", "phase": 8, "description": "Implement partial response handling", "status": "pending", "files": [], "updatedAt": null },
-    { "id": "T8.3", "phase": 8, "description": "Add better error messages", "status": "pending", "files": [], "updatedAt": null },
-    { "id": "T8.4", "phase": 8, "description": "Implement graceful degradation", "status": "pending", "files": [], "updatedAt": null },
-    { "id": "T9.1", "phase": 9, "description": "Review implementation for correctness", "status": "pending", "files": [], "updatedAt": null }
+    { "id": "T8.1", "phase": 8, "description": "Find current timeout values in AI provider clients", "status": "complete", "files": ["app/src/main/java/com/nononsenseapps/feeder/ai/model/AISettings.kt"], "updatedAt": "2026-01-05T19:35:00" },
+    { "id": "T8.2", "phase": 8, "description": "Increase timeout for OpenAI client", "status": "complete", "files": ["app/src/main/java/com/nononsenseapps/feeder/ai/model/AISettings.kt", "app/src/main/java/com/nononsenseapps/feeder/archmodel/SettingsStore.kt", "app/src/main/java/com/nononsenseapps/feeder/model/opml/OPMLImporter.kt"], "updatedAt": "2026-01-05T19:35:00" },
+    { "id": "T8.3", "phase": 8, "description": "Increase timeout for Anthropic client", "status": "complete", "files": ["app/src/main/java/com/nononsenseapps/feeder/ai/model/AISettings.kt", "app/src/main/java/com/nononsenseapps/feeder/archmodel/SettingsStore.kt", "app/src/main/java/com/nononsenseapps/feeder/model/opml/OPMLImporter.kt"], "updatedAt": "2026-01-05T19:35:00" },
+    { "id": "T8.4", "phase": 8, "description": "Test with real translation content", "status": "pending", "files": [], "updatedAt": null },
+    { "id": "T9.1", "phase": 9, "description": "Review timeout increase implementation", "status": "pending", "files": [], "updatedAt": null }
   ],
   "iteration": {
     "loops": 0,

@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -11,6 +12,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size as importSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -49,6 +51,7 @@ fun TranslationSettingsScreen(
 ) {
     val translationEnabled by viewModel.translationEnabled.collectAsStateWithLifecycle()
     val translationLanguage by viewModel.translationLanguage.collectAsStateWithLifecycle()
+    val translationTimeout by viewModel.translationTimeout.collectAsStateWithLifecycle()
 
     var languageMenuExpanded by remember { mutableStateOf(false) }
 
@@ -100,6 +103,16 @@ fun TranslationSettingsScreen(
                 onLanguageSelected = { viewModel.setTranslationLanguage(it) },
                 menuExpanded = languageMenuExpanded,
                 onMenuExpandedChange = { languageMenuExpanded = it },
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Timeout Slider
+            TimeoutSetting(
+                title = stringResource(R.string.translation_timeout_title),
+                description = stringResource(R.string.translation_timeout_description),
+                timeoutSeconds = translationTimeout,
+                onTimeoutChange = { viewModel.setTranslationTimeout(it) },
             )
         }
     }
@@ -176,5 +189,51 @@ private fun LanguageSelectorSetting(
                 },
             )
         }
+    }
+}
+
+@Composable
+private fun TimeoutSetting(
+    title: String,
+    description: String,
+    timeoutSeconds: Int,
+    onTimeoutChange: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val dimens = LocalDimens.current
+
+    Column(
+        modifier =
+            modifier
+                .width(dimens.maxContentWidth)
+                .padding(vertical = 8.dp),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            TitleAndSubtitle(
+                title = {
+                    Text(text = title)
+                },
+                subtitle = {
+                    Text(
+                        text = description,
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                },
+            )
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        SliderWithLabel(
+            value = timeoutSeconds.toFloat(),
+            valueToLabel = { seconds -> "$seconds seconds" },
+            valueRange = 30f..600f,
+            onValueChange = { newValue ->
+                onTimeoutChange(newValue.toInt())
+            },
+            steps = 0, // Continuous slider
+        )
     }
 }

@@ -781,6 +781,15 @@ class SettingsStore(
         sp.edit().putBoolean(PREF_TRANSLATION_ENABLED, value).apply()
     }
 
+    // Translation timeout setting
+    private val _translationTimeout = MutableStateFlow(sp.getInt(PREF_TRANSLATION_TIMEOUT_SECONDS, 90))
+    val translationTimeout = _translationTimeout.asStateFlow()
+
+    fun setTranslationTimeout(value: Int) {
+        _translationTimeout.value = value.coerceIn(30, 600)
+        sp.edit().putInt(PREF_TRANSLATION_TIMEOUT_SECONDS, value).apply()
+    }
+
     private val _showTitleUnreadCount = MutableStateFlow(sp.getBoolean(PREF_SHOW_TITLE_UNREAD_COUNT, false))
     val showTitleUnreadCount = _showTitleUnreadCount.asStateFlow()
 
@@ -946,6 +955,11 @@ const val PREF_TRANSLATION_LANGUAGE = "pref_translation_language"
  * AI translation enabled setting
  */
 const val PREF_TRANSLATION_ENABLED = "pref_translation_enabled"
+
+/**
+ * AI translation timeout setting
+ */
+const val PREF_TRANSLATION_TIMEOUT_SECONDS = "pref_translation_timeout_seconds"
 
 /**
  * Appearance settings

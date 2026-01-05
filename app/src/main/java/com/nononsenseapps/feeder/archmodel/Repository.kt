@@ -379,6 +379,11 @@ class Repository(
 
     fun setTranslationEnabled(value: Boolean) = settingsStore.setTranslationEnabled(value)
 
+    // Translation Timeout Setting
+    val translationTimeout = settingsStore.translationTimeout
+
+    fun setTranslationTimeout(value: Int) = settingsStore.setTranslationTimeout(value)
+
     // Active AI Settings (based on selected provider)
     // FIXED: Use custom getter to always get current value from settingsStore
     // instead of caching the value at initialization time

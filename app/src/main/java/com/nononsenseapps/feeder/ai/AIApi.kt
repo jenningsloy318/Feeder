@@ -111,8 +111,23 @@ class AIApi(
                 return AIClient.TranslationResult.Error(content = "No translatable content found in this article")
             }
 
-            // Call AI provider to translate with structure context
-            val translatedParagraphs = client.translate(translatableTexts, language)
+            // Get translation-specific timeout
+            val translationTimeout = repository.translationTimeout.first()
+
+            // Create client with translation-specific timeout
+            val settingsWithTimeout = when (val settings = aiSettings) {
+                is AISettings.OpenAI -> {
+                    val updatedSettings = settings.openaiSettings.copy(timeoutSeconds = translationTimeout)
+                    AISettings.OpenAI(updatedSettings)
+                }
+                is AISettings.Anthropic -> {
+                    val updatedSettings = settings.anthropicSettings.copy(timeoutSeconds = translationTimeout)
+                    AISettings.Anthropic(updatedSettings)
+                }
+            }
+
+            // Call AI provider to translate with structure context and custom timeout
+            val translatedParagraphs = AIClient.create(settingsWithTimeout).translate(translatableTexts, language)
             translatedParagraphs
         } catch (e: Exception) {
             AIClient.TranslationResult.Error(content = e.message ?: e.cause?.message ?: "Translation failed")

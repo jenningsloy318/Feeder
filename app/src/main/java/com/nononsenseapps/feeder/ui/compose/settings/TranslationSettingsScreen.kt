@@ -271,7 +271,9 @@ private fun TimeoutSetting(
                 },
                 keyboardOptions = KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number),
                 singleLine = true,
-                modifier = Modifier.width(48.dp),
+                modifier = Modifier
+                    .width(48.dp)
+                    .height(40.dp),
                 textStyle = MaterialTheme.typography.bodyMedium,
             )
 

@@ -12,6 +12,8 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -20,8 +22,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -59,26 +62,29 @@ fun TextSelectionMenuPopup(
     }
     val context = LocalContext.current
 
-    // Calculate popup position based on selection rectangle
-    val offset = rememberMenuOffset(state.rect)
-
     // Filter and sort items according to configuration
     val enabledItems = rememberMenuItems(menuItems, menuConfig)
 
-    // Calculate toolbar width based on item count
+    // Calculate toolbar dimensions
     val toolbarWidth = with(LocalDensity.current) {
         (enabledItems.size * 80).dp.toPx()  // Approx 80dp per item
     }.toInt()
 
-    // Calculate toolbar position below selection
-    val gapBelow = with(LocalDensity.current) { 8.dp.toPx() }.toInt()
+    val toolbarHeight = with(LocalDensity.current) {
+        48.dp.toPx()  // Material3 toolbar height
+    }.toInt()
+
+    // Calculate intelligent toolbar position (prefers ABOVE first, like Android system)
+    val offset = calculateToolbarPosition(
+        selectionRect = state.rect,
+        toolbarWidth = toolbarWidth,
+        toolbarHeight = toolbarHeight,
+        density = LocalDensity.current,
+    )
 
     Popup(
         alignment = androidx.compose.ui.Alignment.TopStart,
-        offset = IntOffset(
-            x = (state.rect.left + state.rect.right).toInt() / 2 - toolbarWidth / 2,
-            y = state.rect.bottom.toInt() + gapBelow  // Position below selection
-        ),
+        offset = offset,
         onDismissRequest = {
             menuState.value = null
             onActionExecuted()
@@ -279,20 +285,78 @@ private fun extractSelectedText(
 }
 
 /**
- * Calculate horizontal center position for menu.
+ * Calculate intelligent toolbar position preferring ABOVE first.
  *
- * Positions menu horizontally centered on selection.
+ * Mirrors Android system's FloatingToolbar.java logic:
+ * 1. Tries to position ABOVE selection with full margin (8dp)
+ * 2. Falls back to BELOW selection with full margin (8dp)
+ * 3. Falls back to BELOW with reduced margin (4dp)
+ * 4. Falls back to positioning as high as possible (not enough space)
  *
- * @param rect The text selection rectangle
- * @return IntOffset with horizontal center position
+ * X-axis: Centers toolbar on selection, clamps to screen bounds
+ * Y-axis: Prefers above first, accounts for status bar
+ *
+ * @param selectionRect The text selection rectangle
+ * @param toolbarWidth Width of the toolbar in pixels
+ * @param toolbarHeight Height of the toolbar in pixels
+ * @param density Density for dp-to-px conversion
+ * @return IntOffset with calculated position
  */
 @Composable
-private fun rememberMenuOffset(rect: androidx.compose.ui.geometry.Rect): IntOffset {
-    // Center horizontally on selection
-    val x = (rect.left + rect.right) / 2
-    val y = 0  // Not used - vertical positioning handled directly in Popup
+private fun calculateToolbarPosition(
+    selectionRect: androidx.compose.ui.geometry.Rect,
+    toolbarWidth: Int,
+    toolbarHeight: Int,
+    density: androidx.compose.ui.unit.Density,
+): IntOffset {
+    val configuration = LocalConfiguration.current
+    val statusBarHeight = WindowInsets.statusBars.getTop(density)
 
-    return IntOffset(x.toInt(), y)
+    // Get viewport bounds (screen coordinates)
+    val screenWidth = configuration.screenWidthDp * density.density
+    val screenHeight = configuration.screenHeightDp * density.density
+
+    // Calculate available space above and below selection
+    // Selection coordinates are in local compose space, assume screen starts at 0
+    val availableHeightAboveContent = selectionRect.top - statusBarHeight
+    val availableHeightBelowContent = screenHeight - selectionRect.bottom
+
+    // Margins in pixels
+    val marginVertical = with(density) { 8.dp.toPx() }.toInt()
+    val marginVerticalReduced = with(density) { 4.dp.toPx() }.toInt()
+    val toolbarHeightWithMargin = toolbarHeight + marginVertical
+
+    // Y-position: Prefer ABOVE first (like Android system)
+    val y = when {
+        // 1st choice: Position ABOVE with full margin
+        availableHeightAboveContent >= toolbarHeightWithMargin -> {
+            (selectionRect.top - toolbarHeightWithMargin).toInt()
+        }
+        // 2nd choice: Position BELOW with full margin
+        availableHeightBelowContent >= toolbarHeightWithMargin -> {
+            selectionRect.bottom.toInt()
+        }
+        // 3rd choice: Position BELOW with reduced margin
+        availableHeightBelowContent >= toolbarHeight -> {
+            (selectionRect.bottom - marginVerticalReduced).toInt()
+        }
+        // 4th choice: Not enough space, position as high as possible
+        else -> {
+            maxOf(
+                statusBarHeight.toFloat(),
+                selectionRect.top - toolbarHeightWithMargin
+            ).toInt()
+        }
+    }
+
+    // X-position: Center on selection, clamp to screen bounds
+    val xCenter = (selectionRect.left + selectionRect.right) / 2
+    val x = minOf(
+        xCenter - toolbarWidth / 2,
+        screenWidth - toolbarWidth
+    ).toInt().coerceAtLeast(0)
+
+    return IntOffset(x, y)
 }
 
 /**

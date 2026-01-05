@@ -36,8 +36,11 @@ import java.nio.charset.StandardCharsets
  */
 fun markdownToAnnotatedString(markdown: String): AnnotatedString {
     try {
+        // Normalize line breaks: 3+ consecutive newlines -> 2 newlines (prevents extra spacing)
+        val normalizedMarkdown = markdown.replace(Regex("\n\n+")) { "\n\n" }
+
         // Step 1: Convert markdown to HTML
-        val html = parseMarkdownToHTML(markdown)
+        val html = parseMarkdownToHTML(normalizedMarkdown)
 
         // Step 2: Sanitize HTML to prevent XSS
         val cleanHtml = sanitizeHTML(html)
@@ -97,9 +100,6 @@ fun markdownToAnnotatedStringSafe(markdown: String): AnnotatedString {
  */
 private fun parseMarkdownToHTML(markdown: String): String {
     var html = markdown
-
-    // Normalize line breaks: 3+ consecutive newlines -> 2 newlines (prevents extra spacing)
-    html = html.replace(Regex("\n\n+")) { "\n\n" }
 
     // Escape HTML special characters first to prevent XSS
     html = html.replace("&", "&amp;")

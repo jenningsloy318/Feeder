@@ -268,7 +268,9 @@
   <string name="skip_duplicate_articles_desc">Articles with links or titles identical to existing articles are ignored</string>
   <string name="summarize">Summarize</string>
   <string name="summarize_on_open">Summarize on open</string>
+  <string name="summarizing_progress">Summarizing...</string>
   <string name="translate">Translate</string>
+  <string name="translating_progress">Translating...</string>
   <string name="translation_error">Translation Error</string>
   <string name="translation_error_no_content">No translatable content found in this article</string>
   <string name="translate_article_content_description">Translate article content</string>

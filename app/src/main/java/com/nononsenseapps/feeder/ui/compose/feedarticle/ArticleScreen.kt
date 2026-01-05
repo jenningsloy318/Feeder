@@ -4,7 +4,11 @@ import android.content.Intent
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.foundation.focusGroup
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -29,10 +33,6 @@ import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material.icons.outlined.ErrorOutline
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import com.nononsenseapps.feeder.ai.AIClient
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -50,6 +50,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusProperties
@@ -618,9 +619,20 @@ private fun SummarySection(summary: AISummaryState) {
         when (summary) {
             AISummaryState.Empty -> {}
             AISummaryState.Loading ->
-                LinearProgressIndicator(
-                    modifier = Modifier.padding(16.dp).fillMaxWidth(),
-                )
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = stringResource(R.string.summarizing_progress),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    LinearProgressIndicator(
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
             is AISummaryState.Result ->
                 MarkdownText(
                     modifier = Modifier.padding(8.dp),
@@ -664,7 +676,7 @@ private fun MarkdownText(
  *
  * Handles three states:
  * - Empty: Shows nothing
- * - Loading: Shows progress indicator
+ * - Loading: Shows progress indicator with text
  * - Result: Delegates to TranslationErrorSection for errors, or returns nothing for success
  * (success translations are displayed inline with paragraphs)
  */
@@ -676,9 +688,20 @@ private fun TranslationStatusSection(translation: TranslationState) {
             OutlinedCard(
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                LinearProgressIndicator(
-                    modifier = Modifier.padding(16.dp).fillMaxWidth(),
-                )
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = stringResource(R.string.translating_progress),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    LinearProgressIndicator(
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
             }
         is TranslationState.Result ->
             when (val result = translation.value) {

@@ -397,4 +397,5 @@
   <!-- Auto Fetch Full Article Setting -->
   <string name="setting_auto_fetch_full_article">Auto Fetch Full Article</string>
   <string name="setting_auto_fetch_full_article_description">Automatically fetch full article text when opening articles</string>
+  <string name="unable_to_open_app">Unable to open %s</string>
 </resources>

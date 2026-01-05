@@ -13,6 +13,8 @@ import coil3.SingletonImageLoader
 import coil3.annotation.ExperimentalCoilApi
 import coil3.disk.DiskCache
 import coil3.memory.MemoryCache
+import androidx.compose.foundation.ComposeFoundationFlags
+import androidx.compose.foundation.ExperimentalFoundationApi
 import coil3.memoryCacheMaxSizePercentWhileInBackground
 import coil3.network.okhttp.OkHttpNetworkFetcherFactory
 import coil3.request.crossfade
@@ -62,7 +64,7 @@ import org.kodein.di.singleton
 import java.io.File
 import java.util.concurrent.TimeUnit
 
-@OptIn(ExperimentalCoilApi::class)
+@OptIn(ExperimentalCoilApi::class, ExperimentalFoundationApi::class)
 class FeederApplication :
     Application(),
     DIAware,
@@ -213,6 +215,10 @@ class FeederApplication :
 
     override fun onCreate() {
         super.onCreate()
+        // Disable new context menu to allow custom text toolbar on Android 13+
+        // The new context menu system bypasses LocalTextToolbar.showMenu()
+        // Setting this to false forces SelectionContainer to use the old code path
+        ComposeFoundationFlags.isNewContextMenuEnabled = false
         @Suppress("DEPRECATION")
         staticFilesDir = filesDir
     }

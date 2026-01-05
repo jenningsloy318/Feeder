@@ -1,0 +1,50 @@
+{
+  "featureName": "Wire Global Menu Config to Article Page",
+  "startedAt": "2026-01-05T00:00:00Z",
+  "phases": [
+    { "id": 0, "name": "Apply Dev Rules", "status": "complete", "startedAt": "2026-01-05T00:00:00Z", "completedAt": "2026-01-05T00:00:00Z" },
+    { "id": 1, "name": "Specification Setup", "status": "complete", "startedAt": "2026-01-05T00:00:00Z", "completedAt": "2026-01-05T00:00:00Z" },
+    { "id": 2, "name": "Requirements Clarification", "status": "complete", "startedAt": "2026-01-05T00:00:00Z", "completedAt": "2026-01-05T00:00:00Z" },
+    { "id": 3, "name": "Research", "status": "complete", "startedAt": "2026-01-05T00:00:00Z", "completedAt": "2026-01-05T00:00:00Z" },
+    { "id": 4, "name": "Debug Analysis", "status": "skipped", "startedAt": null, "completedAt": null },
+    { "id": 5, "name": "Code Assessment", "status": "complete", "startedAt": "2026-01-05T00:00:00Z", "completedAt": "2026-01-05T00:00:00Z" },
+    { "id": 6, "name": "Specification Writing", "status": "complete", "startedAt": "2026-01-05T00:00:00Z", "completedAt": "2026-01-05T00:00:00Z" },
+    { "id": 7, "name": "Specification Review", "status": "complete", "startedAt": "2026-01-05T00:00:00Z", "completedAt": "2026-01-05T00:00:00Z" },
+    { "id": 8, "name": "Execution & QA", "status": "in_progress", "startedAt": "2026-01-05T00:00:00Z", "completedAt": null },
+    { "id": 9, "name": "Code Review", "status": "pending", "startedAt": null, "completedAt": null },
+    { "id": 10, "name": "Documentation Update", "status": "pending", "startedAt": null, "completedAt": null },
+    { "id": 11, "name": "Cleanup", "status": "pending", "startedAt": null, "completedAt": null },
+    { "id": 12, "name": "Commit & Push", "status": "pending", "startedAt": null, "completedAt": null },
+    { "id": 13, "name": "Final Verification", "status": "pending", "startedAt": null, "completedAt": null }
+  ],
+  "tasks": [
+    { "id": "T1.1", "phase": 1, "description": "Create MenuConfigStore interface and implementation", "status": "pending", "files": [], "updatedAt": null },
+    { "id": "T1.2", "phase": 1, "description": "Register MenuConfigStore in DI", "status": "pending", "files": [], "updatedAt": null },
+    { "id": "T1.3", "phase": 1, "description": "Write unit tests for MenuConfigStore", "status": "pending", "files": [], "updatedAt": null },
+    { "id": "T2.1", "phase": 2, "description": "Create CustomFeederTextToolbar class", "status": "pending", "files": [], "updatedAt": null },
+    { "id": "T2.2", "phase": 2, "description": "Create ToolbarState data class", "status": "pending", "files": [], "updatedAt": null },
+    { "id": "T2.3", "phase": 2, "description": "Write unit tests for CustomFeederTextToolbar", "status": "pending", "files": [], "updatedAt": null },
+    { "id": "T3.1", "phase": 3, "description": "Create TextSelectionMenuPopup composable", "status": "pending", "files": [], "updatedAt": null },
+    { "id": "T3.2", "phase": 3, "description": "Create MenuItemRow composable", "status": "pending", "files": [], "updatedAt": null },
+    { "id": "T3.3", "phase": 3, "description": "Implement popup positioning logic", "status": "pending", "files": [], "updatedAt": null },
+    { "id": "T3.4", "phase": 3, "description": "Write UI tests for popup", "status": "pending", "files": [], "updatedAt": null },
+    { "id": "T4.1", "phase": 4, "description": "Implement system action handlers", "status": "pending", "files": [], "updatedAt": null },
+    { "id": "T4.2", "phase": 4, "description": "Implement Feeder action handlers", "status": "pending", "files": [], "updatedAt": null },
+    { "id": "T4.3", "phase": 4, "description": "Implement third-party action handler", "status": "pending", "files": [], "updatedAt": null },
+    { "id": "T4.4", "phase": 4, "description": "Create ActionExecutor class", "status": "pending", "files": [], "updatedAt": null },
+    { "id": "T5.1", "phase": 5, "description": "Update WithFeederTextToolbar", "status": "pending", "files": [], "updatedAt": null },
+    { "id": "T5.2", "phase": 5, "description": "Update ArticleScreen", "status": "pending", "files": [], "updatedAt": null },
+    { "id": "T5.3", "phase": 5, "description": "Register new components in DI", "status": "pending", "files": [], "updatedAt": null },
+    { "id": "T5.4", "phase": 5, "description": "End-to-end testing", "status": "pending", "files": [], "updatedAt": null },
+    { "id": "T5.5", "phase": 5, "description": "Bug fixes and refinement", "status": "pending", "files": [], "updatedAt": null }
+  ],
+  "iteration": {
+    "loops": 0,
+    "lastReviewVerdict": null
+  },
+  "status": {
+    "allPhasesComplete": false,
+    "allTasksComplete": false,
+    "workflowDone": false
+  }
+}

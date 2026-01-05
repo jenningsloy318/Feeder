@@ -16,6 +16,7 @@ import android.view.View
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalTextToolbar
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.TextToolbar
@@ -27,9 +28,23 @@ import org.kodein.di.instance
 private const val LOG_TAG = "FEEDER_TEXTTOOL"
 
 @Composable
-fun WithFeederTextToolbar(content: @Composable () -> Unit) {
+fun WithFeederTextToolbar(
+    onReadAloud: ((String) -> Unit)? = null,
+    onTranslate: ((String) -> Unit)? = null,
+    content: @Composable () -> Unit,
+) {
     val activityLauncher: ActivityLauncher by LocalDI.current.instance()
-    CompositionLocalProvider(LocalTextToolbar provides FeederTextToolbar(LocalView.current, activityLauncher)) {
+    val menuConfigStore: MenuConfigStore by LocalDI.current.instance()
+
+    CompositionLocalProvider(
+        LocalTextToolbar provides CustomFeederTextToolbar(
+            context = LocalContext.current,
+            menuConfigStore = menuConfigStore,
+            activityLauncher = activityLauncher,
+            onReadAloud = onReadAloud,
+            onTranslate = onTranslate,
+        ),
+    ) {
         content()
     }
 }

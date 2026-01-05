@@ -175,6 +175,58 @@ fun ArticleScreen(
     onTranslate: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    // Wrap with custom text toolbar to enable selection menu
+    com.nononsenseapps.feeder.ui.compose.utils.WithFeederTextToolbar(
+        onReadAloud = { ttsOnPlay() },
+        onTranslate = { onTranslate() },
+    ) {
+        ArticleScreenInternal(
+            viewState = viewState,
+            onToggleFullText = onToggleFullText,
+            onMarkAsUnread = onMarkAsUnread,
+            onShare = onShare,
+            onOpenInCustomTab = onOpenInCustomTab,
+            onFeedTitleClick = onFeedTitleClick,
+            onShowToolbarMenu = onShowToolbarMenu,
+            ttsOnPlay = ttsOnPlay,
+            ttsOnPause = ttsOnPause,
+            ttsOnStop = ttsOnStop,
+            ttsOnSkipNext = ttsOnSkipNext,
+            ttsOnSelectLanguage = ttsOnSelectLanguage,
+            onToggleBookmark = onToggleBookmark,
+            articleListState = articleListState,
+            onNavigateUp = onNavigateUp,
+            onSummarize = onSummarize,
+            onTranslate = onTranslate,
+            modifier = modifier,
+        )
+    }
+}
+
+@OptIn(
+    ExperimentalMaterial3Api::class,
+)
+@Composable
+private fun ArticleScreenInternal(
+    viewState: ArticleScreenViewState,
+    onToggleFullText: () -> Unit,
+    onMarkAsUnread: () -> Unit,
+    onShare: () -> Unit,
+    onOpenInCustomTab: () -> Unit,
+    onFeedTitleClick: () -> Unit,
+    onShowToolbarMenu: (Boolean) -> Unit,
+    ttsOnPlay: () -> Unit,
+    ttsOnPause: () -> Unit,
+    ttsOnStop: () -> Unit,
+    ttsOnSkipNext: () -> Unit,
+    ttsOnSelectLanguage: (LocaleOverride) -> Unit,
+    onToggleBookmark: () -> Unit,
+    articleListState: LazyListState,
+    onNavigateUp: () -> Unit,
+    onSummarize: () -> Unit,
+    onTranslate: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
     val bottomBarVisibleState = remember { MutableTransitionState(viewState.isBottomBarVisible) }
@@ -402,6 +454,12 @@ fun ArticleScreen(
                 Modifier
                     .padding(padding),
         ) {
+            // Handle text selection menu popup
+            com.nononsenseapps.feeder.ui.compose.utils.TextSelectionMenuHandler(
+                onReadAloud = { ttsOnPlay() },
+                onTranslate = { onTranslate() },
+            )
+
             ArticleContent(
                 viewState = viewState,
                 screenType = ScreenType.SINGLE,

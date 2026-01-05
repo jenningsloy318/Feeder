@@ -243,7 +243,7 @@ private fun TimeoutSetting(
             // Minus button
             IconButton(
                 onClick = {
-                    val newValue = (timeoutSeconds - 10).coerceAtLeast(30)
+                    val newValue = (timeoutSeconds - 1).coerceAtLeast(30)
                     inputValue = newValue.toString()
                     onTimeoutChange(newValue)
                 },
@@ -282,7 +282,7 @@ private fun TimeoutSetting(
             // Plus button
             IconButton(
                 onClick = {
-                    val newValue = (timeoutSeconds + 10).coerceAtMost(600)
+                    val newValue = (timeoutSeconds + 1).coerceAtMost(600)
                     inputValue = newValue.toString()
                     onTimeoutChange(newValue)
                 },

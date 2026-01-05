@@ -21,7 +21,7 @@ This specification addressed multiple issues with the AI translation feature in 
 - Recursive text extraction and rendering
 - Configurable timeout UI
 
-**Total Commits:** 14 commits specific to spec-020
+**Total Commits:** 15 commits specific to spec-020
 **Total Files Modified:** 9 files
 **Lines of Code Changed:** ~500+ lines
 
@@ -167,6 +167,7 @@ This specification addressed multiple issues with the AI translation feature in 
 
 | Commit Hash | Message | Date |
 |-------------|---------|------|
+| `e4b71637` | 🎨 style(ui): reduce timeout input font size for compact display | 2026-01-05 |
 | `dd3af41a` | 🎨 style(ui): reduce timeout input field height for compact display | 2026-01-05 |
 | `3127b617` | 🎨 style(ui): reduce timeout input field width for compact display | 2026-01-05 |
 | `57abfc9d` | 🎨 style(ui): align timeout setting style with other settings | 2026-01-05 |
@@ -595,7 +596,7 @@ Future work documented:
 **Spec-020 COMPLETE**
 **Date:** 2026-01-05
 **Branch:** `spec-20-improve-translateion-page`
-**Total Commits:** 14
+**Total Commits:** 15
 **Files Modified:** 9
 **Lines Changed:** ~500+
 **Status:** ✅ READY FOR MERGE

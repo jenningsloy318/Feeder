@@ -1,0 +1,53 @@
+{
+  "featureName": "Structure-Aware Translation Implementation",
+  "startedAt": "2026-01-05T18:30:00Z",
+  "resumedAt": "2026-01-05T20:15:00Z",
+  "description": "Implement structure-aware translation for improved translation quality with element type and nesting context",
+  "phases": [
+    { "id": 0, "name": "Apply Dev Rules", "status": "complete", "startedAt": "2026-01-05T18:30:00Z", "completedAt": "2026-01-05T18:35:00Z" },
+    { "id": 1, "name": "Specification Setup", "status": "complete", "startedAt": "2026-01-05T18:35:00Z", "completedAt": "2026-01-05T18:40:00Z" },
+    { "id": 2, "name": "Requirements Clarification", "status": "complete", "startedAt": "2026-01-05T18:40:00Z", "completedAt": "2026-01-05T18:50:00Z" },
+    { "id": 3, "name": "Research", "status": "complete", "startedAt": "2026-01-05T18:50:00Z", "completedAt": "2026-01-05T19:15:00Z" },
+    { "id": 5, "name": "Code Assessment", "status": "complete", "startedAt": "2026-01-05T18:50:00Z", "completedAt": "2026-01-05T19:30:00Z" },
+    { "id": 6, "name": "Specification Writing", "status": "complete", "startedAt": "2026-01-05T19:30:00Z", "completedAt": "2026-01-05T20:00:00Z" },
+    { "id": 7, "name": "User Approval & Scope Definition", "status": "complete", "startedAt": "2026-01-05T20:00:00Z", "completedAt": "2026-01-05T20:15:00Z" },
+    { "id": 8, "name": "Execution & QA", "status": "in_progress", "startedAt": "2026-01-05T20:15:00Z", "completedAt": null },
+    { "id": 9, "name": "Code Review", "status": "pending", "startedAt": null, "completedAt": null },
+    { "id": 10, "name": "Documentation Update", "status": "pending", "startedAt": null, "completedAt": null },
+    { "id": 11, "name": "Cleanup", "status": "pending", "startedAt": null, "completedAt": null },
+    { "id": 12, "name": "Commit & Push", "status": "pending", "startedAt": null, "completedAt": null },
+    { "id": 13, "name": "Final Verification", "status": "pending", "startedAt": null, "completedAt": null }
+  ],
+  "tasks": [
+    { "id": "T0.1", "phase": 0, "description": "Apply development rules and coding standards", "status": "complete", "files": [], "updatedAt": "2026-01-05T18:35:00Z" },
+    { "id": "T1.1", "phase": 1, "description": "Verify spec-020 directory structure and prepare for updates", "status": "complete", "files": [], "updatedAt": "2026-01-05T18:40:00Z" },
+    { "id": "T2.1", "phase": 2, "description": "Gather requirements for advanced content parsing assessment", "status": "complete", "files": ["01-requirements-v3.md"], "updatedAt": "2026-01-05T18:50:00Z" },
+    { "id": "T3.1", "phase": 3, "description": "Research RSS standards and HTML content handling best practices", "status": "complete", "files": ["05-findings-and-recommendations-v3.md"], "updatedAt": "2026-01-05T19:15:00Z" },
+    { "id": "T5.1", "phase": 5, "description": "Assess content parsing and rendering pipeline", "status": "complete", "files": ["05-findings-and-recommendations-v3.md"], "updatedAt": "2026-01-05T19:30:00Z" },
+    { "id": "T6.1", "phase": 6, "description": "Write findings and recommendations specification", "status": "complete", "files": ["05-findings-and-recommendations-v3.md"], "updatedAt": "2026-01-05T20:00:00Z" },
+    { "id": "T7.1", "phase": 7, "description": "Receive user approval and define implementation scope", "status": "complete", "files": [], "updatedAt": "2026-01-05T20:15:00Z" },
+    { "id": "T8.1", "phase": 8, "description": "Create TranslatableText data class with structure metadata", "status": "pending", "files": [], "updatedAt": null },
+    { "id": "T8.2", "phase": 8, "description": "Modify extractTranslatableTextRecursively to return TranslatableText", "status": "pending", "files": [], "updatedAt": null },
+    { "id": "T8.3", "phase": 8, "description": "Update translation API calls to include structure context", "status": "pending", "files": [], "updatedAt": null },
+    { "id": "T8.4", "phase": 8, "description": "Write unit tests for structure-aware extraction", "status": "pending", "files": [], "updatedAt": null },
+    { "id": "T8.5", "phase": 8, "description": "Test translation with various element types and nesting", "status": "pending", "files": [], "updatedAt": null }
+  ],
+  "iteration": {
+    "loops": 0,
+    "lastReviewVerdict": null
+  },
+  "scope": {
+    "approvedFeatures": [
+      "Structure-Aware Translation - Include element type and nesting level in translation requests"
+    ],
+    "excludedFeatures": [
+      "Translation Caching - User explicitly skipped",
+      "Inline Annotation Handling - User explicitly skipped"
+    ]
+  },
+  "status": {
+    "allPhasesComplete": false,
+    "allTasksComplete": false,
+    "workflowDone": false
+  }
+}

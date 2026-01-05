@@ -1,0 +1,41 @@
+{
+  "featureName": "Improve Translation Page - Fix Nested Lists and Blockquote Translation",
+  "startedAt": "2026-01-05T17:45:00Z",
+  "phases": [
+    { "id": 0, "name": "Apply Dev Rules", "status": "complete", "startedAt": "2026-01-05T17:45:00Z", "completedAt": "2026-01-05T17:45:30Z" },
+    { "id": 1, "name": "Specification Setup", "status": "in_progress", "startedAt": "2026-01-05T17:45:30Z", "completedAt": null },
+    { "id": 2, "name": "Requirements Clarification", "status": "pending", "startedAt": null, "completedAt": null },
+    { "id": 3, "name": "Research", "status": "pending", "startedAt": null, "completedAt": null },
+    { "id": 4, "name": "Debug Analysis", "status": "pending", "startedAt": null, "completedAt": null },
+    { "id": 5, "name": "Code Assessment", "status": "pending", "startedAt": null, "completedAt": null },
+    { "id": 6, "name": "Specification Writing", "status": "pending", "startedAt": null, "completedAt": null },
+    { "id": 7, "name": "Specification Review", "status": "pending", "startedAt": null, "completedAt": null },
+    { "id": 8, "name": "Execution & QA", "status": "pending", "startedAt": null, "completedAt": null },
+    { "id": 9, "name": "Code Review", "status": "pending", "startedAt": null, "completedAt": null },
+    { "id": 10, "name": "Documentation Update", "status": "pending", "startedAt": null, "completedAt": null },
+    { "id": 11, "name": "Cleanup", "status": "pending", "startedAt": null, "completedAt": null },
+    { "id": 12, "name": "Commit & Push", "status": "pending", "startedAt": null, "completedAt": null },
+    { "id": 13, "name": "Final Verification", "status": "pending", "startedAt": null, "completedAt": null }
+  ],
+  "tasks": [
+    { "id": "T1.1", "phase": 1, "description": "Create spec-020 directory structure", "status": "complete", "files": ["workflow-tracking.json"], "updatedAt": "2026-01-05T17:45:30Z" },
+    { "id": "T2.1", "phase": 2, "description": "Document requirements for nested lists translation", "status": "pending", "files": [], "updatedAt": null },
+    { "id": "T2.2", "phase": 2, "description": "Document requirements for blockquote translation", "status": "pending", "files": [], "updatedAt": null },
+    { "id": "T4.1", "phase": 4, "description": "Analyze root cause of nested list translation failure", "status": "pending", "files": [], "updatedAt": null },
+    { "id": "T4.2", "phase": 4, "description": "Analyze root cause of blockquote translation failure", "status": "pending", "files": [], "updatedAt": null },
+    { "id": "T5.1", "phase": 5, "description": "Assess current translation extraction logic", "status": "pending", "files": [], "updatedAt": null },
+    { "id": "T5.2", "phase": 5, "description": "Assess current translation rendering logic", "status": "pending", "files": [], "updatedAt": null },
+    { "id": "T6.1", "phase": 6, "description": "Write technical specification", "status": "pending", "files": [], "updatedAt": null },
+    { "id": "T6.2", "phase": 6, "description": "Write implementation plan", "status": "pending", "files": [], "updatedAt": null },
+    { "id": "T6.3", "phase": 6, "description": "Write task list", "status": "pending", "files": [], "updatedAt": null }
+  ],
+  "iteration": {
+    "loops": 0,
+    "lastReviewVerdict": null
+  },
+  "status": {
+    "allPhasesComplete": false,
+    "allTasksComplete": false,
+    "workflowDone": false
+  }
+}

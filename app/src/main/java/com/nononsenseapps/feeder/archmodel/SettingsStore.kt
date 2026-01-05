@@ -490,7 +490,7 @@ class SettingsStore(
                 key = sp.getStringNonNull(PREF_OPENAI_KEY, ""),
                 modelId = sp.getStringNonNull(PREF_OPENAI_MODEL_ID, ModelOpenAISettings.DEFAULT_MODEL),
                 baseUrl = sp.getStringNonNull(PREF_OPENAI_URL, ""),
-                timeoutSeconds = sp.getInt(PREF_OPENAI_REQUEST_TIMEOUT_SECONDS, 30),
+                timeoutSeconds = sp.getInt(PREF_OPENAI_REQUEST_TIMEOUT_SECONDS, 90),
                 azureApiVersion = sp.getStringNonNull(PREF_OPENAI_AZURE_VERSION, ""),
                 azureDeploymentId = sp.getStringNonNull(PREF_OPENAI_AZURE_DEPLOYMENT_ID, ""),
             ),
@@ -504,7 +504,7 @@ class SettingsStore(
                 key = sp.getStringNonNull(PREF_ANTHROPIC_KEY, ""),
                 modelId = sp.getStringNonNull(PREF_ANTHROPIC_MODEL_ID, AnthropicSettings.DEFAULT_MODEL),
                 baseUrl = sp.getStringNonNull(PREF_ANTHROPIC_URL, ""),
-                timeoutSeconds = sp.getInt(PREF_ANTHROPIC_REQUEST_TIMEOUT_SECONDS, 30),
+                timeoutSeconds = sp.getInt(PREF_ANTHROPIC_REQUEST_TIMEOUT_SECONDS, 90),
             ),
         )
     val anthropicSettings = _anthropicSettings.asStateFlow()
@@ -584,7 +584,7 @@ class SettingsStore(
                         key = oldOpenAIKey,
                         modelId = sp.getString(PREF_OPENAI_MODEL_ID, ModelOpenAISettings.DEFAULT_MODEL) ?: ModelOpenAISettings.DEFAULT_MODEL,
                         baseUrl = sp.getStringNonNull(PREF_OPENAI_URL, ""),
-                        timeoutSeconds = sp.getInt(PREF_OPENAI_REQUEST_TIMEOUT_SECONDS, 30),
+                        timeoutSeconds = sp.getInt(PREF_OPENAI_REQUEST_TIMEOUT_SECONDS, 90),
                         azureApiVersion = sp.getStringNonNull(PREF_OPENAI_AZURE_VERSION, ""),
                         azureDeploymentId = sp.getStringNonNull(PREF_OPENAI_AZURE_DEPLOYMENT_ID, ""),
                     ),
@@ -607,7 +607,7 @@ class SettingsStore(
                         key = oldAnthropicKey,
                         modelId = sp.getString(PREF_ANTHROPIC_MODEL_ID, AnthropicSettings.DEFAULT_MODEL) ?: AnthropicSettings.DEFAULT_MODEL,
                         baseUrl = sp.getStringNonNull(PREF_ANTHROPIC_URL, ""),
-                        timeoutSeconds = sp.getInt(PREF_ANTHROPIC_REQUEST_TIMEOUT_SECONDS, 30),
+                        timeoutSeconds = sp.getInt(PREF_ANTHROPIC_REQUEST_TIMEOUT_SECONDS, 90),
                     ),
                     isActive = activeProviderType == AIProvider.ANTHROPIC,
                     createdAt = System.currentTimeMillis(),
@@ -781,6 +781,15 @@ class SettingsStore(
         sp.edit().putBoolean(PREF_TRANSLATION_ENABLED, value).apply()
     }
 
+    // Translation timeout setting
+    private val _translationTimeout = MutableStateFlow(sp.getInt(PREF_TRANSLATION_TIMEOUT_SECONDS, 90))
+    val translationTimeout = _translationTimeout.asStateFlow()
+
+    fun setTranslationTimeout(value: Int) {
+        _translationTimeout.value = value.coerceIn(30, 600)
+        sp.edit().putInt(PREF_TRANSLATION_TIMEOUT_SECONDS, value).apply()
+    }
+
     private val _showTitleUnreadCount = MutableStateFlow(sp.getBoolean(PREF_SHOW_TITLE_UNREAD_COUNT, false))
     val showTitleUnreadCount = _showTitleUnreadCount.asStateFlow()
 
@@ -946,6 +955,11 @@ const val PREF_TRANSLATION_LANGUAGE = "pref_translation_language"
  * AI translation enabled setting
  */
 const val PREF_TRANSLATION_ENABLED = "pref_translation_enabled"
+
+/**
+ * AI translation timeout setting
+ */
+const val PREF_TRANSLATION_TIMEOUT_SECONDS = "pref_translation_timeout_seconds"
 
 /**
  * Appearance settings

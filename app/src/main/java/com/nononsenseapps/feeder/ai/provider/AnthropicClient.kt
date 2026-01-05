@@ -5,6 +5,7 @@ import com.anthropic.client.okhttp.AnthropicOkHttpClientAsync
 import com.anthropic.models.messages.Message
 import com.anthropic.models.messages.MessageCreateParams
 import com.nononsenseapps.feeder.ai.AIClient
+import com.nononsenseapps.feeder.ai.TranslatableText
 import com.nononsenseapps.feeder.ai.model.AnthropicSettings
 import com.nononsenseapps.feeder.ai.model.SummaryLanguage
 import com.nononsenseapps.feeder.ai.model.TranslationLanguage
@@ -104,27 +105,30 @@ class AnthropicClient(
     }
 
     /**
-     * Translates article paragraphs using Anthropic Claude API.
+     * Translates article paragraphs with structure context using Anthropic Claude API.
      *
-     * Sends all paragraphs in a single request with numbered indexing to maintain
-     * paragraph structure. Parses the response to extract translated paragraphs.
+     * Sends all paragraphs with structure information (element type, nesting level) in a
+     * single request with numbered indexing to maintain paragraph structure.
+     * Parses the response to extract translated paragraphs.
      *
-     * @param paragraphs List of text paragraphs to translate
+     * The structure context helps the AI understand document hierarchy for better translations.
+     *
+     * @param translatableTexts List of translatable texts with structure metadata
      * @param targetLanguage Target language for translation
      * @return TranslationResult containing translated paragraphs or error
      */
     override suspend fun translate(
-        paragraphs: List<String>,
+        translatableTexts: List<TranslatableText>,
         targetLanguage: TranslationLanguage,
     ): AIClient.TranslationResult {
-        if (paragraphs.isEmpty()) {
+        if (translatableTexts.isEmpty()) {
             return AIClient.TranslationResult.Error(
                 content = "No translatable content found in this article"
             )
         }
 
         return try {
-            val prompt = buildTranslationPrompt(paragraphs, targetLanguage)
+            val prompt = buildTranslationPrompt(translatableTexts, targetLanguage)
 
             val params = MessageCreateParams.builder()
                 .model(settings.modelId)
@@ -143,7 +147,7 @@ class AnthropicClient(
 
             val translatedParagraphs = parseTranslationResponse(
                 translatedText,
-                paragraphs.size
+                translatableTexts.size
             )
 
             AIClient.TranslationResult.Success(paragraphs = translatedParagraphs)
@@ -183,21 +187,23 @@ class AnthropicClient(
     }
 
     /**
-     * Builds a JSON-structured translation prompt for accurate, professional translation.
+     * Builds a JSON-structured translation prompt with structure context for accurate, professional translation.
      *
      * Based on research of best practices for AI translation prompts, including:
      * - Professional role assignment
      * - Clear translation guidelines
      * - JSON structured input/output for reliable parsing
      * - Context preservation for technical accuracy
+     * - Structure-aware translation for better quality
      */
     private fun buildTranslationPrompt(
-        paragraphs: List<String>,
+        translatableTexts: List<TranslatableText>,
         targetLanguage: TranslationLanguage,
     ): String {
-        // Build JSON array of paragraphs with indices
-        val paragraphsJson = paragraphs.mapIndexed { index, text ->
-            """        {"index": ${index + 1}, "text": ${jsonEscape(text)}}"""
+        // Build JSON array of paragraphs with indices and structure context
+        val paragraphsJson = translatableTexts.mapIndexed { index, tt ->
+            val structureInfo = tt.getStructureDescription()
+            """        {"index": ${index + 1}, "type": "$structureInfo", "text": ${jsonEscape(tt.text)}}"""
         }.joinToString(",\n")
 
         return """
@@ -206,6 +212,7 @@ You are a distinguished professional translator and bilingual scholar specializi
 ## Translation Task
 
 Translate the following article paragraphs from JSON format to ${targetLanguage.languageName}.
+Each paragraph includes structure information (element type and nesting level) to help you provide better translations.
 
 ## Input Format (JSON)
 ```json
@@ -232,27 +239,33 @@ Respond with a JSON object in the following exact format:
 
 ## Translation Guidelines
 
-1. **Accuracy & Precision**: Maintain technical accuracy while ensuring the translation flows naturally in ${targetLanguage.languageName}
+1. **Structure Awareness**: Consider the element type and nesting level:
+   - Headings should remain concise and authoritative
+   - Paragraphs should flow naturally in ${targetLanguage.languageName}
+   - Nested list items should maintain proper indentation and hierarchy
+   - Blockquotes should preserve the quoted tone
 
-2. **Cultural Adaptation**: Adapt expressions and cultural references to ${targetLanguage.languageName} language conventions
+2. **Accuracy & Precision**: Maintain technical accuracy while ensuring the translation flows naturally in ${targetLanguage.languageName}
 
-3. **Tone Preservation**: Preserve the author's style, tone, and intent
+3. **Cultural Adaptation**: Adapt expressions and cultural references to ${targetLanguage.languageName} language conventions
 
-4. **Technical Terms**: Keep technical terminology, code, variable names, and commands untranslated
+4. **Tone Preservation**: Preserve the author's style, tone, and intent based on element type
 
-5. **Format Preservation**: Maintain the original paragraph structure, numbering, and layout
+5. **Technical Terms**: Keep technical terminology, code, variable names, and commands untranslated
 
-6. **Quality**: Provide fluent, professional translations that read naturally to native speakers
+6. **Format Preservation**: Maintain the original paragraph structure, numbering, and layout
 
-7. **Consistency**: Use consistent terminology throughout the translation
+7. **Quality**: Provide fluent, professional translations that read naturally to native speakers
 
-8. **Completeness**: Translate ALL paragraphs. Return exactly ${paragraphs.size} translations.
+8. **Consistency**: Use consistent terminology throughout the translation
+
+9. **Completeness**: Translate ALL paragraphs. Return exactly ${translatableTexts.size} translations.
 
 ## Important
 
 - Return ONLY the JSON object, no additional text or explanations
 - Ensure the JSON is valid and can be parsed
-- Match each index exactly from the input (1 to ${paragraphs.size})
+- Match each index exactly from the input (1 to ${translatableTexts.size})
 - Do not omit any paragraphs
 - Do not add any conversational filler
 

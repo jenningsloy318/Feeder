@@ -32,6 +32,8 @@ import com.nononsenseapps.feeder.model.UnsupportedContentType
 import com.nononsenseapps.feeder.model.html.HtmlLinearizer
 import com.nononsenseapps.feeder.model.html.LinearArticle
 import com.nononsenseapps.feeder.ai.AIApi
+import com.nononsenseapps.feeder.ai.ElementType
+import com.nononsenseapps.feeder.ai.TranslatableText
 import com.nononsenseapps.feeder.ui.compose.text.htmlToAnnotatedString
 import com.nononsenseapps.feeder.util.Either
 import com.nononsenseapps.feeder.util.FilePathProvider
@@ -473,24 +475,26 @@ class ArticleViewModel(
     }
 
     /**
-     * Initiates article translation.
+     * Initiates article translation with structure-aware context.
      *
-     * Extracts translatable paragraphs from the article content and calls the AI API
-     * to translate them. Results are displayed paragraph-by-paragraph below the original text.
+     * Extracts translatable paragraphs from the article content along with their
+     * structural context (element type, nesting level) and calls the AI API
+     * to translate them. The structure information helps improve translation quality.
      *
+     * Results are displayed paragraph-by-paragraph below the original text.
      * Users can tap the translate button again to retry if translation fails.
      */
     fun translate() {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 translationState.value = TranslationState.Loading
-                Log.d(LOG_TAG, "Starting translation for article $itemId")
+                Log.d(LOG_TAG, "Starting structure-aware translation for article $itemId")
 
-                // Extract translatable paragraphs from article content
-                val paragraphs = extractTranslatableParagraphs()
-                Log.d(LOG_TAG, "Extracted ${paragraphs.size} paragraphs for translation")
+                // Extract translatable paragraphs with structure context
+                val translatableTexts = extractTranslatableParagraphs()
+                Log.d(LOG_TAG, "Extracted ${translatableTexts.size} paragraphs for translation")
 
-                if (paragraphs.isEmpty()) {
+                if (translatableTexts.isEmpty()) {
                     translationState.value =
                         TranslationState.Result(
                             value = com.nononsenseapps.feeder.ai.AIClient.TranslationResult.Error(
@@ -500,8 +504,8 @@ class ArticleViewModel(
                     return@launch
                 }
 
-                // Call AI API to translate paragraphs
-                val result = aiApi.translate(paragraphs)
+                // Call AI API to translate with structure context
+                val result = aiApi.translate(translatableTexts)
                 translationState.value = TranslationState.Result(value = result)
                 Log.d(LOG_TAG, "Translation completed with result: $result")
             } catch (e: Exception) {
@@ -517,52 +521,130 @@ class ArticleViewModel(
     }
 
     /**
-     * Extracts translatable text paragraphs from the article content.
+     * Extracts translatable text paragraphs with structure context from the article content.
      *
-     * Each paragraph from HTML (<p> tags) creates a separate LinearText element.
-     * List items (<li> tags) are also included as separate translation units.
+     * This method recursively traverses the content tree to extract ALL translatable
+     * text elements with their structural context, including:
+     * - Top-level paragraphs (LinearText elements)
+     * - Headings (H1-H6) identified by annotations
+     * - Nested list items at any depth (LinearListItem within LinearListItem)
+     * - Blockquote content (LinearBlockQuote)
      *
-     * This respects the actual HTML structure where each <p> is already a
-     * separate paragraph, avoiding incorrect merging of distinct paragraphs.
+     * Each text element becomes a separate translation unit with metadata about:
+     * - Element type (paragraph, heading, list item, blockquote)
+     * - Nesting level (for nested structures)
      *
-     * @return List of paragraph strings to translate
+     * The recursion ensures that nested structures (e.g., lists within lists,
+     * lists in blockquotes) are properly handled and all translatable content is extracted.
+     *
+     * @return List of TranslatableText with structure metadata, in document order
      */
-    private fun extractTranslatableParagraphs(): List<String> {
+    private fun extractTranslatableParagraphs(): List<TranslatableText> {
         val content = viewState.value.articleContent
-        val paragraphs = mutableListOf<String>()
+        val translatableTexts = mutableListOf<TranslatableText>()
 
-        for (element in content.elements) {
+        // Recursively extract all translatable text with structure context
+        extractTranslatableTextRecursively(
+            elements = content.elements,
+            translatableTexts = translatableTexts,
+            nestingLevel = 0
+        )
+
+        return translatableTexts
+    }
+
+    /**
+     * Recursively extracts translatable text with structure context from a list of elements.
+     *
+     * This helper function performs a depth-first traversal of the element tree,
+     * extracting text from LinearText elements with their element type and recursing
+     * into container elements like LinearListItem and LinearBlockQuote.
+     *
+     * For LinearText elements, it detects heading levels (H1-H6) from annotations
+     * to provide proper element type context to the translator.
+     *
+     * @param elements The list of elements to traverse
+     * @param translatableTexts Mutable list to accumulate TranslatableText (in-out parameter)
+     * @param nestingLevel Current nesting depth (0 for top-level, incremented for nested content)
+     */
+    private fun extractTranslatableTextRecursively(
+        elements: List<com.nononsenseapps.feeder.model.html.LinearElement>,
+        translatableTexts: MutableList<TranslatableText>,
+        nestingLevel: Int = 0
+    ) {
+        for (element in elements) {
             when (element) {
                 is com.nononsenseapps.feeder.model.html.LinearText -> {
                     // Only translate regular text (not code blocks or pre-formatted text)
                     if (element.blockStyle == com.nononsenseapps.feeder.model.html.LinearTextBlockStyle.TEXT) {
                         val text = element.text
                         if (text.isNotBlank()) {
-                            paragraphs.add(text.trim())
+                            // Detect element type from annotations
+                            val elementType = getElementTypeFromAnnotations(element.annotations)
+
+                            translatableTexts.add(
+                                TranslatableText(
+                                    text = text.trim(),
+                                    elementType = elementType,
+                                    nestingLevel = nestingLevel,
+                                )
+                            )
                         }
                     }
                     // Skip PRE_FORMATTED and CODE_BLOCK
                 }
                 is com.nononsenseapps.feeder.model.html.LinearListItem -> {
-                    // Extract text from list item content
-                    // List items can contain nested elements, but typically have one LinearText
-                    val listItemText = element.content
-                        .filterIsInstance<com.nononsenseapps.feeder.model.html.LinearText>()
-                        .filter { it.blockStyle == com.nononsenseapps.feeder.model.html.LinearTextBlockStyle.TEXT }
-                        .map { it.text.trim() }
-                        .filter { it.isNotBlank() }
-                        .joinToString(" ")
-
-                    if (listItemText.isNotBlank()) {
-                        paragraphs.add(listItemText)
-                    }
+                    // Recursively extract text from list item content
+                    // This handles nested lists at any depth
+                    extractTranslatableTextRecursively(
+                        elements = element.content,
+                        translatableTexts = translatableTexts,
+                        nestingLevel = nestingLevel + 1
+                    )
                 }
-                // Skip other element types (images, videos, tables, blockquotes, etc.)
+                is com.nononsenseapps.feeder.model.html.LinearBlockQuote -> {
+                    // Recursively extract text from blockquote content
+                    // This handles paragraphs and other content within blockquotes
+                    extractTranslatableTextRecursively(
+                        elements = element.content,
+                        translatableTexts = translatableTexts,
+                        nestingLevel = nestingLevel + 1
+                    )
+                }
+                // Skip other element types (images, videos, tables, etc.)
                 else -> {}
             }
         }
+    }
 
-        return paragraphs
+    /**
+     * Determines the element type from text annotations.
+     *
+     * Checks if the text has heading annotations (H1-H6) and returns the
+     * corresponding ElementType. Defaults to PARAGRAPH if no heading annotation found.
+     *
+     * @param annotations List of text annotations to check
+     * @return ElementType representing the type of element (heading or paragraph)
+     */
+    private fun getElementTypeFromAnnotations(
+        annotations: List<com.nononsenseapps.feeder.model.html.LinearTextAnnotation>
+    ): ElementType {
+        // Check for heading annotations
+        for (annotation in annotations) {
+            when (annotation.data) {
+                is com.nononsenseapps.feeder.model.html.LinearTextAnnotationH1 -> return ElementType.HEADING_1
+                is com.nononsenseapps.feeder.model.html.LinearTextAnnotationH2 -> return ElementType.HEADING_2
+                is com.nononsenseapps.feeder.model.html.LinearTextAnnotationH3 -> return ElementType.HEADING_3
+                is com.nononsenseapps.feeder.model.html.LinearTextAnnotationH4 -> return ElementType.HEADING_4
+                is com.nononsenseapps.feeder.model.html.LinearTextAnnotationH5 -> return ElementType.HEADING_5
+                is com.nononsenseapps.feeder.model.html.LinearTextAnnotationH6 -> return ElementType.HEADING_6
+                else -> {
+                    // Continue checking other annotations
+                }
+            }
+        }
+        // Default to paragraph if no heading annotation found
+        return ElementType.PARAGRAPH
     }
 
     private suspend fun loadArticleContent(): String {

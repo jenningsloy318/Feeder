@@ -15,6 +15,7 @@ import org.kodein.di.instance
  * Manages the state for:
  * - Whether translation is enabled
  * - The target translation language
+ * - The translation timeout duration
  */
 class TranslationSettingsViewModel(
     di: DI,
@@ -22,6 +23,7 @@ class TranslationSettingsViewModel(
     private val repository: Repository by instance()
     val translationEnabled: StateFlow<Boolean> = repository.translationEnabled
     val translationLanguage: StateFlow<TranslationLanguage> = repository.translationLanguage
+    val translationTimeout: StateFlow<Int> = repository.translationTimeout
 
     fun setTranslationEnabled(enabled: Boolean) {
         viewModelScope.launch {
@@ -32,6 +34,12 @@ class TranslationSettingsViewModel(
     fun setTranslationLanguage(language: TranslationLanguage) {
         viewModelScope.launch {
             repository.setTranslationLanguage(language)
+        }
+    }
+
+    fun setTranslationTimeout(timeoutSeconds: Int) {
+        viewModelScope.launch {
+            repository.setTranslationTimeout(timeoutSeconds)
         }
     }
 }

@@ -318,6 +318,8 @@ fun LinearElementContent(
                 onLinkClick = onLinkClick,
                 modifier = modifier,
                 idToIndex = idToIndex,
+                translatedParagraphs = translatedParagraphs,
+                blockQuoteTranslationStartIndex = parentTranslationIndex ?: -1,
             )
         }
 
@@ -636,6 +638,44 @@ private fun computeChildTranslationIndices(
     return result
 }
 
+/**
+ * Computes translation indices for nested content within a blockquote.
+ * Returns a map of child element index to translation paragraph index.
+ * Only includes indices for translatable elements (LinearText with TEXT blockStyle, LinearListItem).
+ *
+ * This matches the logic in extractTranslatableTextRecursively for blockquote content.
+ */
+private fun computeBlockQuoteContentTranslationIndices(
+    content: List<LinearElement>,
+    startIndex: Int,
+): Map<Int, Int?> {
+    val result = mutableMapOf<Int, Int?>()
+    var translationIndex = startIndex + 1
+    var childIndex = 0
+
+    for (element in content) {
+        when (element) {
+            is LinearText -> {
+                if (element.blockStyle == LinearTextBlockStyle.TEXT && element.text.isNotBlank()) {
+                    result[childIndex] = translationIndex++
+                } else {
+                    result[childIndex] = null
+                }
+            }
+            is LinearListItem -> {
+                // Nested list items get their own translation
+                result[childIndex] = translationIndex++
+            }
+            else -> {
+                result[childIndex] = null
+            }
+        }
+        childIndex++
+    }
+
+    return result
+}
+
 @Composable
 fun LinearImageContent(
     linearImage: LinearImage,
@@ -822,6 +862,8 @@ fun LinearBlockQuoteContent(
     idToIndex: Map<String, Int>,
     onLinkClick: (url: String, index: Int?) -> Unit,
     modifier: Modifier = Modifier,
+    translatedParagraphs: List<String>? = null,
+    blockQuoteTranslationStartIndex: Int = -1,
 ) {
     Surface(
         color = MaterialTheme.colorScheme.surface,
@@ -836,23 +878,64 @@ fun LinearBlockQuoteContent(
             horizontalAlignment = Alignment.Start,
             modifier = Modifier.padding(8.dp),
         ) {
-            blockQuote.content
-                .filterIsInstance<LinearText>()
-                .forEach { element ->
-                    ProvideTextStyle(
-                        MaterialTheme.typography.bodyLarge.merge(
-                            SpanStyle(
-                                fontWeight = FontWeight.Light,
+            // Compute translation indices for blockquote content
+            // This matches the logic in extractTranslatableTextRecursively
+            val contentTranslationIndices = if (translatedParagraphs != null) {
+                computeBlockQuoteContentTranslationIndices(blockQuote.content, blockQuoteTranslationStartIndex)
+            } else {
+                emptyMap()
+            }
+
+            var currentContentIndex = 0
+            blockQuote.content.forEach { element ->
+                when (element) {
+                    is LinearText -> {
+                        val contentTranslation = if (element.blockStyle == LinearTextBlockStyle.TEXT && element.text.isNotBlank()) {
+                            contentTranslationIndices[currentContentIndex]?.let { idx ->
+                                translatedParagraphs?.getOrNull(idx)
+                            }
+                        } else {
+                            null
+                        }
+                        currentContentIndex++
+
+                        ProvideTextStyle(
+                            MaterialTheme.typography.bodyLarge.merge(
+                                SpanStyle(
+                                    fontWeight = FontWeight.Light,
+                                ),
                             ),
-                        ),
-                    ) {
-                        LinearTextContent(
-                            linearText = element,
+                        ) {
+                            LinearTextContent(
+                                linearText = element,
+                                translation = contentTranslation,
+                                idToIndex = idToIndex,
+                                onLinkClick = onLinkClick,
+                            )
+                        }
+                    }
+                    is LinearListItem -> {
+                        val contentTranslation = contentTranslationIndices[currentContentIndex]?.let { idx ->
+                            translatedParagraphs?.getOrNull(idx)
+                        }
+                        currentContentIndex++
+
+                        // Render nested list items with their translations
+                        LinearListItemContent(
+                            listItem = element,
+                            translation = contentTranslation,
+                            allowHorizontalScroll = true,
                             idToIndex = idToIndex,
                             onLinkClick = onLinkClick,
+                            translatedParagraphs = translatedParagraphs,
+                            childTranslationStartIndex = contentTranslationIndices[currentContentIndex - 1] ?: -1,
                         )
                     }
+                    else -> {
+                        currentContentIndex++
+                    }
                 }
+            }
 
             blockQuote.cite?.let { cite ->
                 val annotatedText =

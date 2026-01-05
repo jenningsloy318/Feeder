@@ -98,6 +98,9 @@ fun markdownToAnnotatedStringSafe(markdown: String): AnnotatedString {
 private fun parseMarkdownToHTML(markdown: String): String {
     var html = markdown
 
+    // Normalize line breaks: 3+ consecutive newlines -> 2 newlines (prevents extra spacing)
+    html = html.replace(Regex("\n\n+")) { "\n\n" }
+
     // Escape HTML special characters first to prevent XSS
     html = html.replace("&", "&amp;")
         .replace("<", "&lt;")

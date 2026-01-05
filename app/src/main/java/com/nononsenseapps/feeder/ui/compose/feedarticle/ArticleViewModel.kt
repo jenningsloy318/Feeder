@@ -519,19 +519,46 @@ class ArticleViewModel(
     /**
      * Extracts translatable text paragraphs from the article content.
      *
-     * Each paragraph from HTML (<p> tags) creates a separate LinearText element.
-     * List items (<li> tags) are also included as separate translation units.
+     * This method recursively traverses the content tree to extract ALL translatable
+     * text elements, including:
+     * - Top-level paragraphs (LinearText elements)
+     * - Nested list items at any depth (LinearListItem within LinearListItem)
+     * - Blockquote content (LinearBlockQuote)
      *
-     * This respects the actual HTML structure where each <p> is already a
-     * separate paragraph, avoiding incorrect merging of distinct paragraphs.
+     * Each text element becomes a separate translation unit. The recursion ensures
+     * that nested structures (e.g., lists within lists, lists in blockquotes) are
+     * properly handled and all translatable content is extracted.
      *
-     * @return List of paragraph strings to translate
+     * @return List of paragraph strings to translate, in document order
      */
     private fun extractTranslatableParagraphs(): List<String> {
         val content = viewState.value.articleContent
         val paragraphs = mutableListOf<String>()
 
-        for (element in content.elements) {
+        // Recursively extract all translatable text
+        extractTranslatableTextRecursively(
+            elements = content.elements,
+            paragraphs = paragraphs
+        )
+
+        return paragraphs
+    }
+
+    /**
+     * Recursively extracts translatable text from a list of elements.
+     *
+     * This helper function performs a depth-first traversal of the element tree,
+     * extracting text from LinearText elements and recursing into container elements
+     * like LinearListItem and LinearBlockQuote.
+     *
+     * @param elements The list of elements to traverse
+     * @param paragraphs Mutable list to accumulate extracted text (in-out parameter)
+     */
+    private fun extractTranslatableTextRecursively(
+        elements: List<com.nononsenseapps.feeder.model.html.LinearElement>,
+        paragraphs: MutableList<String>
+    ) {
+        for (element in elements) {
             when (element) {
                 is com.nononsenseapps.feeder.model.html.LinearText -> {
                     // Only translate regular text (not code blocks or pre-formatted text)
@@ -544,25 +571,25 @@ class ArticleViewModel(
                     // Skip PRE_FORMATTED and CODE_BLOCK
                 }
                 is com.nononsenseapps.feeder.model.html.LinearListItem -> {
-                    // Extract text from list item content
-                    // List items can contain nested elements, but typically have one LinearText
-                    val listItemText = element.content
-                        .filterIsInstance<com.nononsenseapps.feeder.model.html.LinearText>()
-                        .filter { it.blockStyle == com.nononsenseapps.feeder.model.html.LinearTextBlockStyle.TEXT }
-                        .map { it.text.trim() }
-                        .filter { it.isNotBlank() }
-                        .joinToString(" ")
-
-                    if (listItemText.isNotBlank()) {
-                        paragraphs.add(listItemText)
-                    }
+                    // Recursively extract text from list item content
+                    // This handles nested lists at any depth
+                    extractTranslatableTextRecursively(
+                        elements = element.content,
+                        paragraphs = paragraphs
+                    )
                 }
-                // Skip other element types (images, videos, tables, blockquotes, etc.)
+                is com.nononsenseapps.feeder.model.html.LinearBlockQuote -> {
+                    // Recursively extract text from blockquote content
+                    // This handles paragraphs and other content within blockquotes
+                    extractTranslatableTextRecursively(
+                        elements = element.content,
+                        paragraphs = paragraphs
+                    )
+                }
+                // Skip other element types (images, videos, tables, etc.)
                 else -> {}
             }
         }
-
-        return paragraphs
     }
 
     private suspend fun loadArticleContent(): String {

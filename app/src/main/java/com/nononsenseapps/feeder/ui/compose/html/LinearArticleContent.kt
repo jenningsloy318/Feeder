@@ -650,7 +650,7 @@ private fun computeBlockQuoteContentTranslationIndices(
     startIndex: Int,
 ): Map<Int, Int?> {
     val result = mutableMapOf<Int, Int?>()
-    var translationIndex = startIndex + 1
+    var translationIndex = startIndex
     var childIndex = 0
 
     for (element in content) {

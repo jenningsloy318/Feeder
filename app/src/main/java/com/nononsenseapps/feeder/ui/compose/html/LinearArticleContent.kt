@@ -200,8 +200,31 @@ private fun computeParagraphIndexRecursive(
         }
         is LinearBlockQuote -> {
             // Block quotes don't get their own translation at the container level
-            // The paragraph(s) within the blockquote will get translations
-            result[elementIndex] = null
+            // Store the STARTING index for blockquote content translations
+            result[elementIndex] = paragraphCounter.index
+
+            // Recursively count translatable content within blockquote to advance counter
+            // This matches extractTranslatableTextRecursively behavior
+            element.content.forEach { nested ->
+                when (nested) {
+                    is LinearText -> {
+                        if (nested.blockStyle == LinearTextBlockStyle.TEXT && nested.text.isNotBlank()) {
+                            paragraphCounter.increment()
+                        }
+                    }
+                    is LinearListItem -> {
+                        // Count translatable text in nested list items
+                        val hasTranslatableText = nested.content
+                            .filterIsInstance<LinearText>()
+                            .filter { it.blockStyle == LinearTextBlockStyle.TEXT }
+                            .any { it.text.isNotBlank() }
+                        if (hasTranslatableText) {
+                            paragraphCounter.increment()
+                        }
+                    }
+                    else -> {}
+                }
+            }
         }
         // Other element types don't get translations
         else -> {

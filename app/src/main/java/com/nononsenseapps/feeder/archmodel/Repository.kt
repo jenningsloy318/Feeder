@@ -369,6 +369,11 @@ class Repository(
 
     fun setSummaryEnabled(value: Boolean) = settingsStore.setSummaryEnabled(value)
 
+    // Summary Timeout Setting
+    val summaryTimeout = settingsStore.summaryTimeout
+
+    fun setSummaryTimeout(value: Int) = settingsStore.setSummaryTimeout(value)
+
     // Translation Language Setting
     val translationLanguage = settingsStore.translationLanguage
 

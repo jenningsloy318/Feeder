@@ -36,8 +36,11 @@ import java.nio.charset.StandardCharsets
  */
 fun markdownToAnnotatedString(markdown: String): AnnotatedString {
     try {
+        // Normalize line breaks: 3+ consecutive newlines -> 2 newlines (prevents extra spacing)
+        val normalizedMarkdown = markdown.replace(Regex("\n\n+")) { "\n\n" }
+
         // Step 1: Convert markdown to HTML
-        val html = parseMarkdownToHTML(markdown)
+        val html = parseMarkdownToHTML(normalizedMarkdown)
 
         // Step 2: Sanitize HTML to prevent XSS
         val cleanHtml = sanitizeHTML(html)
@@ -149,16 +152,16 @@ private fun parseMarkdownToHTML(markdown: String): String {
     html = html.replace(Regex("\n\n")) { "</p><p>" }
     html = "<p>$html</p>"
     html = html.replace(Regex("<p></p>")) { "" }
-    html = html.replace(Regex("<p>(<h[1-6]>)")) { "$1" }
-    html = html.replace(Regex("(</h[1-6]>)</p>")) { "$1" }
-    html = html.replace(Regex("<p>(<ul>)")) { "$1" }
-    html = html.replace(Regex("(</ul>)</p>")) { "$1" }
-    html = html.replace(Regex("<p>(<ol>)")) { "$1" }
-    html = html.replace(Regex("(</ol>)</p>")) { "$1" }
-    html = html.replace(Regex("<p>(<pre>)")) { "$1" }
-    html = html.replace(Regex("(</pre>)</p>")) { "$1" }
-    html = html.replace(Regex("<p>(<blockquote>)")) { "$1" }
-    html = html.replace(Regex("(</blockquote>)</p>")) { "$1" }
+    html = html.replace(Regex("<p>(<h[1-6]>)")) { it.groupValues[1] }
+    html = html.replace(Regex("(</h[1-6]>)</p>")) { it.groupValues[1] }
+    html = html.replace(Regex("<p>(<ul>)")) { it.groupValues[1] }
+    html = html.replace(Regex("(</ul>)</p>")) { it.groupValues[1] }
+    html = html.replace(Regex("<p>(<ol>)")) { it.groupValues[1] }
+    html = html.replace(Regex("(</ol>)</p>")) { it.groupValues[1] }
+    html = html.replace(Regex("<p>(<pre>)")) { it.groupValues[1] }
+    html = html.replace(Regex("(</pre>)</p>")) { it.groupValues[1] }
+    html = html.replace(Regex("<p>(<blockquote>)")) { it.groupValues[1] }
+    html = html.replace(Regex("(</blockquote>)</p>")) { it.groupValues[1] }
     html = html.replace(Regex("\n")) { "<br>" }
 
     return html

@@ -15,6 +15,7 @@ import org.kodein.di.instance
  * Manages the state for:
  * - Whether summaries are enabled
  * - The language for summaries
+ * - The timeout for summary generation
  */
 class SummarySettingsViewModel(
     di: DI,
@@ -22,6 +23,7 @@ class SummarySettingsViewModel(
     private val repository: Repository by instance()
     val summaryEnabled: StateFlow<Boolean> = repository.summaryEnabled
     val summaryLanguage: StateFlow<SummaryLanguage> = repository.summaryLanguage
+    val summaryTimeout: StateFlow<Int> = repository.summaryTimeout
 
     fun setSummaryEnabled(enabled: Boolean) {
         viewModelScope.launch {
@@ -32,6 +34,12 @@ class SummarySettingsViewModel(
     fun setSummaryLanguage(language: SummaryLanguage) {
         viewModelScope.launch {
             repository.setSummaryLanguage(language)
+        }
+    }
+
+    fun setSummaryTimeout(timeout: Int) {
+        viewModelScope.launch {
+            repository.setSummaryTimeout(timeout)
         }
     }
 }

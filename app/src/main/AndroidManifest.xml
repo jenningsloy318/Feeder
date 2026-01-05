@@ -163,6 +163,33 @@
       android:launchMode="singleInstance"
       android:taskAffinity="${applicationId}.OpenLinkTask" />
 
+    <!-- Text processing actions for Android 13+ contextual toolbar -->
+    <!-- Read Aloud action - appears in system text selection menu on Android 13+ -->
+    <activity
+      android:name=".ui.textaction.ReadAloudActivity"
+      android:exported="true"
+      android:label="@string/read_aloud_action"
+      android:theme="@style/AppThemeDialog">
+      <intent-filter>
+        <action android:name="android.intent.action.PROCESS_TEXT" />
+        <category android:name="android.intent.category.DEFAULT" />
+        <data android:mimeType="text/plain" />
+      </intent-filter>
+    </activity>
+
+    <!-- Translate action - appears in system text selection menu on Android 13+ -->
+    <activity
+      android:name=".ui.textaction.TranslateActivity"
+      android:exported="true"
+      android:label="@string/translate_action"
+      android:theme="@style/AppThemeDialog">
+      <intent-filter>
+        <action android:name="android.intent.action.PROCESS_TEXT" />
+        <category android:name="android.intent.category.DEFAULT" />
+        <data android:mimeType="text/plain" />
+      </intent-filter>
+    </activity>
+
     <!-- Service for background jobs -->
     <service
       android:name=".background.FeederJobService"

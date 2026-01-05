@@ -327,6 +327,11 @@
   <string name="selection_menu_translate">Translate</string>
   <string name="selection_menu_translate_description">Translate selected text</string>
 
+  <!-- ACTION_PROCESS_TEXT Actions (Android 13+) -->
+  <string name="read_aloud_action">Read Aloud</string>
+  <string name="translate_action">Translate</string>
+  <string name="translation_placeholder_message">Translation: %s…</string>
+
   <!-- System Menu Items -->
   <string name="selection_menu_copy_description">Copy selected text to clipboard</string>
   <string name="selection_menu_paste_description">Paste text from clipboard</string>

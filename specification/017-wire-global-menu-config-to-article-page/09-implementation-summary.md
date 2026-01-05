@@ -1,17 +1,44 @@
 # Implementation Summary: Wire Global Menu Config to Article Page
 
-**Document Version**: 1.0
+**Document Version**: 1.1
 **Date**: 2026-01-05
 **Spec Index**: 017
-**Status**: ✅ COMPLETE - Build Successful
+**Status**: ⚠️ IMPLEMENTED BUT NON-FUNCTIONAL ON ANDROID 13+
 
 ---
 
 ## Executive Summary
 
-Successfully implemented Specification 17: **Wire Global Menu Config to Article Page**. The implementation connects the Selection Menu Configuration (from specs 15-16) to the article page text selection menu, enabling users to customize their text selection experience.
+**Specification 17** ("Wire Global Menu Config to Article Page") was **successfully implemented** but **does not function on Android 13+** due to a fundamental behavioral change in Android's text selection system.
+
+### Critical Finding
+
+After extensive testing and research, we discovered that **Android 13 (API 33) introduced a new floating contextual toolbar system that completely bypasses custom `ActionMode.Callback` and `TextToolbar` implementations**. The `FeederTextToolbar` implementation is correct, but `onCreateActionMode()` is never called on Android 13+ because the system uses TextClassifier/Smart Actions instead.
+
+### Summary Table
+
+| Android Version | MenuConfig Works? | Implementation Status |
+|-----------------|-------------------|----------------------|
+| Android 12 and below (API 31-) | ✅ Yes | Fully functional |
+| Android 13+ (API 33+) | ❌ No | Implementation correct but bypassed by system |
+
+### Research Documentation
+
+See **[10-research-findings-android13-text-selection.md](./10-research-findings-android13-text-selection.md)** for comprehensive research on:
+- Android 13+ contextual toolbar API changes
+- Why Moon+ Reader still works (WebView approach)
+- Jetpack Compose SelectionContainer limitations
+- Available solutions and recommendations
+
+---
+
+## Implementation Status
 
 **Build Status**: ✅ **SUCCESSFUL** (compiled with 0 errors, only pre-existing warnings)
+
+**Functional Status**: ⚠️ **PARTIAL**
+- ✅ Works on Android 12 and below
+- ❌ Does not work on Android 13+ (system limitation)
 
 ---
 

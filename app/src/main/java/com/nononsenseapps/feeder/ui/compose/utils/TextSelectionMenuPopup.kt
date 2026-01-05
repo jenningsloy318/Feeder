@@ -37,7 +37,7 @@ import com.nononsenseapps.feeder.util.ActivityLauncher
  * Compose Popup-based text selection menu.
  *
  * Displays a horizontal toolbar with user-configured items when text is selected,
- * similar to the Android system floating toolbar.
+ * positioned below the selection with a small gap.
  *
  * @param menuState Mutable state holding toolbar state (null = menu hidden)
  * @param menuConfig Current menu configuration (order + visibility)
@@ -70,16 +70,14 @@ fun TextSelectionMenuPopup(
         (enabledItems.size * 80).dp.toPx()  // Approx 80dp per item
     }.toInt()
 
-    // Calculate toolbar position
-    // The goal: position popup ABOVE the selection
-    val gapAbove = with(LocalDensity.current) { 16.dp.toPx() }.toInt()
-    val popupHeight = with(LocalDensity.current) { 48.dp.toPx() }.toInt()
+    // Calculate toolbar position below selection
+    val gapBelow = with(LocalDensity.current) { 8.dp.toPx() }.toInt()
 
     Popup(
         alignment = androidx.compose.ui.Alignment.TopStart,
         offset = IntOffset(
             x = (state.rect.left + state.rect.right).toInt() / 2 - toolbarWidth / 2,
-            y = state.rect.top.toInt() + gapAbove + popupHeight  // Try + instead of -
+            y = state.rect.bottom.toInt() + gapBelow  // Position below selection
         ),
         onDismissRequest = {
             menuState.value = null
@@ -281,22 +279,18 @@ private fun extractSelectedText(
 }
 
 /**
- * Calculate menu position offset based on selection rectangle.
+ * Calculate horizontal center position for menu.
  *
- * Positions menu:
- * - Horizontally: centered on selection
- * - Vertically: above the first line of selection
+ * Positions menu horizontally centered on selection.
  *
  * @param rect The text selection rectangle
- * @return IntOffset for Popup positioning
+ * @return IntOffset with horizontal center position
  */
 @Composable
 private fun rememberMenuOffset(rect: androidx.compose.ui.geometry.Rect): IntOffset {
     // Center horizontally on selection
     val x = (rect.left + rect.right) / 2
-
-    // Position above the first line of selection
-    val y = rect.top.toInt()
+    val y = 0  // Not used - vertical positioning handled directly in Popup
 
     return IntOffset(x.toInt(), y)
 }

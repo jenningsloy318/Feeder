@@ -74,6 +74,7 @@ import com.nononsenseapps.feeder.ui.compose.icons.CustomFilled
 import com.nononsenseapps.feeder.ui.compose.icons.TextToSpeech
 import com.nononsenseapps.feeder.ui.compose.readaloud.HideableTTSPlayer
 import com.nononsenseapps.feeder.ui.compose.theme.SensibleTopAppBar
+import com.nononsenseapps.feeder.ui.compose.text.markdownToAnnotatedStringSafe
 import com.nononsenseapps.feeder.ui.compose.utils.ImmutableHolder
 import com.nononsenseapps.feeder.ui.compose.utils.ScreenType
 import com.nononsenseapps.feeder.ui.compose.utils.onKeyEventLikeEscape
@@ -621,12 +622,41 @@ private fun SummarySection(summary: AISummaryState) {
                     modifier = Modifier.padding(16.dp).fillMaxWidth(),
                 )
             is AISummaryState.Result ->
-                Text(
+                MarkdownText(
                     modifier = Modifier.padding(8.dp),
-                    text = summary.value.content,
+                    markdown = summary.value.content,
                 )
         }
     }
+}
+
+/**
+ * Displays markdown-formatted text.
+ *
+ * Converts markdown to AnnotatedString for proper rendering of:
+ * - Bold and italic text
+ * - Links
+ * - Lists
+ * - Headings
+ * - Code blocks
+ * - Blockquotes
+ *
+ * Falls back to plain text if markdown parsing fails.
+ */
+@Composable
+private fun MarkdownText(
+    markdown: String,
+    modifier: Modifier = Modifier,
+) {
+    val annotatedString = remember(markdown) {
+        markdownToAnnotatedStringSafe(markdown)
+    }
+
+    Text(
+        modifier = modifier,
+        text = annotatedString,
+        style = MaterialTheme.typography.bodyMedium,
+    )
 }
 
 /**

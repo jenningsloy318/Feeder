@@ -1,7 +1,9 @@
 package com.nononsenseapps.feeder.ui.compose.settings
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -15,6 +17,8 @@ import androidx.compose.foundation.layout.size as importSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -49,6 +53,7 @@ fun SummarySettingsScreen(
 ) {
     val summaryEnabled by viewModel.summaryEnabled.collectAsStateWithLifecycle()
     val summaryLanguage by viewModel.summaryLanguage.collectAsStateWithLifecycle()
+    val summaryTimeout by viewModel.summaryTimeout.collectAsStateWithLifecycle()
 
     var languageMenuExpanded by remember { mutableStateOf(false) }
 
@@ -100,6 +105,16 @@ fun SummarySettingsScreen(
                 onLanguageSelected = { viewModel.setSummaryLanguage(it) },
                 menuExpanded = languageMenuExpanded,
                 onMenuExpandedChange = { languageMenuExpanded = it },
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Timeout Setting
+            TimeoutSetting(
+                title = stringResource(R.string.summary_timeout_title),
+                description = stringResource(R.string.summary_timeout_description),
+                timeoutSeconds = summaryTimeout,
+                onTimeoutChange = { viewModel.setSummaryTimeout(it) },
             )
         }
     }
@@ -175,6 +190,93 @@ private fun LanguageSelectorSetting(
                     onMenuExpandedChange(false)
                 },
             )
+        }
+    }
+}
+
+@Composable
+private fun TimeoutSetting(
+    title: String,
+    description: String,
+    timeoutSeconds: Int,
+    onTimeoutChange: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val dimens = LocalDimens.current
+    var inputValue by remember(timeoutSeconds) { mutableStateOf(timeoutSeconds.toString()) }
+
+    Row(
+        modifier =
+            modifier
+                .width(dimens.maxContentWidth)
+                .heightIn(min = 64.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        // Empty 64dp box to align with other settings
+        Box(
+            modifier = Modifier.importSize(64.dp),
+            contentAlignment = Alignment.Center,
+        ) {}
+
+        TitleAndSubtitle(
+            title = {
+                Text(text = title)
+            },
+            subtitle = {
+                Text(
+                    text = description,
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            },
+        )
+
+        Spacer(modifier = Modifier.width(8.dp))
+
+        // Compact input stepper on the right
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.End,
+        ) {
+            // Minus button
+            IconButton(
+                onClick = {
+                    val newValue = (timeoutSeconds - 1).coerceAtLeast(30)
+                    inputValue = newValue.toString()
+                    onTimeoutChange(newValue)
+                },
+                enabled = timeoutSeconds > 30,
+                modifier = Modifier.importSize(32.dp),
+            ) {
+                Icon(
+                    Icons.Filled.Remove,
+                    contentDescription = null,
+                    modifier = Modifier.importSize(16.dp),
+                )
+            }
+
+            // Value display
+            Text(
+                text = inputValue,
+                modifier = Modifier.width(40.dp),
+                style = MaterialTheme.typography.bodyMedium,
+            )
+
+            // Plus button
+            IconButton(
+                onClick = {
+                    val newValue = (timeoutSeconds + 1).coerceAtMost(600)
+                    inputValue = newValue.toString()
+                    onTimeoutChange(newValue)
+                },
+                enabled = timeoutSeconds < 600,
+                modifier = Modifier.importSize(32.dp),
+            ) {
+                Icon(
+                    Icons.Filled.Add,
+                    contentDescription = null,
+                    modifier = Modifier.importSize(16.dp),
+                )
+            }
         }
     }
 }

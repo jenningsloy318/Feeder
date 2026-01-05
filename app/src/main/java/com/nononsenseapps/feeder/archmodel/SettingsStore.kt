@@ -761,6 +761,15 @@ class SettingsStore(
         sp.edit().putBoolean(PREF_SUMMARY_ENABLED, value).apply()
     }
 
+    // Summary timeout setting
+    private val _summaryTimeout = MutableStateFlow(sp.getInt(PREF_SUMMARY_TIMEOUT_SECONDS, 90))
+    val summaryTimeout = _summaryTimeout.asStateFlow()
+
+    fun setSummaryTimeout(value: Int) {
+        _summaryTimeout.value = value.coerceIn(30, 600)
+        sp.edit().putInt(PREF_SUMMARY_TIMEOUT_SECONDS, value).apply()
+    }
+
     // Translation language setting
     private val _translationLanguage = MutableStateFlow(
         TranslationLanguage.fromCode(sp.getString(PREF_TRANSLATION_LANGUAGE, null)),
@@ -945,6 +954,7 @@ const val PREF_SUMMARY_LANGUAGE = "pref_summary_language"
  * AI summary enabled setting
  */
 const val PREF_SUMMARY_ENABLED = "pref_summary_enabled"
+const val PREF_SUMMARY_TIMEOUT_SECONDS = "pref_summary_timeout_seconds"
 
 /**
  * AI translation language setting

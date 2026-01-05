@@ -47,6 +47,9 @@ interface AIClient {
             val completeTokens: Int,
             val totalTokens: Int,
             val detectedLanguage: String,
+            val title: String = "",
+            val keyPoints: List<String> = emptyList(),
+            val sentiment: String = "",
         ) : SummaryResult
 
         /**

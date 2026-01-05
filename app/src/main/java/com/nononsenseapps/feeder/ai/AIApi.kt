@@ -83,8 +83,24 @@ class AIApi(
                 return AIClient.SummaryResult.Error(content = "")
             }
 
+            // Get summary-specific timeout
+            val summaryTimeout = repository.summaryTimeout.first()
+
+            // Create client with summary-specific timeout
+            val settingsWithTimeout = when (val settings = aiSettings) {
+                is AISettings.OpenAI -> {
+                    val updatedSettings = settings.openaiSettings.copy(timeoutSeconds = summaryTimeout)
+                    AISettings.OpenAI(updatedSettings)
+                }
+                is AISettings.Anthropic -> {
+                    val updatedSettings = settings.anthropicSettings.copy(timeoutSeconds = summaryTimeout)
+                    AISettings.Anthropic(updatedSettings)
+                }
+            }
+
+            // Get language and generate summary with custom timeout
             val language = repository.summaryLanguage.first()
-            client.generateSummary(content, language)
+            AIClient.create(settingsWithTimeout).generateSummary(content, language)
         } catch (e: Exception) {
             AIClient.SummaryResult.Error(content = e.message ?: e.cause?.message ?: "")
         }

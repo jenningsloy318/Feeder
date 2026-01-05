@@ -123,12 +123,16 @@ private const val LOG_TAG = "FEEDER_LINEARCON"
  * Computes which element positions should display which paragraph translations.
  * Matches the logic in ArticleViewModel.extractTranslatableParagraphs().
  *
- * Each translatable element (LinearText with blockStyle=TEXT, or LinearListItem)
- * gets its own translation index.
+ * IMPORTANT: This must use the EXACT same logic as extractTranslatableTextRecursively()
+ * to ensure translation indices match up correctly.
  *
  * Returns a map where:
  * - Key: element index in the elements array
  * - Value: paragraph index to translate (null if this position shouldn't show translation)
+ *
+ * NOTE: For nested structures (LinearListItem, LinearBlockQuote), the translation is
+ * assigned to the parent element only. The nested content will be handled recursively
+ * by passing through the parent's translation to its children.
  */
 private fun computeParagraphIndices(
     elements: List<LinearElement>,
@@ -139,39 +143,71 @@ private fun computeParagraphIndices(
     }
 
     val result = mutableMapOf<Int, Int?>()
-    var paragraphIndex = 0
+    val paragraphCounter = ParagraphCounter()
 
     elements.forEachIndexed { index, element ->
-        when (element) {
-            is LinearText -> {
-                // Only translate regular text (not code blocks or pre-formatted text)
-                if (element.blockStyle == LinearTextBlockStyle.TEXT && element.text.isNotBlank()) {
-                    result[index] = paragraphIndex++
-                } else {
-                    result[index] = null
-                }
-            }
-            is LinearListItem -> {
-                // Check if list item has translatable text content
-                val hasText = element.content
-                    .filterIsInstance<LinearText>()
-                    .filter { it.blockStyle == LinearTextBlockStyle.TEXT }
-                    .any { it.text.isNotBlank() }
-
-                if (hasText) {
-                    result[index] = paragraphIndex++
-                } else {
-                    result[index] = null
-                }
-            }
-            // Other element types don't get translations
-            else -> {
-                result[index] = null
-            }
-        }
+        computeParagraphIndexRecursive(element, index, result, paragraphCounter)
     }
 
     return result
+}
+
+/**
+ * Helper class to track paragraph index during recursive traversal.
+ * Matches the behavior of accumulating translatable texts in extractTranslatableTextRecursively.
+ */
+private class ParagraphCounter {
+    var index = 0
+    fun increment() = index++
+}
+
+/**
+ * Recursively computes paragraph indices for an element and its nested content.
+ * This MUST match the logic in extractTranslatableTextRecursively().
+ */
+private fun computeParagraphIndexRecursive(
+    element: LinearElement,
+    elementIndex: Int,
+    result: MutableMap<Int, Int?>,
+    paragraphCounter: ParagraphCounter,
+) {
+    when (element) {
+        is LinearText -> {
+            // Only translate regular text (not code blocks or pre-formatted text)
+            if (element.blockStyle == LinearTextBlockStyle.TEXT && element.text.isNotBlank()) {
+                result[elementIndex] = paragraphCounter.increment()
+            } else {
+                result[elementIndex] = null
+            }
+        }
+        is LinearListItem -> {
+            // Check if list item has translatable text content at the top level
+            val hasTranslatableText = element.content
+                .filterIsInstance<LinearText>()
+                .filter { it.blockStyle == LinearTextBlockStyle.TEXT }
+                .any { it.text.isNotBlank() }
+
+            if (hasTranslatableText) {
+                // Assign a translation to this list item
+                result[elementIndex] = paragraphCounter.increment()
+            } else {
+                // This list item itself doesn't get a translation
+                result[elementIndex] = null
+            }
+
+            // Note: Nested list items within this content will have their own translations
+            // and are rendered as separate elements in the parent's content iteration
+        }
+        is LinearBlockQuote -> {
+            // Block quotes don't get their own translation at the container level
+            // The paragraph(s) within the blockquote will get translations
+            result[elementIndex] = null
+        }
+        // Other element types don't get translations
+        else -> {
+            result[elementIndex] = null
+        }
+    }
 }
 
 fun LazyListScope.linearArticleContent(
@@ -228,6 +264,8 @@ fun LazyListScope.linearArticleContent(
                         Modifier
                             .widthIn(max = minOf(maxWidth, LocalDimens.current.maxReaderWidth))
                             .fillMaxWidth(),
+                    translatedParagraphs = translatedParagraphs,
+                    parentTranslationIndex = paragraphIndexForPosition[index],
                 )
             }
         }
@@ -242,6 +280,8 @@ fun LinearElementContent(
     idToIndex: Map<String, Int>,
     onLinkClick: (url: String, index: Int?) -> Unit,
     modifier: Modifier = Modifier,
+    translatedParagraphs: List<String>? = null,
+    parentTranslationIndex: Int? = null,
 ) {
     when (linearElement) {
 //        is LinearList ->
@@ -260,6 +300,8 @@ fun LinearElementContent(
                 onLinkClick = onLinkClick,
                 modifier = modifier,
                 idToIndex = idToIndex,
+                translatedParagraphs = translatedParagraphs,
+                childTranslationStartIndex = (parentTranslationIndex ?: -1) + 1,
             )
 
         is LinearImage ->
@@ -496,6 +538,8 @@ fun LinearListItemContent(
     idToIndex: Map<String, Int>,
     onLinkClick: (url: String, index: Int?) -> Unit,
     modifier: Modifier = Modifier,
+    translatedParagraphs: List<String>? = null,
+    childTranslationStartIndex: Int = 0,
 ) {
     Row(
         verticalAlignment = Alignment.Top,
@@ -514,17 +558,82 @@ fun LinearListItemContent(
             verticalArrangement = Arrangement.spacedBy(8.dp),
             horizontalAlignment = Alignment.Start,
         ) {
+            // Compute translation indices for nested content
+            // This matches the logic in computeParagraphIndexRecursive for nested elements
+            val childTranslationIndices = if (translatedParagraphs != null) {
+                computeChildTranslationIndices(listItem.content, childTranslationStartIndex)
+            } else {
+                emptyMap()
+            }
+
+            var currentChildIndex = 0
             listItem.content.forEach { element ->
+                val childTranslation = when (element) {
+                    is LinearText -> {
+                        if (element.blockStyle == LinearTextBlockStyle.TEXT && element.text.isNotBlank()) {
+                            childTranslationIndices[currentChildIndex]?.let { idx ->
+                                translatedParagraphs?.getOrNull(idx)
+                            }
+                        } else {
+                            null
+                        }
+                    }
+                    is LinearListItem -> {
+                        childTranslationIndices[currentChildIndex]?.let { idx ->
+                            translatedParagraphs?.getOrNull(idx)
+                        }
+                    }
+                    else -> null
+                }
+                currentChildIndex++
+
                 LinearElementContent(
                     linearElement = element,
-                    translation = translation,
+                    translation = childTranslation,
                     allowHorizontalScroll = allowHorizontalScroll,
                     onLinkClick = onLinkClick,
                     idToIndex = idToIndex,
+                    translatedParagraphs = translatedParagraphs,
                 )
             }
         }
     }
+}
+
+/**
+ * Computes translation indices for nested content within a list item.
+ * Returns a map of child element index to translation paragraph index.
+ * Only includes indices for translatable elements (LinearText with TEXT blockStyle, LinearListItem).
+ */
+private fun computeChildTranslationIndices(
+    content: List<LinearElement>,
+    startIndex: Int,
+): Map<Int, Int?> {
+    val result = mutableMapOf<Int, Int?>()
+    var translationIndex = startIndex
+    var childIndex = 0
+
+    for (element in content) {
+        when (element) {
+            is LinearText -> {
+                if (element.blockStyle == LinearTextBlockStyle.TEXT && element.text.isNotBlank()) {
+                    result[childIndex] = translationIndex++
+                } else {
+                    result[childIndex] = null
+                }
+            }
+            is LinearListItem -> {
+                // Nested list items get their own translation
+                result[childIndex] = translationIndex++
+            }
+            else -> {
+                result[childIndex] = null
+            }
+        }
+        childIndex++
+    }
+
+    return result
 }
 
 @Composable

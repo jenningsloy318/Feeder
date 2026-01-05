@@ -9,8 +9,10 @@
     { "id": 6, "name": "Specification Writing", "status": "complete", "startedAt": "2026-01-05T19:00:00", "completedAt": "2026-01-05T19:15:00" },
     { "id": 8, "name": "Execution & QA", "status": "complete", "startedAt": "2026-01-05T19:30:00", "completedAt": "2026-01-05T19:35:00" },
     { "id": 9, "name": "Code Review", "status": "complete", "startedAt": "2026-01-05T19:35:00", "completedAt": "2026-01-05T19:40:00" },
-    { "id": 10, "name": "Documentation Update", "status": "pending", "startedAt": null, "completedAt": null },
-    { "id": 13, "name": "Final Verification", "status": "pending", "startedAt": null, "completedAt": null }
+    { "id": 10, "name": "Documentation Update", "status": "complete", "startedAt": "2026-01-05T19:40:00", "completedAt": "2026-01-05T19:40:00" },
+    { "id": 11, "name": "Cleanup", "status": "complete", "startedAt": "2026-01-05T19:42:00", "completedAt": "2026-01-05T19:42:00" },
+    { "id": 12, "name": "Commit & Push", "status": "complete", "startedAt": "2026-01-05T19:42:00", "completedAt": "2026-01-05T19:43:00" },
+    { "id": 13, "name": "Final Verification", "status": "complete", "startedAt": "2026-01-05T19:43:00", "completedAt": "2026-01-05T19:45:00" }
   ],
   "tasks": [
     { "id": "T1.1", "phase": 1, "description": "Create workflow tracking file", "status": "complete", "files": ["workflow-tracking-bugfix.json"], "updatedAt": "2026-01-05T18:52:54" },
@@ -26,16 +28,16 @@
     { "id": "T8.1", "phase": 8, "description": "Find current timeout values in AI provider clients", "status": "complete", "files": ["app/src/main/java/com/nononsenseapps/feeder/ai/model/AISettings.kt"], "updatedAt": "2026-01-05T19:35:00" },
     { "id": "T8.2", "phase": 8, "description": "Increase timeout for OpenAI client", "status": "complete", "files": ["app/src/main/java/com/nononsenseapps/feeder/ai/model/AISettings.kt", "app/src/main/java/com/nononsenseapps/feeder/archmodel/SettingsStore.kt", "app/src/main/java/com/nononsenseapps/feeder/model/opml/OPMLImporter.kt"], "updatedAt": "2026-01-05T19:35:00" },
     { "id": "T8.3", "phase": 8, "description": "Increase timeout for Anthropic client", "status": "complete", "files": ["app/src/main/java/com/nononsenseapps/feeder/ai/model/AISettings.kt", "app/src/main/java/com/nononsenseapps/feeder/archmodel/SettingsStore.kt", "app/src/main/java/com/nononsenseapps/feeder/model/opml/OPMLImporter.kt"], "updatedAt": "2026-01-05T19:35:00" },
-    { "id": "T8.4", "phase": 8, "description": "Test with real translation content", "status": "pending", "files": [], "updatedAt": null },
-    { "id": "T9.1", "phase": 9, "description": "Review timeout increase implementation", "status": "pending", "files": [], "updatedAt": null }
+    { "id": "T8.4", "phase": 8, "description": "Test with real translation content", "status": "complete", "files": [], "updatedAt": "2026-01-05T19:43:00" },
+    { "id": "T9.1", "phase": 9, "description": "Review timeout increase implementation", "status": "complete", "files": [], "updatedAt": "2026-01-05T19:40:00" }
   ],
   "iteration": {
     "loops": 0,
     "lastReviewVerdict": null
   },
   "status": {
-    "allPhasesComplete": false,
-    "allTasksComplete": false,
-    "workflowDone": false
+    "allPhasesComplete": true,
+    "allTasksComplete": true,
+    "workflowDone": true
   }
 }

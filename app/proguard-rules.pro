@@ -76,3 +76,16 @@
 -dontwarn org.openjsse.net.ssl.OpenJSSE
 -dontwarn org.slf4j.impl.StaticLoggerBinder
 
+# AI SDKs - Anthropic and OpenAI Java SDKs use reflection and serialization
+-keep class com.anthropic.** { *; }
+-keep interface com.anthropic.** { *; }
+-keep class com.openai.** { *; }
+-keep interface com.openai.** { *; }
+
+# Kotlin serialization for AI models
+-keepattributes *Annotation*
+-keep @kotlinx.serialization.Serializable class * {*;}
+-keepclassmembers class * {
+    @kotlinx.serialization.SerialName <fields>;
+}
+

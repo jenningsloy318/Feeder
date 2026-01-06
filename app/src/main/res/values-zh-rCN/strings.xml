@@ -284,14 +284,14 @@
     <string name="summarize_on_open">打开时总结</string>
     <string name="summarizing_progress">总结中...</string>
     <string name="feed_search_suggestions_header">建议</string>
-    <string name="openai_settings_info">兼容众多 AI 提供者，但非全部</string>
+    <string name="openai_settings_info">兼容众多 AI 供应商，但非全部</string>
 
     <!-- Auto Fetch Full Article -->
     <string name="setting_auto_fetch_full_article">自动获取完整文章</string>
     <string name="setting_auto_fetch_full_article_description">同步时自动获取完整文章</string>
 
     <!-- AI Provider -->
-    <string name="ai_provider">AI 提供者</string>
+    <string name="ai_provider">AI 供应商</string>
     <string name="ai_provider_openai_compatible">OpenAI 兼容</string>
     <string name="ai_provider_anthropic_compatible">Anthropic 兼容</string>
 
@@ -310,6 +310,8 @@
     <string name="summary_language_russian">俄语</string>
     <string name="summary_language_arabic">阿拉伯语</string>
     <string name="summary_language_hindi">印地语</string>
+    <string name="summary_timeout_title">摘要超时</string>
+    <string name="summary_timeout_description">AI 生成摘要的最大等待时间</string>
 
     <!-- Summary Settings -->
     <string name="summary_title">摘要</string>
@@ -324,7 +326,7 @@
     <string name="translation_enabled_title">启用自动翻译</string>
     <string name="translation_enabled_description">自动翻译外语文章</string>
     <string name="translation_target_language_title">目标语言</string>
-    <string name="translation_provider_title">AI 提供者</string>
+    <string name="translation_provider_title">AI 供应商</string>
     <string name="translation_language_device_default">设备默认</string>
     <string name="translation_language_english">英语</string>
     <string name="translation_language_chinese">中文</string>
@@ -343,23 +345,23 @@
     <string name="translation_timeout_seconds_label">秒</string>
 
     <!-- Provider Management -->
-    <string name="provider_list_title">AI 提供者</string>
-    <string name="add_provider">添加提供者</string>
+    <string name="provider_list_title">AI 供应商</string>
+    <string name="add_provider">添加供应商</string>
     <string name="edit">编辑</string>
     <string name="delete">删除</string>
-    <string name="edit_provider">编辑提供者</string>
-    <string name="delete_provider">删除提供者</string>
+    <string name="edit_provider">编辑供应商</string>
+    <string name="delete_provider">删除供应商</string>
     <string name="delete_provider_confirmation">确定要删除"%s"吗？</string>
-    <string name="no_providers_configured">未配置提供者</string>
-    <string name="provider_configured">已配置提供者</string>
-    <string name="add_provider_to_get_started">添加提供者以开始使用</string>
-    <string name="active_provider">活跃提供者</string>
-    <string name="provider_name">提供者名称</string>
-    <string name="provider_name_hint">输入提供者名称</string>
-    <string name="provider_name_required">提供者名称必填</string>
+    <string name="no_providers_configured">未配置供应商</string>
+    <string name="provider_configured">已配置供应商</string>
+    <string name="add_provider_to_get_started">添加供应商以开始使用</string>
+    <string name="active_provider">活跃供应商</string>
+    <string name="provider_name">供应商名称</string>
+    <string name="provider_name_hint">输入供应商名称</string>
+    <string name="provider_name_required">供应商名称必填</string>
     <string name="api_key_required">API 密钥必填</string>
-    <string name="provider_saved">已保存提供者</string>
-    <string name="save_provider">保存提供者</string>
+    <string name="provider_saved">已保存供应商</string>
+    <string name="save_provider">保存供应商</string>
     <string name="cancel">取消</string>
     <string name="set_as_default_provider">设为默认</string>
 

@@ -251,7 +251,7 @@
     <string name="read_adjective">已讀</string>
     <string name="summarize">概述</string>
     <string name="openai_settings">OpenAI 整合</string>
-    <string name="openai_settings_info">相容於多個 AI 提供者，但非全部</string>
+    <string name="openai_settings_info">相容於多個 AI 供應商，但非全部</string>
     <string name="touch_to_play_audio">點擊播放音訊</string>
     <string name="azure_deployment_id">Azure 部署 ID</string>
     <string name="azure_api_version">Azure API 版本</string>
@@ -268,7 +268,7 @@
     <string name="setting_auto_fetch_full_article_description">同步時自動擷取完整文章</string>
 
     <!-- AI Provider -->
-    <string name="ai_provider">AI 提供者</string>
+    <string name="ai_provider">AI 供應商</string>
     <string name="ai_provider_openai_compatible">OpenAI 相容</string>
     <string name="ai_provider_anthropic_compatible">Anthropic 相容</string>
 
@@ -287,6 +287,8 @@
     <string name="summary_language_russian">俄語</string>
     <string name="summary_language_arabic">阿拉伯語</string>
     <string name="summary_language_hindi">印地語</string>
+    <string name="summary_timeout_title">摘要逾時</string>
+    <string name="summary_timeout_description">AI 生成摘要的最大等候時間</string>
 
     <!-- Summary Settings -->
     <string name="summary_title">摘要</string>
@@ -296,23 +298,23 @@
     <string name="summary_enabled_description">為文章自動生成 AI 摘要</string>
 
     <!-- Provider Management -->
-    <string name="provider_list_title">AI 提供者</string>
-    <string name="add_provider">新增提供者</string>
+    <string name="provider_list_title">AI 供應商</string>
+    <string name="add_provider">新增供應商</string>
     <string name="edit">編輯</string>
     <string name="delete">刪除</string>
-    <string name="edit_provider">編輯提供者</string>
-    <string name="delete_provider">刪除提供者</string>
+    <string name="edit_provider">編輯供應商</string>
+    <string name="delete_provider">刪除供應商</string>
     <string name="delete_provider_confirmation">確定要刪除"%s"嗎？</string>
-    <string name="no_providers_configured">未設定提供者</string>
-    <string name="provider_configured">已設定提供者</string>
-    <string name="add_provider_to_get_started">新增提供者以開始使用</string>
-    <string name="active_provider">活躍提供者</string>
-    <string name="provider_name">提供者名稱</string>
-    <string name="provider_name_hint">輸入提供者名稱</string>
-    <string name="provider_name_required">提供者名稱必填</string>
+    <string name="no_providers_configured">未設定供應商</string>
+    <string name="provider_configured">已設定供應商</string>
+    <string name="add_provider_to_get_started">新增供應商以開始使用</string>
+    <string name="active_provider">活躍供應商</string>
+    <string name="provider_name">供應商名稱</string>
+    <string name="provider_name_hint">輸入供應商名稱</string>
+    <string name="provider_name_required">供應商名稱必填</string>
     <string name="api_key_required">API 金鑰必填</string>
-    <string name="provider_saved">已儲存提供者</string>
-    <string name="save_provider">儲存提供者</string>
+    <string name="provider_saved">已儲存供應商</string>
+    <string name="save_provider">儲存供應商</string>
     <string name="cancel">取消</string>
     <string name="set_as_default_provider">設為預設</string>
 </resources>

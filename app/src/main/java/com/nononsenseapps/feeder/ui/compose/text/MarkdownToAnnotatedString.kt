@@ -1,9 +1,15 @@
 package com.nononsenseapps.feeder.ui.compose.text
 
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
 import com.mikepenz.markdown.m3.Markdown
+import com.mikepenz.markdown.m3.markdownTypography
 
 /**
  * Markdown rendering composable using Mikepenz Multiplatform Markdown Renderer.
@@ -34,11 +40,43 @@ fun MarkdownContent(
     markdown: String,
     modifier: Modifier = Modifier,
 ) {
+    val baseTypography = MaterialTheme.typography
+
+    // Custom typography with smaller heading sizes for inline content
+    val markdownTypography =
+        markdownTypography(
+            h1 = baseTypography.titleLarge,
+            h2 = baseTypography.titleMedium,
+            h3 = baseTypography.titleSmall,
+            h4 = baseTextStyle(baseTypography, 16.sp, FontWeight.SemiBold),
+            h5 = baseTextStyle(baseTypography, 15.sp, FontWeight.Medium),
+            h6 = baseTextStyle(baseTypography, 14.sp, FontWeight.Medium),
+            paragraph = baseTypography.bodyMedium,
+            list = baseTypography.bodyMedium,
+            quote = baseTypography.bodyMedium,
+            code = baseTypography.bodyMedium,
+            inlineCode = baseTypography.bodyMedium,
+        )
+
     Markdown(
         content = markdown,
         modifier = modifier,
+        typography = markdownTypography,
     )
 }
+
+@Composable
+private fun baseTextStyle(
+    typography: Typography,
+    fontSize: androidx.compose.ui.unit.TextUnit,
+    fontWeight: FontWeight,
+): TextStyle =
+    typography.bodyMedium.merge(
+        TextStyle(
+            fontSize = fontSize,
+            fontWeight = fontWeight,
+        ),
+    )
 
 /**
  * Safe variant of MarkdownContent that falls back to plain text on error.

@@ -3,6 +3,7 @@ package com.nononsenseapps.feeder.ui.compose.feedarticle
 import android.content.Intent
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.MutableTransitionState
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -29,11 +30,9 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.OpenInBrowser
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.filled.Translate
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.outlined.ErrorOutline
-import androidx.compose.foundation.BorderStroke
-import com.nononsenseapps.feeder.ai.AIClient
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -65,6 +64,7 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nononsenseapps.feeder.R
+import com.nononsenseapps.feeder.ai.AIClient
 import com.nononsenseapps.feeder.archmodel.TextToDisplay
 import com.nononsenseapps.feeder.db.room.ID_UNSET
 import com.nononsenseapps.feeder.model.LocaleOverride
@@ -74,8 +74,8 @@ import com.nononsenseapps.feeder.ui.compose.html.linearArticleContent
 import com.nononsenseapps.feeder.ui.compose.icons.CustomFilled
 import com.nononsenseapps.feeder.ui.compose.icons.TextToSpeech
 import com.nononsenseapps.feeder.ui.compose.readaloud.HideableTTSPlayer
+import com.nononsenseapps.feeder.ui.compose.text.MarkdownContentSafe
 import com.nononsenseapps.feeder.ui.compose.theme.SensibleTopAppBar
-import com.nononsenseapps.feeder.ui.compose.text.markdownToAnnotatedStringSafe
 import com.nononsenseapps.feeder.ui.compose.utils.ImmutableHolder
 import com.nononsenseapps.feeder.ui.compose.utils.ScreenType
 import com.nononsenseapps.feeder.ui.compose.utils.onKeyEventLikeEscape
@@ -291,11 +291,12 @@ private fun ArticleScreenInternal(
                             ) {
                                 Icon(
                                     Icons.Default.Translate,
-                                    contentDescription = if (isLoading) {
-                                        "Translating article, please wait"
-                                    } else {
-                                        stringResource(R.string.translate_article_content_description)
-                                    },
+                                    contentDescription =
+                                        if (isLoading) {
+                                            "Translating article, please wait"
+                                        } else {
+                                            stringResource(R.string.translate_article_content_description)
+                                        },
                                 )
                             }
                         }
@@ -621,12 +622,12 @@ private fun SummarySection(summary: AISummaryState) {
             AISummaryState.Loading ->
                 Column(
                     modifier = Modifier.padding(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Text(
                         text = stringResource(R.string.summarizing_progress),
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     LinearProgressIndicator(
@@ -645,13 +646,16 @@ private fun SummarySection(summary: AISummaryState) {
 /**
  * Displays markdown-formatted text.
  *
- * Converts markdown to AnnotatedString for proper rendering of:
+ * Renders markdown with comprehensive support including:
  * - Bold and italic text
  * - Links
- * - Lists
+ * - Lists (including nested)
  * - Headings
  * - Code blocks
  * - Blockquotes
+ * - Tables
+ * - Task lists
+ * - Strikethrough
  *
  * Falls back to plain text if markdown parsing fails.
  */
@@ -660,14 +664,9 @@ private fun MarkdownText(
     markdown: String,
     modifier: Modifier = Modifier,
 ) {
-    val annotatedString = remember(markdown) {
-        markdownToAnnotatedStringSafe(markdown)
-    }
-
-    Text(
+    MarkdownContentSafe(
+        markdown = markdown,
         modifier = modifier,
-        text = annotatedString,
-        style = MaterialTheme.typography.bodyMedium,
     )
 }
 
@@ -690,12 +689,12 @@ private fun TranslationStatusSection(translation: TranslationState) {
             ) {
                 Column(
                     modifier = Modifier.padding(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Text(
                         text = stringResource(R.string.translating_progress),
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     LinearProgressIndicator(
@@ -724,10 +723,11 @@ private fun TranslationStatusSection(translation: TranslationState) {
 private fun TranslationErrorSection(errorMessage: String) {
     OutlinedCard(
         modifier = Modifier.fillMaxWidth(),
-        border = BorderStroke(
-            1.dp,
-            MaterialTheme.colorScheme.error,
-        ),
+        border =
+            BorderStroke(
+                1.dp,
+                MaterialTheme.colorScheme.error,
+            ),
     ) {
         Row(
             modifier = Modifier.padding(16.dp),

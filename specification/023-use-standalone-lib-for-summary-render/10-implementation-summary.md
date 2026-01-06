@@ -6,7 +6,9 @@
 
 ## Overview
 
-Successfully migrated from manual regex-based markdown parsing to the Mikepenz Multiplatform Markdown Renderer library (version 0.39.0).
+Successfully migrated from manual regex-based markdown parsing to the Mikepenz Multiplatform Markdown Renderer library (version 0.38.1).
+
+**IMPORTANT BUG FIX**: Downgraded from version 0.39.0 to 0.38.1 to fix Compose version compatibility crash.
 
 ## Changes Made
 
@@ -15,7 +17,8 @@ Successfully migrated from manual regex-based markdown parsing to the Mikepenz M
 #### Task 1.1: Updated Version Catalog
 - **File**: `gradle/libs.versions.toml`
 - **Changes**:
-  - Added `mikepenz-markdown = "0.39.0"` to versions
+  - Added `mikepenz-markdown = "0.39.0"` initially
+  - **BUG FIX**: Downgraded to `mikepenz-markdown = "0.38.1"` for Compose 1.9.4 compatibility
   - Added 3 library definitions: mikepenz-markdown, mikepenz-markdown-m3, mikepenz-markdown-coil3
 
 #### Task 1.2: Updated Build Configuration
@@ -194,3 +197,54 @@ The migration is **COMPLETE**. All implementation phases have been successfully 
 **Confidence Level**: ✅ High
 **Risk Level**: ✅ Low
 **Status**: ✅ Ready for commit and push
+
+## Bug Fix: Compose Version Compatibility
+
+### Issue Discovered
+**Date**: January 6, 2026
+**Error**: `java.lang.NoSuchMethodError: No static method init-impl(Landroidx/compose/runtime/Composer;Ljava/lang/Object;Lkotlin/jvm/functions/Function2;)V in class Landroidx/compose/runtime/Updater;`
+
+### Root Cause
+- **Initial Version**: mikepenz-markdown 0.39.0
+- **Project Compose Version**: 1.9.4 (from BOM 2025.10.01)
+- **Issue**: Version 0.39.0 has known compatibility issues with Compose 1.9.3/1.9.4
+- **Reference**: GitHub Issue #491 - "Crash with compose 1.9.3 and below while using v0.39.0"
+
+### Fix Applied
+- **Downgraded To**: mikepenz-markdown 0.38.1
+- **Rationale**: Version 0.38.1 is stable and compatible with Compose 1.9.4
+- **Verification**: Build successful (`BUILD SUCCESSFUL in 1m 32s`)
+
+### Technical Details
+**Compatibility Matrix**:
+| Component | Version | Status |
+|-----------|---------|--------|
+| Kotlin | 2.2.20 | ✅ Compatible |
+| Compose BOM | 2025.10.01 | ✅ Compatible |
+| Compose Runtime | 1.9.4 | ✅ Compatible |
+| mikepenz-markdown | 0.38.1 | ✅ Compatible |
+
+**Files Changed**:
+- `gradle/libs.versions.toml`: Downgraded version with inline comment explaining the fix
+
+**Testing**:
+- ✅ Clean build successful
+- ✅ Debug APK assembled successfully
+- ✅ No compilation errors
+- ✅ No new warnings introduced
+
+### Documentation
+- Created `03-debug-analysis.md` with comprehensive root cause analysis
+- Created `12-code-review-fix.md` with fix verification
+- Updated implementation summary with bug fix details
+
+### Future Considerations
+- Monitor for version 0.40.x release with confirmed Compose 1.9.4+ support
+- Consider upgrading when stable version with proper compatibility is available
+- Reference: [mikepenz/multiplatform-markdown-renderer Releases](https://github.com/mikepenz/multiplatform-markdown-renderer/releases)
+
+### Sources
+- [mikepenz/multiplatform-markdown-renderer GitHub](https://github.com/mikepenz/multiplatform-markdown-renderer)
+- [Maven Central: multiplatform-markdown-renderer](https://central.sonatype.com/artifact/com.mikepenz/multiplatform-markdown-renderer)
+- [Compose BOM Mapping](https://developer.android.com/develop/ui/compose/bom/bom-mapping)
+- [jetc.dev Newsletter #287](https://jetc.dev/issues/287)

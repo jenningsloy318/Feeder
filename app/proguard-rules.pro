@@ -89,3 +89,7 @@
     @kotlinx.serialization.SerialName <fields>;
 }
 
+# Missing classes from JSON schema generator (R8 generated rules)
+-dontwarn java.lang.reflect.AnnotatedParameterizedType
+-dontwarn java.lang.reflect.AnnotatedType
+

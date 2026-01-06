@@ -18,7 +18,6 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalTextToolbar
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.TextToolbar
 import androidx.compose.ui.platform.TextToolbarStatus
 import com.nononsenseapps.feeder.util.ActivityLauncher
@@ -37,13 +36,14 @@ fun WithFeederTextToolbar(
     val menuConfigStore: MenuConfigStore by LocalDI.current.instance()
 
     CompositionLocalProvider(
-        LocalTextToolbar provides CustomFeederTextToolbar(
-            context = LocalContext.current,
-            menuConfigStore = menuConfigStore,
-            activityLauncher = activityLauncher,
-            onReadAloud = onReadAloud,
-            onTranslate = onTranslate,
-        ),
+        LocalTextToolbar provides
+            CustomFeederTextToolbar(
+                context = LocalContext.current,
+                menuConfigStore = menuConfigStore,
+                activityLauncher = activityLauncher,
+                onReadAloud = onReadAloud,
+                onTranslate = onTranslate,
+            ),
     ) {
         content()
     }

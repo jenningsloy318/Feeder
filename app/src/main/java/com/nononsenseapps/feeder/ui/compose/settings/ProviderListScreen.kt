@@ -22,7 +22,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
@@ -36,7 +35,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -157,12 +155,13 @@ fun ProviderList(
 ) {
     LazyColumn(
         modifier = modifier,
-        contentPadding = LocalDimens.current.let { dimens ->
-            androidx.compose.foundation.layout.PaddingValues(
-                horizontal = dimens.margin,
-                vertical = 8.dp,
-            )
-        },
+        contentPadding =
+            LocalDimens.current.let { dimens ->
+                androidx.compose.foundation.layout.PaddingValues(
+                    horizontal = dimens.margin,
+                    vertical = 8.dp,
+                )
+            },
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         items(
@@ -187,25 +186,27 @@ fun ProviderListItem(
     onDelete: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val dismissState = rememberSwipeToDismissBoxState(
-        confirmValueChange = { dismissValue ->
-            if (dismissValue == SwipeToDismissBoxValue.EndToStart) {
-                onDelete()
-                true
-            } else {
-                false
-            }
-        },
-    )
+    val dismissState =
+        rememberSwipeToDismissBoxState(
+            confirmValueChange = { dismissValue ->
+                if (dismissValue == SwipeToDismissBoxValue.EndToStart) {
+                    onDelete()
+                    true
+                } else {
+                    false
+                }
+            },
+        )
 
     SwipeToDismissBox(
         state = dismissState,
         backgroundContent = {
-            val color = when (dismissState.dismissDirection) {
-                SwipeToDismissBoxValue.StartToEnd -> Color.Transparent
-                SwipeToDismissBoxValue.EndToStart -> MaterialTheme.colorScheme.error
-                SwipeToDismissBoxValue.Settled -> Color.Transparent
-            }
+            val color =
+                when (dismissState.dismissDirection) {
+                    SwipeToDismissBoxValue.StartToEnd -> Color.Transparent
+                    SwipeToDismissBoxValue.EndToStart -> MaterialTheme.colorScheme.error
+                    SwipeToDismissBoxValue.Settled -> Color.Transparent
+                }
 
             Box(
                 modifier =
@@ -262,7 +263,11 @@ fun ProviderItemContent(
             contentAlignment = Alignment.Center,
         ) {
             Text(
-                text = provider.name.firstOrNull()?.uppercase()?.toString() ?: "?",
+                text =
+                    provider.name
+                        .firstOrNull()
+                        ?.uppercase()
+                        ?.toString() ?: "?",
                 style =
                     MaterialTheme.typography.titleLarge.copy(
                         color = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -327,9 +332,7 @@ fun ProviderItemContent(
 }
 
 @Composable
-fun EmptyProvidersState(
-    modifier: Modifier = Modifier,
-) {
+fun EmptyProvidersState(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier.padding(32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,

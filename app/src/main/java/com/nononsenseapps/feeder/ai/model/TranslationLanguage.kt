@@ -133,7 +133,6 @@ enum class TranslationLanguage(
         /**
          * Parse language code to TranslationLanguage, defaulting to DEVICE_DEFAULT.
          */
-        fun fromCode(code: String?): TranslationLanguage =
-            entries.firstOrNull { it.code == code } ?: DEVICE_DEFAULT
+        fun fromCode(code: String?): TranslationLanguage = entries.firstOrNull { it.code == code } ?: DEVICE_DEFAULT
     }
 }

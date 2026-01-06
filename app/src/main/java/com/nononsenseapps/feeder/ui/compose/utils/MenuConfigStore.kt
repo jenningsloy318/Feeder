@@ -42,21 +42,17 @@ class MenuConfigStoreImpl(
     // Cache config in memory for fast access
     private var cachedConfig: MenuConfig = _configFlow.value
 
-    override fun getConfig(): MenuConfig {
-        return cachedConfig
-    }
+    override fun getConfig(): MenuConfig = cachedConfig
 
-    override fun getConfigFlow(): StateFlow<MenuConfig> {
-        return _configFlow.asStateFlow()
-    }
+    override fun getConfigFlow(): StateFlow<MenuConfig> = _configFlow.asStateFlow()
 
     /**
      * Load menu configuration from SharedPreferences.
      *
      * @return Loaded MenuConfig or Default if loading fails
      */
-    private fun loadConfig(): MenuConfig {
-        return try {
+    private fun loadConfig(): MenuConfig =
+        try {
             val jsonString = sharedPreferences.getString(PREF_MENU_CONFIG, null)
             if (jsonString != null) {
                 MenuConfig.fromJson(jsonString)
@@ -67,7 +63,6 @@ class MenuConfigStoreImpl(
             // Return default config on any error
             MenuConfig.Default
         }
-    }
 
     companion object {
         private const val PREF_MENU_CONFIG = "menu_config"

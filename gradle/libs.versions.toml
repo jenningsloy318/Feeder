@@ -48,6 +48,7 @@ androidWindow = "1.5.0"
 lazycolumnscrollbar = "2.2.0"
 androidxBrowser = "1.9.0"
 jetbrains-markdown = "0.7.3"
+mikepenz-markdown = "0.38.1"  # Downgraded from 0.39.0 for Compose 1.9.4 compatibility (fixes NoSuchMethodError crash)
 junit = "4.13.2"
 espresso = "3.7.0"
 mockk = "1.14.6"
@@ -124,6 +125,9 @@ qrgen = { module = "com.github.kenglxn.qrgen:android", version.ref = "qrgen" }
 lazycolumnscrollbar = { module = "com.github.nanihadesuka:LazyColumnScrollbar", version.ref = "lazycolumnscrollbar" }
 emoji2-view-helper = { module = "androidx.emoji2:emoji2-views-helper", version.ref = "emoji2" }
 emoji2 = { module = "androidx.emoji2:emoji2", version.ref = "emoji2" }
+mikepenz-markdown = { module = "com.mikepenz:multiplatform-markdown-renderer", version.ref = "mikepenz-markdown" }
+mikepenz-markdown-m3 = { module = "com.mikepenz:multiplatform-markdown-renderer-m3", version.ref = "mikepenz-markdown" }
+mikepenz-markdown-coil3 = { module = "com.mikepenz:multiplatform-markdown-renderer-coil3", version.ref = "mikepenz-markdown" }
 junit = { module = "junit:junit", version.ref = "junit" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 mockwebserver = { module = "com.squareup.okhttp3:mockwebserver", version.ref = "okhttp" }

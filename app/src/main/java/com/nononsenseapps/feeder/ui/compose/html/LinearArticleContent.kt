@@ -158,6 +158,7 @@ private fun computeParagraphIndices(
  */
 private class ParagraphCounter {
     var index = 0
+
     fun increment() = index++
 }
 
@@ -182,10 +183,11 @@ private fun computeParagraphIndexRecursive(
         }
         is LinearListItem -> {
             // Check if list item has translatable text content at the top level
-            val hasTranslatableText = element.content
-                .filterIsInstance<LinearText>()
-                .filter { it.blockStyle == LinearTextBlockStyle.TEXT }
-                .any { it.text.isNotBlank() }
+            val hasTranslatableText =
+                element.content
+                    .filterIsInstance<LinearText>()
+                    .filter { it.blockStyle == LinearTextBlockStyle.TEXT }
+                    .any { it.text.isNotBlank() }
 
             if (hasTranslatableText) {
                 // Assign a translation to this list item
@@ -214,10 +216,11 @@ private fun computeParagraphIndexRecursive(
                     }
                     is LinearListItem -> {
                         // Count translatable text in nested list items
-                        val hasTranslatableText = nested.content
-                            .filterIsInstance<LinearText>()
-                            .filter { it.blockStyle == LinearTextBlockStyle.TEXT }
-                            .any { it.text.isNotBlank() }
+                        val hasTranslatableText =
+                            nested.content
+                                .filterIsInstance<LinearText>()
+                                .filter { it.blockStyle == LinearTextBlockStyle.TEXT }
+                                .any { it.text.isNotBlank() }
                         if (hasTranslatableText) {
                             paragraphCounter.increment()
                         }
@@ -250,13 +253,17 @@ fun LazyListScope.linearArticleContent(
             val element = articleContent.elements[index]
             when (element) {
                 is LinearText -> "text_${index}_${element.text.take(20)}"
-                is LinearImage -> "image_${index}_${element.sources.firstOrNull()?.imgUri?.hashCode() ?: index}"
+                is LinearImage ->
+                    "image_${index}_${element.sources
+                        .firstOrNull()
+                        ?.imgUri
+                        ?.hashCode() ?: index}"
                 is LinearVideo -> "video_${index}_${element.firstSource.link.hashCode()}"
                 is LinearAudio -> "audio_${index}_${element.firstSource.uri.hashCode()}"
                 is LinearTable -> "table_${index}_${element.rowCount}x${element.colCount}"
                 is LinearBlockQuote -> "blockquote_${index}_${element.cite?.hashCode() ?: index}"
-                is LinearListItem -> "listitem_${index}_${element.orderedIndex ?: "bullet"}_${index}"
-                else -> "element_${index}"
+                is LinearListItem -> "listitem_${index}_${element.orderedIndex ?: "bullet"}_$index"
+                else -> "element_$index"
             }
         },
         contentType = { index -> articleContent.elements[index].lazyListContentType },
@@ -264,9 +271,10 @@ fun LazyListScope.linearArticleContent(
         val element = articleContent.elements[index]
 
         // Get translation for this element position (only at paragraph endings)
-        val translation = paragraphIndexForPosition[index]?.let { paragraphIndex ->
-            translatedParagraphs?.getOrNull(paragraphIndex)
-        }
+        val translation =
+            paragraphIndexForPosition[index]?.let { paragraphIndex ->
+                translatedParagraphs?.getOrNull(paragraphIndex)
+            }
 
         ProvideTextStyle(
             MaterialTheme.typography.bodyLarge.merge(
@@ -585,31 +593,33 @@ fun LinearListItemContent(
         ) {
             // Compute translation indices for nested content
             // This matches the logic in computeParagraphIndexRecursive for nested elements
-            val childTranslationIndices = if (translatedParagraphs != null) {
-                computeChildTranslationIndices(listItem.content, childTranslationStartIndex)
-            } else {
-                emptyMap()
-            }
+            val childTranslationIndices =
+                if (translatedParagraphs != null) {
+                    computeChildTranslationIndices(listItem.content, childTranslationStartIndex)
+                } else {
+                    emptyMap()
+                }
 
             var currentChildIndex = 0
             listItem.content.forEach { element ->
-                val childTranslation = when (element) {
-                    is LinearText -> {
-                        if (element.blockStyle == LinearTextBlockStyle.TEXT && element.text.isNotBlank()) {
+                val childTranslation =
+                    when (element) {
+                        is LinearText -> {
+                            if (element.blockStyle == LinearTextBlockStyle.TEXT && element.text.isNotBlank()) {
+                                childTranslationIndices[currentChildIndex]?.let { idx ->
+                                    translatedParagraphs?.getOrNull(idx)
+                                }
+                            } else {
+                                null
+                            }
+                        }
+                        is LinearListItem -> {
                             childTranslationIndices[currentChildIndex]?.let { idx ->
                                 translatedParagraphs?.getOrNull(idx)
                             }
-                        } else {
-                            null
                         }
+                        else -> null
                     }
-                    is LinearListItem -> {
-                        childTranslationIndices[currentChildIndex]?.let { idx ->
-                            translatedParagraphs?.getOrNull(idx)
-                        }
-                    }
-                    else -> null
-                }
                 currentChildIndex++
 
                 LinearElementContent(
@@ -903,23 +913,25 @@ fun LinearBlockQuoteContent(
         ) {
             // Compute translation indices for blockquote content
             // This matches the logic in extractTranslatableTextRecursively
-            val contentTranslationIndices = if (translatedParagraphs != null) {
-                computeBlockQuoteContentTranslationIndices(blockQuote.content, blockQuoteTranslationStartIndex)
-            } else {
-                emptyMap()
-            }
+            val contentTranslationIndices =
+                if (translatedParagraphs != null) {
+                    computeBlockQuoteContentTranslationIndices(blockQuote.content, blockQuoteTranslationStartIndex)
+                } else {
+                    emptyMap()
+                }
 
             var currentContentIndex = 0
             blockQuote.content.forEach { element ->
                 when (element) {
                     is LinearText -> {
-                        val contentTranslation = if (element.blockStyle == LinearTextBlockStyle.TEXT && element.text.isNotBlank()) {
-                            contentTranslationIndices[currentContentIndex]?.let { idx ->
-                                translatedParagraphs?.getOrNull(idx)
+                        val contentTranslation =
+                            if (element.blockStyle == LinearTextBlockStyle.TEXT && element.text.isNotBlank()) {
+                                contentTranslationIndices[currentContentIndex]?.let { idx ->
+                                    translatedParagraphs?.getOrNull(idx)
+                                }
+                            } else {
+                                null
                             }
-                        } else {
-                            null
-                        }
                         currentContentIndex++
 
                         ProvideTextStyle(
@@ -938,9 +950,10 @@ fun LinearBlockQuoteContent(
                         }
                     }
                     is LinearListItem -> {
-                        val contentTranslation = contentTranslationIndices[currentContentIndex]?.let { idx ->
-                            translatedParagraphs?.getOrNull(idx)
-                        }
+                        val contentTranslation =
+                            contentTranslationIndices[currentContentIndex]?.let { idx ->
+                                translatedParagraphs?.getOrNull(idx)
+                            }
                         currentContentIndex++
 
                         // Render nested list items with their translations

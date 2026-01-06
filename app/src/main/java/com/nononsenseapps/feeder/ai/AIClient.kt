@@ -2,7 +2,6 @@ package com.nononsenseapps.feeder.ai
 
 import com.nononsenseapps.feeder.ai.model.AISettings
 import com.nononsenseapps.feeder.ai.model.SummaryLanguage
-import com.nononsenseapps.feeder.ai.provider.AIProvider
 import com.nononsenseapps.feeder.ai.provider.AnthropicClient
 import com.nononsenseapps.feeder.ai.provider.OpenAICompatibleClient
 
@@ -143,11 +142,10 @@ interface AIClient {
         /**
          * Factory method to create the appropriate client based on settings.
          */
-        fun create(settings: AISettings): AIClient {
-            return when (settings) {
+        fun create(settings: AISettings): AIClient =
+            when (settings) {
                 is AISettings.OpenAI -> OpenAICompatibleClient(settings.openaiSettings)
                 is AISettings.Anthropic -> AnthropicClient(settings.anthropicSettings)
             }
-        }
     }
 }

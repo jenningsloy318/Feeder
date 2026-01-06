@@ -9,12 +9,10 @@ import androidx.annotation.StringRes
 import com.nononsenseapps.feeder.R
 import com.nononsenseapps.feeder.ai.model.AISettings
 import com.nononsenseapps.feeder.ai.model.AnthropicSettings
-import com.nononsenseapps.feeder.ai.model.OpenAISettings as ModelOpenAISettings
 import com.nononsenseapps.feeder.ai.model.ProviderConfig
 import com.nononsenseapps.feeder.ai.model.SummaryLanguage
 import com.nononsenseapps.feeder.ai.model.TranslationLanguage
 import com.nononsenseapps.feeder.ai.provider.AIProvider
-import kotlinx.serialization.json.Json
 import com.nononsenseapps.feeder.background.schedulePeriodicRssSync
 import com.nononsenseapps.feeder.db.room.BlocklistDao
 import com.nononsenseapps.feeder.db.room.ID_UNSET
@@ -30,18 +28,19 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.update
+import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
 import java.time.Instant
+import com.nononsenseapps.feeder.ai.model.OpenAISettings as ModelOpenAISettings
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class SettingsStore(
@@ -253,9 +252,10 @@ class SettingsStore(
         schedulePeriodicRssSync(di = di, replace = true)
     }
 
-    private val _autoFetchFullArticle = MutableStateFlow(
-        sp.getBoolean(PREF_AUTO_FETCH_FULL_ARTICLE, false)
-    )
+    private val _autoFetchFullArticle =
+        MutableStateFlow(
+            sp.getBoolean(PREF_AUTO_FETCH_FULL_ARTICLE, false),
+        )
     val autoFetchFullArticle = _autoFetchFullArticle.asStateFlow()
 
     fun setAutoFetchFullArticle(value: Boolean) {
@@ -539,10 +539,11 @@ class SettingsStore(
     }
 
     // Multi-provider support
-    private val json = Json {
-        ignoreUnknownKeys = true
-        encodeDefaults = true
-    }
+    private val json =
+        Json {
+            ignoreUnknownKeys = true
+            encodeDefaults = true
+        }
 
     private val _providers = MutableStateFlow(emptyList<ProviderConfig>())
     val providers: StateFlow<List<ProviderConfig>> = _providers.asStateFlow()
@@ -580,14 +581,15 @@ class SettingsStore(
                     id = "migrated_openai_${System.currentTimeMillis()}",
                     name = "OpenAI Provider (Migrated)",
                     providerType = AIProvider.OPENAI_COMPATIBLE,
-                    openAISettings = ModelOpenAISettings(
-                        key = oldOpenAIKey,
-                        modelId = sp.getString(PREF_OPENAI_MODEL_ID, ModelOpenAISettings.DEFAULT_MODEL) ?: ModelOpenAISettings.DEFAULT_MODEL,
-                        baseUrl = sp.getStringNonNull(PREF_OPENAI_URL, ""),
-                        timeoutSeconds = sp.getInt(PREF_OPENAI_REQUEST_TIMEOUT_SECONDS, 90),
-                        azureApiVersion = sp.getStringNonNull(PREF_OPENAI_AZURE_VERSION, ""),
-                        azureDeploymentId = sp.getStringNonNull(PREF_OPENAI_AZURE_DEPLOYMENT_ID, ""),
-                    ),
+                    openAISettings =
+                        ModelOpenAISettings(
+                            key = oldOpenAIKey,
+                            modelId = sp.getString(PREF_OPENAI_MODEL_ID, ModelOpenAISettings.DEFAULT_MODEL) ?: ModelOpenAISettings.DEFAULT_MODEL,
+                            baseUrl = sp.getStringNonNull(PREF_OPENAI_URL, ""),
+                            timeoutSeconds = sp.getInt(PREF_OPENAI_REQUEST_TIMEOUT_SECONDS, 90),
+                            azureApiVersion = sp.getStringNonNull(PREF_OPENAI_AZURE_VERSION, ""),
+                            azureDeploymentId = sp.getStringNonNull(PREF_OPENAI_AZURE_DEPLOYMENT_ID, ""),
+                        ),
                     isActive = activeProviderType == AIProvider.OPENAI_COMPATIBLE,
                     createdAt = System.currentTimeMillis(),
                     updatedAt = System.currentTimeMillis(),
@@ -603,12 +605,13 @@ class SettingsStore(
                     id = "migrated_anthropic_${System.currentTimeMillis()}",
                     name = "Anthropic Provider (Migrated)",
                     providerType = AIProvider.ANTHROPIC,
-                    anthropicSettings = AnthropicSettings(
-                        key = oldAnthropicKey,
-                        modelId = sp.getString(PREF_ANTHROPIC_MODEL_ID, AnthropicSettings.DEFAULT_MODEL) ?: AnthropicSettings.DEFAULT_MODEL,
-                        baseUrl = sp.getStringNonNull(PREF_ANTHROPIC_URL, ""),
-                        timeoutSeconds = sp.getInt(PREF_ANTHROPIC_REQUEST_TIMEOUT_SECONDS, 90),
-                    ),
+                    anthropicSettings =
+                        AnthropicSettings(
+                            key = oldAnthropicKey,
+                            modelId = sp.getString(PREF_ANTHROPIC_MODEL_ID, AnthropicSettings.DEFAULT_MODEL) ?: AnthropicSettings.DEFAULT_MODEL,
+                            baseUrl = sp.getStringNonNull(PREF_ANTHROPIC_URL, ""),
+                            timeoutSeconds = sp.getInt(PREF_ANTHROPIC_REQUEST_TIMEOUT_SECONDS, 90),
+                        ),
                     isActive = activeProviderType == AIProvider.ANTHROPIC,
                     createdAt = System.currentTimeMillis(),
                     updatedAt = System.currentTimeMillis(),
@@ -617,13 +620,14 @@ class SettingsStore(
         }
 
         // Ensure exactly one provider is active
-        val finalProviders = if (providers.none { it.isActive } && providers.isNotEmpty()) {
-            providers.mapIndexed { index, provider ->
-                provider.copy(isActive = index == 0)
+        val finalProviders =
+            if (providers.none { it.isActive } && providers.isNotEmpty()) {
+                providers.mapIndexed { index, provider ->
+                    provider.copy(isActive = index == 0)
+                }
+            } else {
+                providers
             }
-        } else {
-            providers
-        }
 
         // Save migrated providers
         if (finalProviders.isNotEmpty()) {
@@ -646,7 +650,10 @@ class SettingsStore(
      * @param excludeId Optional provider ID to exclude from check (for updates)
      * @return true if duplicate exists, false otherwise
      */
-    fun isProviderNameDuplicate(name: String, excludeId: String? = null): Boolean {
+    fun isProviderNameDuplicate(
+        name: String,
+        excludeId: String? = null,
+    ): Boolean {
         val trimmedName = name.trim()
         return _providers.value.any { provider ->
             provider.id != excludeId &&
@@ -682,9 +689,10 @@ class SettingsStore(
                 duplicateName = provider.name,
             )
         }
-        val updated = _providers.value.map {
-            if (it.id == provider.id) provider else it
-        }
+        val updated =
+            _providers.value.map {
+                if (it.id == provider.id) provider else it
+            }
         saveProviders(updated)
     }
 
@@ -692,17 +700,19 @@ class SettingsStore(
         var updated = _providers.value.filter { it.id != id }
         // Ensure at least one provider remains active
         if (updated.none { it.isActive } && updated.isNotEmpty()) {
-            updated = updated.mapIndexed { index, provider ->
-                provider.copy(isActive = index == 0)
-            }
+            updated =
+                updated.mapIndexed { index, provider ->
+                    provider.copy(isActive = index == 0)
+                }
         }
         saveProviders(updated)
     }
 
     fun activateProvider(id: String) {
-        val updated = _providers.value.map {
-            it.copy(isActive = it.id == id)
-        }
+        val updated =
+            _providers.value.map {
+                it.copy(isActive = it.id == id)
+            }
         saveProviders(updated)
     }
 
@@ -724,16 +734,16 @@ class SettingsStore(
 
     // UPDATED: aiSettingsFlow now uses provider list
     val aiSettingsFlow: StateFlow<AISettings>
-        get() = _providers
-            .map { providers ->
-                providers.firstOrNull { it.isActive }?.toAISettings()
-                    ?: fallbackToOldSettings()
-            }
-            .stateIn(
-                scope = CoroutineScope(Dispatchers.Default + SupervisorJob()),
-                started = SharingStarted.Eagerly,
-                initialValue = aiSettings,
-            )
+        get() =
+            _providers
+                .map { providers ->
+                    providers.firstOrNull { it.isActive }?.toAISettings()
+                        ?: fallbackToOldSettings()
+                }.stateIn(
+                    scope = CoroutineScope(Dispatchers.Default + SupervisorJob()),
+                    started = SharingStarted.Eagerly,
+                    initialValue = aiSettings,
+                )
 
     private fun fallbackToOldSettings(): AISettings =
         when (_aiProviderType.value) {
@@ -742,9 +752,10 @@ class SettingsStore(
         }
 
     // Summary language setting
-    private val _summaryLanguage = MutableStateFlow(
-        SummaryLanguage.fromCode(sp.getString(PREF_SUMMARY_LANGUAGE, null)),
-    )
+    private val _summaryLanguage =
+        MutableStateFlow(
+            SummaryLanguage.fromCode(sp.getString(PREF_SUMMARY_LANGUAGE, null)),
+        )
     val summaryLanguage = _summaryLanguage.asStateFlow()
 
     fun setSummaryLanguage(value: SummaryLanguage) {
@@ -771,9 +782,10 @@ class SettingsStore(
     }
 
     // Translation language setting
-    private val _translationLanguage = MutableStateFlow(
-        TranslationLanguage.fromCode(sp.getString(PREF_TRANSLATION_LANGUAGE, null)),
-    )
+    private val _translationLanguage =
+        MutableStateFlow(
+            TranslationLanguage.fromCode(sp.getString(PREF_TRANSLATION_LANGUAGE, null)),
+        )
     val translationLanguage = _translationLanguage.asStateFlow()
 
     fun setTranslationLanguage(value: TranslationLanguage) {
@@ -1022,13 +1034,16 @@ enum class UserSettings(
     SETTING_OPENAI_AZURE_VERSION(key = PREF_OPENAI_AZURE_VERSION),
     SETTING_OPENAI_AZURE_DEPLOYMENT_ID(key = PREF_OPENAI_AZURE_DEPLOYMENT_ID),
     SETTING_OPENAI_REQUEST_TIMEOUT_SECONDS(key = PREF_OPENAI_REQUEST_TIMEOUT_SECONDS),
+
     // Anthropic settings
     SETTING_ANTHROPIC_KEY(key = PREF_ANTHROPIC_KEY),
     SETTING_ANTHROPIC_MODEL_ID(key = PREF_ANTHROPIC_MODEL_ID),
     SETTING_ANTHROPIC_URL(key = PREF_ANTHROPIC_URL),
     SETTING_ANTHROPIC_REQUEST_TIMEOUT_SECONDS(key = PREF_ANTHROPIC_REQUEST_TIMEOUT_SECONDS),
+
     // AI provider selection
     SETTING_AI_PROVIDER_TYPE(key = PREF_AI_PROVIDER_TYPE),
+
     // Summary settings
     SETTING_SUMMARY_ENABLED(key = PREF_SUMMARY_ENABLED),
     ;

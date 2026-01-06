@@ -64,7 +64,8 @@ class AIApi(
             }
         }
         return try {
-            AIClient.create(settings)
+            AIClient
+                .create(settings)
                 .listModels()
                 .let { AIClient.ModelsResult.Success(ids = it) }
         } catch (e: Exception) {
@@ -87,16 +88,17 @@ class AIApi(
             val summaryTimeout = repository.summaryTimeout.first()
 
             // Create client with summary-specific timeout
-            val settingsWithTimeout = when (val settings = aiSettings) {
-                is AISettings.OpenAI -> {
-                    val updatedSettings = settings.openaiSettings.copy(timeoutSeconds = summaryTimeout)
-                    AISettings.OpenAI(updatedSettings)
+            val settingsWithTimeout =
+                when (val settings = aiSettings) {
+                    is AISettings.OpenAI -> {
+                        val updatedSettings = settings.openaiSettings.copy(timeoutSeconds = summaryTimeout)
+                        AISettings.OpenAI(updatedSettings)
+                    }
+                    is AISettings.Anthropic -> {
+                        val updatedSettings = settings.anthropicSettings.copy(timeoutSeconds = summaryTimeout)
+                        AISettings.Anthropic(updatedSettings)
+                    }
                 }
-                is AISettings.Anthropic -> {
-                    val updatedSettings = settings.anthropicSettings.copy(timeoutSeconds = summaryTimeout)
-                    AISettings.Anthropic(updatedSettings)
-                }
-            }
 
             // Get language and generate summary with custom timeout
             val language = repository.summaryLanguage.first()
@@ -131,16 +133,17 @@ class AIApi(
             val translationTimeout = repository.translationTimeout.first()
 
             // Create client with translation-specific timeout
-            val settingsWithTimeout = when (val settings = aiSettings) {
-                is AISettings.OpenAI -> {
-                    val updatedSettings = settings.openaiSettings.copy(timeoutSeconds = translationTimeout)
-                    AISettings.OpenAI(updatedSettings)
+            val settingsWithTimeout =
+                when (val settings = aiSettings) {
+                    is AISettings.OpenAI -> {
+                        val updatedSettings = settings.openaiSettings.copy(timeoutSeconds = translationTimeout)
+                        AISettings.OpenAI(updatedSettings)
+                    }
+                    is AISettings.Anthropic -> {
+                        val updatedSettings = settings.anthropicSettings.copy(timeoutSeconds = translationTimeout)
+                        AISettings.Anthropic(updatedSettings)
+                    }
                 }
-                is AISettings.Anthropic -> {
-                    val updatedSettings = settings.anthropicSettings.copy(timeoutSeconds = translationTimeout)
-                    AISettings.Anthropic(updatedSettings)
-                }
-            }
 
             // Call AI provider to translate with structure context and custom timeout
             val translatedParagraphs = AIClient.create(settingsWithTimeout).translate(translatableTexts, language)

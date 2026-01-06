@@ -9,9 +9,6 @@ import com.nononsenseapps.feeder.ApplicationCoroutineScope
 import com.nononsenseapps.feeder.ai.AIApi
 import com.nononsenseapps.feeder.ai.model.AISettings
 import com.nononsenseapps.feeder.ai.model.SummaryLanguage
-import com.nononsenseapps.feeder.ui.compose.settings.AISettingsEvent
-import com.nononsenseapps.feeder.ui.compose.settings.AISettingsState
-import com.nononsenseapps.feeder.ui.compose.settings.ModelsState
 import com.nononsenseapps.feeder.archmodel.DarkThemePreferences
 import com.nononsenseapps.feeder.archmodel.FeedItemStyle
 import com.nononsenseapps.feeder.archmodel.ItemOpener
@@ -22,8 +19,11 @@ import com.nononsenseapps.feeder.archmodel.SwipeAsRead
 import com.nononsenseapps.feeder.archmodel.SyncFrequency
 import com.nononsenseapps.feeder.archmodel.ThemeOptions
 import com.nononsenseapps.feeder.base.DIAwareViewModel
+import com.nononsenseapps.feeder.ui.compose.settings.AISettingsEvent
+import com.nononsenseapps.feeder.ui.compose.settings.AISettingsState
 import com.nononsenseapps.feeder.ui.compose.settings.FontSelection
 import com.nononsenseapps.feeder.ui.compose.settings.FontSelection.SystemDefault
+import com.nononsenseapps.feeder.ui.compose.settings.ModelsState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow

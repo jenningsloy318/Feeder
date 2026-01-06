@@ -46,19 +46,19 @@ data class ProviderConfig(
     /**
      * Get display name for UI.
      */
-    fun getDisplayName(): String = name.ifBlank {
-        when (providerType) {
-            AIProvider.OPENAI_COMPATIBLE -> "OpenAI Provider"
-            AIProvider.ANTHROPIC -> "Anthropic Provider"
+    fun getDisplayName(): String =
+        name.ifBlank {
+            when (providerType) {
+                AIProvider.OPENAI_COMPATIBLE -> "OpenAI Provider"
+                AIProvider.ANTHROPIC -> "Anthropic Provider"
+            }
         }
-    }
 
     companion object {
         /**
          * Generate unique ID for new provider.
          */
-        fun generateId(): String =
-            "provider_${System.currentTimeMillis()}"
+        fun generateId(): String = "provider_${System.currentTimeMillis()}"
 
         /**
          * Create ProviderConfig from AISettings.

@@ -5,6 +5,8 @@ import android.app.job.JobScheduler
 import android.content.ContentResolver
 import android.content.SharedPreferences
 import android.widget.Toast
+import androidx.compose.foundation.ComposeFoundationFlags
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.core.app.NotificationManagerCompat
 import androidx.preference.PreferenceManager
 import coil3.ImageLoader
@@ -13,8 +15,6 @@ import coil3.SingletonImageLoader
 import coil3.annotation.ExperimentalCoilApi
 import coil3.disk.DiskCache
 import coil3.memory.MemoryCache
-import androidx.compose.foundation.ComposeFoundationFlags
-import androidx.compose.foundation.ExperimentalFoundationApi
 import coil3.memoryCacheMaxSizePercentWhileInBackground
 import coil3.network.okhttp.OkHttpNetworkFetcherFactory
 import coil3.request.crossfade

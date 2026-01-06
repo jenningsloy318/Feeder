@@ -34,6 +34,8 @@ import com.nononsenseapps.feeder.ui.compose.settings.ProviderEditScreen
 import com.nononsenseapps.feeder.ui.compose.settings.ProviderEditViewModel
 import com.nononsenseapps.feeder.ui.compose.settings.ProviderListScreen
 import com.nononsenseapps.feeder.ui.compose.settings.ProviderListViewModel
+import com.nononsenseapps.feeder.ui.compose.settings.SelectionMenuSettingsScreen
+import com.nononsenseapps.feeder.ui.compose.settings.SelectionMenuSettingsViewModel
 import com.nononsenseapps.feeder.ui.compose.settings.SettingsScreen
 import com.nononsenseapps.feeder.ui.compose.settings.SummarySettingsScreen
 import com.nononsenseapps.feeder.ui.compose.settings.SummarySettingsViewModel
@@ -41,8 +43,6 @@ import com.nononsenseapps.feeder.ui.compose.settings.TextSettingsScreen
 import com.nononsenseapps.feeder.ui.compose.settings.TextSettingsViewModel
 import com.nononsenseapps.feeder.ui.compose.settings.TranslationSettingsScreen
 import com.nononsenseapps.feeder.ui.compose.settings.TranslationSettingsViewModel
-import com.nononsenseapps.feeder.ui.compose.settings.SelectionMenuSettingsScreen
-import com.nononsenseapps.feeder.ui.compose.settings.SelectionMenuSettingsViewModel
 import com.nononsenseapps.feeder.ui.compose.sync.SyncScreen
 import com.nononsenseapps.feeder.ui.compose.sync.SyncScreenViewModel
 import com.nononsenseapps.feeder.util.DEEP_LINK_BASE_URI

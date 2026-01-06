@@ -3,12 +3,9 @@ package com.nononsenseapps.feeder.ui.compose.utils
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.platform.LocalInspectionMode
-import com.nononsenseapps.feeder.ui.compose.settings.MenuConfig
 import com.nononsenseapps.feeder.ui.compose.settings.SelectionMenuItem
 import com.nononsenseapps.feeder.util.ActivityLauncher
 import kotlinx.coroutines.Dispatchers
@@ -41,9 +38,10 @@ fun TextSelectionMenuHandler(
     // Load menu items on first composition
     LaunchedEffect(Unit) {
         if (menuItems.isEmpty()) {
-            menuItems = withContext(Dispatchers.Default) {
-                menuDiscoveryService.discoverAll()
-            }
+            menuItems =
+                withContext(Dispatchers.Default) {
+                    menuDiscoveryService.discoverAll()
+                }
         }
     }
 

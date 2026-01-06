@@ -81,36 +81,40 @@ class ProviderEditViewModel(
             AIProvider.entries.find { it.name == typeString }
         }
 
-    private val _internalState = MutableStateFlow<ProviderEditState>(
-        if (providerId != null) {
-            // Editing existing provider
-            val existingProvider = run {
-                // Synchronously get the provider from the current value
-                val providers = repository.providers.value
-                providers.find { it.id == providerId }
-                    ?: createDefaultProvider()
-            }
-            ProviderEditState(
-                provider = existingProvider,
-                isNew = false,
-                saveResult = null,
-            )
-        } else {
-            // Creating new provider
-            val newProvider = ProviderConfig.fromAISettings(
-                settings = com.nononsenseapps.feeder.ai.model.AISettings.defaultForProvider(
-                    providerType ?: AIProvider.OPENAI_COMPATIBLE,
-                ),
-                name = "",
-                isActive = false,
-            )
-            ProviderEditState(
-                provider = newProvider,
-                isNew = true,
-                saveResult = null,
-            )
-        },
-    )
+    private val _internalState =
+        MutableStateFlow<ProviderEditState>(
+            if (providerId != null) {
+                // Editing existing provider
+                val existingProvider =
+                    run {
+                        // Synchronously get the provider from the current value
+                        val providers = repository.providers.value
+                        providers.find { it.id == providerId }
+                            ?: createDefaultProvider()
+                    }
+                ProviderEditState(
+                    provider = existingProvider,
+                    isNew = false,
+                    saveResult = null,
+                )
+            } else {
+                // Creating new provider
+                val newProvider =
+                    ProviderConfig.fromAISettings(
+                        settings =
+                            com.nononsenseapps.feeder.ai.model.AISettings.defaultForProvider(
+                                providerType ?: AIProvider.OPENAI_COMPATIBLE,
+                            ),
+                        name = "",
+                        isActive = false,
+                    )
+                ProviderEditState(
+                    provider = newProvider,
+                    isNew = true,
+                    saveResult = null,
+                )
+            },
+        )
 
     val viewModelState: StateFlow<ProviderEditState> = _internalState.asStateFlow()
 
@@ -152,12 +156,13 @@ class ProviderEditViewModel(
      */
     fun updateSettings(settings: com.nononsenseapps.feeder.ai.model.AISettings) {
         val current = _internalState.value.provider
-        val updatedProvider = when (settings) {
-            is com.nononsenseapps.feeder.ai.model.AISettings.OpenAI ->
-                current.copy(openAISettings = settings.openaiSettings)
-            is com.nononsenseapps.feeder.ai.model.AISettings.Anthropic ->
-                current.copy(anthropicSettings = settings.anthropicSettings)
-        }
+        val updatedProvider =
+            when (settings) {
+                is com.nononsenseapps.feeder.ai.model.AISettings.OpenAI ->
+                    current.copy(openAISettings = settings.openaiSettings)
+                is com.nononsenseapps.feeder.ai.model.AISettings.Anthropic ->
+                    current.copy(anthropicSettings = settings.anthropicSettings)
+            }
         updateProvider(updatedProvider)
     }
 
@@ -166,21 +171,24 @@ class ProviderEditViewModel(
      */
     fun updateProviderType(type: AIProvider) {
         val current = _internalState.value.provider
-        val newSettings = com.nononsenseapps.feeder.ai.model.AISettings.defaultForProvider(type)
-        val updatedProvider = when (newSettings) {
-            is com.nononsenseapps.feeder.ai.model.AISettings.OpenAI ->
-                current.copy(
-                    providerType = type,
-                    openAISettings = newSettings.openaiSettings,
-                    anthropicSettings = null,
-                )
-            is com.nononsenseapps.feeder.ai.model.AISettings.Anthropic ->
-                current.copy(
-                    providerType = type,
-                    openAISettings = null,
-                    anthropicSettings = newSettings.anthropicSettings,
-                )
-        }
+        val newSettings =
+            com.nononsenseapps.feeder.ai.model.AISettings
+                .defaultForProvider(type)
+        val updatedProvider =
+            when (newSettings) {
+                is com.nononsenseapps.feeder.ai.model.AISettings.OpenAI ->
+                    current.copy(
+                        providerType = type,
+                        openAISettings = newSettings.openaiSettings,
+                        anthropicSettings = null,
+                    )
+                is com.nononsenseapps.feeder.ai.model.AISettings.Anthropic ->
+                    current.copy(
+                        providerType = type,
+                        openAISettings = null,
+                        anthropicSettings = newSettings.anthropicSettings,
+                    )
+            }
         updateProvider(updatedProvider)
     }
 
@@ -189,18 +197,23 @@ class ProviderEditViewModel(
      */
     fun updateApiKey(key: String) {
         val current = _internalState.value.provider
-        val updatedProvider = when (current.providerType) {
-            AIProvider.OPENAI_COMPATIBLE ->
-                current.copy(
-                    openAISettings = current.openAISettings?.copy(key = key)
-                        ?: com.nononsenseapps.feeder.ai.model.OpenAISettings(key = key),
-                )
-            AIProvider.ANTHROPIC ->
-                current.copy(
-                    anthropicSettings = current.anthropicSettings?.copy(key = key)
-                        ?: com.nononsenseapps.feeder.ai.model.AnthropicSettings(key = key),
-                )
-        }
+        val updatedProvider =
+            when (current.providerType) {
+                AIProvider.OPENAI_COMPATIBLE ->
+                    current.copy(
+                        openAISettings =
+                            current.openAISettings?.copy(key = key)
+                                ?: com.nononsenseapps.feeder.ai.model
+                                    .OpenAISettings(key = key),
+                    )
+                AIProvider.ANTHROPIC ->
+                    current.copy(
+                        anthropicSettings =
+                            current.anthropicSettings?.copy(key = key)
+                                ?: com.nononsenseapps.feeder.ai.model
+                                    .AnthropicSettings(key = key),
+                    )
+            }
         updateProvider(updatedProvider)
     }
 
@@ -209,18 +222,23 @@ class ProviderEditViewModel(
      */
     fun updateBaseUrl(url: String) {
         val current = _internalState.value.provider
-        val updatedProvider = when (current.providerType) {
-            AIProvider.OPENAI_COMPATIBLE ->
-                current.copy(
-                    openAISettings = current.openAISettings?.copy(baseUrl = url)
-                        ?: com.nononsenseapps.feeder.ai.model.OpenAISettings(baseUrl = url),
-                )
-            AIProvider.ANTHROPIC ->
-                current.copy(
-                    anthropicSettings = current.anthropicSettings?.copy(baseUrl = url)
-                        ?: com.nononsenseapps.feeder.ai.model.AnthropicSettings(baseUrl = url),
-                )
-        }
+        val updatedProvider =
+            when (current.providerType) {
+                AIProvider.OPENAI_COMPATIBLE ->
+                    current.copy(
+                        openAISettings =
+                            current.openAISettings?.copy(baseUrl = url)
+                                ?: com.nononsenseapps.feeder.ai.model
+                                    .OpenAISettings(baseUrl = url),
+                    )
+                AIProvider.ANTHROPIC ->
+                    current.copy(
+                        anthropicSettings =
+                            current.anthropicSettings?.copy(baseUrl = url)
+                                ?: com.nononsenseapps.feeder.ai.model
+                                    .AnthropicSettings(baseUrl = url),
+                    )
+            }
         updateProvider(updatedProvider)
     }
 
@@ -229,18 +247,23 @@ class ProviderEditViewModel(
      */
     fun updateModelId(modelId: String) {
         val current = _internalState.value.provider
-        val updatedProvider = when (current.providerType) {
-            AIProvider.OPENAI_COMPATIBLE ->
-                current.copy(
-                    openAISettings = current.openAISettings?.copy(modelId = modelId)
-                        ?: com.nononsenseapps.feeder.ai.model.OpenAISettings(modelId = modelId),
-                )
-            AIProvider.ANTHROPIC ->
-                current.copy(
-                    anthropicSettings = current.anthropicSettings?.copy(modelId = modelId)
-                        ?: com.nononsenseapps.feeder.ai.model.AnthropicSettings(modelId = modelId),
-                )
-        }
+        val updatedProvider =
+            when (current.providerType) {
+                AIProvider.OPENAI_COMPATIBLE ->
+                    current.copy(
+                        openAISettings =
+                            current.openAISettings?.copy(modelId = modelId)
+                                ?: com.nononsenseapps.feeder.ai.model
+                                    .OpenAISettings(modelId = modelId),
+                    )
+                AIProvider.ANTHROPIC ->
+                    current.copy(
+                        anthropicSettings =
+                            current.anthropicSettings?.copy(modelId = modelId)
+                                ?: com.nononsenseapps.feeder.ai.model
+                                    .AnthropicSettings(modelId = modelId),
+                    )
+            }
         updateProvider(updatedProvider)
     }
 
@@ -282,15 +305,17 @@ class ProviderEditViewModel(
                 _internalState.value = _internalState.value.copy(isSaving = false, saveResult = Result.success(Unit))
             } catch (e: com.nononsenseapps.feeder.archmodel.SettingsStore.DuplicateProviderNameException) {
                 // Handle duplicate name exception with user-friendly message
-                _internalState.value = _internalState.value.copy(
-                    isSaving = false,
-                    saveResult = Result.failure(
-                        IllegalArgumentException(
-                            "A provider with the name '${e.duplicateName}' already exists. Please choose a different name.",
-                            e,
-                        ),
-                    ),
-                )
+                _internalState.value =
+                    _internalState.value.copy(
+                        isSaving = false,
+                        saveResult =
+                            Result.failure(
+                                IllegalArgumentException(
+                                    "A provider with the name '${e.duplicateName}' already exists. Please choose a different name.",
+                                    e,
+                                ),
+                            ),
+                    )
             } catch (e: Exception) {
                 _internalState.value = _internalState.value.copy(isSaving = false, saveResult = Result.failure(e))
             }
@@ -306,16 +331,19 @@ class ProviderEditViewModel(
 
     private fun createDefaultProvider(): ProviderConfig =
         ProviderConfig.fromAISettings(
-            settings = com.nononsenseapps.feeder.ai.model.AISettings.OpenAI(),
+            settings =
+                com.nononsenseapps.feeder.ai.model.AISettings
+                    .OpenAI(),
             name = "Unknown Provider",
             isActive = false,
         )
 
-    private fun toUiState(state: ProviderEditState) = ProviderEditUiState(
-        provider = state.provider,
-        isNewProvider = state.isNew,
-        isSaving = state.isSaving,
-        isLoading = false,
-        saveResult = state.saveResult,
-    )
+    private fun toUiState(state: ProviderEditState) =
+        ProviderEditUiState(
+            provider = state.provider,
+            isNewProvider = state.isNew,
+            isSaving = state.isSaving,
+            isLoading = false,
+            saveResult = state.saveResult,
+        )
 }

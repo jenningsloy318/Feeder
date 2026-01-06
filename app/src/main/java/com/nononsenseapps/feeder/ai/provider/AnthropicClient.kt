@@ -2,7 +2,6 @@ package com.nononsenseapps.feeder.ai.provider
 
 import com.anthropic.client.AnthropicClientAsync
 import com.anthropic.client.okhttp.AnthropicOkHttpClientAsync
-import com.anthropic.models.messages.Message
 import com.anthropic.models.messages.MessageCreateParams
 import com.nononsenseapps.feeder.ai.AIClient
 import com.nononsenseapps.feeder.ai.TranslatableText
@@ -15,8 +14,6 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
-import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import java.net.SocketTimeoutException
@@ -50,7 +47,8 @@ class AnthropicClient(
      * - Language detection and handling
      */
     private fun buildSummaryPrompt(language: SummaryLanguage): String {
-        val basePrompt = """
+        val basePrompt =
+            """
 You are an expert news analyst and professional journalist specializing in concise, accurate article summarization. Your expertise includes identifying key information, extracting essential points, and presenting complex topics in clear, accessible language.
 
 ## Task
@@ -101,14 +99,18 @@ Respond with a JSON object in the following exact format:
 
 ### Language Handling
 
-${if (language == SummaryLanguage.AUTO_DETECT) """
+${if (language == SummaryLanguage.AUTO_DETECT) {
+                """
 - **Language Detection**: Identify the article's language from the content
 - **Summarize in Same Language**: Always summarize in the detected language
 - **Language Field**: Report the detected ISO 639-1 language code in the JSON response
-""" else """
+"""
+            } else {
+                """
 - **Target Language**: Summarize in ${language.languageName}
 - **Language Field**: Use the fixed language code "${language.code}" in the JSON response
-"""}
+"""
+            }}
 
 ### Content Guidelines
 
@@ -135,14 +137,14 @@ ${if (language == SummaryLanguage.AUTO_DETECT) """
 - Extract exactly 3-5 key points (not more, not less)
 
 Now, summarize the following article:
-""".trimIndent()
+            """.trimIndent()
 
         return basePrompt
     }
 
     override suspend fun generateSummary(
         content: String,
-        language: SummaryLanguage
+        language: SummaryLanguage,
     ): AIClient.SummaryResult {
         if (!settings.isValid) {
             return AIClient.SummaryResult.Error(content = "Invalid settings")
@@ -151,21 +153,25 @@ Now, summarize the following article:
         return try {
             val systemPrompt = buildSummaryPrompt(language)
 
-            val params = MessageCreateParams.builder()
-                .model(settings.modelId)
-                .system(systemPrompt)
-                .maxTokens(2048L) // Increased for JSON structured response
-                .addUserMessage(content)
-                .build()
+            val params =
+                MessageCreateParams
+                    .builder()
+                    .model(settings.modelId)
+                    .system(systemPrompt)
+                    .maxTokens(2048L) // Increased for JSON structured response
+                    .addUserMessage(content)
+                    .build()
 
-            val response = withContext(Dispatchers.IO) {
-                client.messages().create(params).get()
-            }
+            val response =
+                withContext(Dispatchers.IO) {
+                    client.messages().create(params).get()
+                }
 
             // Get content blocks from the response - iterate and collect text
-            val text = response.content().joinToString("") { contentBlock ->
-                contentBlock.text().getOrNull()?.text() ?: ""
-            }
+            val text =
+                response.content().joinToString("") { contentBlock ->
+                    contentBlock.text().getOrNull()?.text() ?: ""
+                }
 
             val summaryData = parseSummaryJsonResponse(text)
 
@@ -215,45 +221,52 @@ Now, summarize the following article:
     ): AIClient.TranslationResult {
         if (translatableTexts.isEmpty()) {
             return AIClient.TranslationResult.Error(
-                content = "No translatable content found in this article"
+                content = "No translatable content found in this article",
             )
         }
 
         return try {
             val prompt = buildTranslationPrompt(translatableTexts, targetLanguage)
 
-            val params = MessageCreateParams.builder()
-                .model(settings.modelId)
-                .maxTokens(8192L)
-                .addUserMessage(prompt)
-                .build()
+            val params =
+                MessageCreateParams
+                    .builder()
+                    .model(settings.modelId)
+                    .maxTokens(8192L)
+                    .addUserMessage(prompt)
+                    .build()
 
-            val response = withContext(Dispatchers.IO) {
-                client.messages().create(params).get()
-            }
+            val response =
+                withContext(Dispatchers.IO) {
+                    client.messages().create(params).get()
+                }
 
             // Get content blocks from the response
-            val translatedText = response.content().joinToString("") { contentBlock ->
-                contentBlock.text().getOrNull()?.text() ?: ""
-            }
+            val translatedText =
+                response.content().joinToString("") { contentBlock ->
+                    contentBlock.text().getOrNull()?.text() ?: ""
+                }
 
-            val translatedParagraphs = parseTranslationResponse(
-                translatedText,
-                translatableTexts.size
-            )
+            val translatedParagraphs =
+                parseTranslationResponse(
+                    translatedText,
+                    translatableTexts.size,
+                )
 
             AIClient.TranslationResult.Success(paragraphs = translatedParagraphs)
         } catch (e: Exception) {
             AIClient.TranslationResult.Error(
-                content = handleTranslationError(e)
+                content = handleTranslationError(e),
             )
         }
     }
 
     private fun buildClient(): AnthropicClientAsync {
-        val builder = AnthropicOkHttpClientAsync.builder()
-            .apiKey(settings.key)
-            .timeout(Duration.ofSeconds(settings.timeoutSeconds.toLong()))
+        val builder =
+            AnthropicOkHttpClientAsync
+                .builder()
+                .apiKey(settings.key)
+                .timeout(Duration.ofSeconds(settings.timeoutSeconds.toLong()))
 
         // Set custom base URL if provided
         if (settings.baseUrl.isNotEmpty()) {
@@ -293,18 +306,19 @@ Now, summarize the following article:
             val sentiment = jsonObject["sentiment"]?.jsonPrimitive?.content ?: ""
 
             // Parse keyPoints array
-            val keyPoints = try {
-                val keyPointsElement = jsonObject["keyPoints"]
-                if (keyPointsElement is JsonArray) {
-                    keyPointsElement.mapNotNull { item ->
-                        item.jsonPrimitive.content.takeIf { it.isNotEmpty() }
+            val keyPoints =
+                try {
+                    val keyPointsElement = jsonObject["keyPoints"]
+                    if (keyPointsElement is JsonArray) {
+                        keyPointsElement.mapNotNull { item ->
+                            item.jsonPrimitive.content.takeIf { it.isNotEmpty() }
+                        }
+                    } else {
+                        emptyList()
                     }
-                } else {
+                } catch (e: Exception) {
                     emptyList()
                 }
-            } catch (e: Exception) {
-                emptyList()
-            }
 
             val summary = jsonObject["summary"]?.jsonPrimitive?.content ?: ""
 
@@ -351,16 +365,22 @@ Now, summarize the following article:
      */
     private fun parseLegacySummaryResponse(content: String): SummaryResponseData {
         val lines = content.lines()
-        val lang = if (lines.firstOrNull()?.startsWith("Lang:") == true) {
-            lines.first().removePrefix("Lang:").trim().take(2)
-        } else {
-            ""
-        }
-        val summary = if (lines.firstOrNull()?.startsWith("Lang:") == true) {
-            lines.drop(1).joinToString("\n").trim()
-        } else {
-            content.trim()
-        }
+        val lang =
+            if (lines.firstOrNull()?.startsWith("Lang:") == true) {
+                lines
+                    .first()
+                    .removePrefix("Lang:")
+                    .trim()
+                    .take(2)
+            } else {
+                ""
+            }
+        val summary =
+            if (lines.firstOrNull()?.startsWith("Lang:") == true) {
+                lines.drop(1).joinToString("\n").trim()
+            } else {
+                content.trim()
+            }
 
         return SummaryResponseData(
             language = lang,
@@ -395,10 +415,12 @@ Now, summarize the following article:
         targetLanguage: TranslationLanguage,
     ): String {
         // Build JSON array of paragraphs with indices and structure context
-        val paragraphsJson = translatableTexts.mapIndexed { index, tt ->
-            val structureInfo = tt.getStructureDescription()
-            """        {"index": ${index + 1}, "type": "$structureInfo", "text": ${jsonEscape(tt.text)}}"""
-        }.joinToString(",\n")
+        val paragraphsJson =
+            translatableTexts
+                .mapIndexed { index, tt ->
+                    val structureInfo = tt.getStructureDescription()
+                    """        {"index": ${index + 1}, "type": "$structureInfo", "text": ${jsonEscape(tt.text)}}"""
+                }.joinToString(",\n")
 
         return """
 You are a distinguished professional translator and bilingual scholar specializing in ${targetLanguage.languageName}. Your expertise encompasses accurately and elegantly translating texts while meticulously considering all linguistic complexities, nuances, and cultural contexts.
@@ -464,7 +486,7 @@ Respond with a JSON object in the following exact format:
 - Do not add any conversational filler
 
 Now, translate the above JSON input.
-""".trimIndent()
+            """.trimIndent()
     }
 
     /**
@@ -560,14 +582,14 @@ Now, translate the above JSON input.
 
             if (translations.size != expectedParagraphs) {
                 throw AIClientException(
-                    "Expected $expectedParagraphs paragraphs, got ${translations.size}"
+                    "Expected $expectedParagraphs paragraphs, got ${translations.size}",
                 )
             }
 
             return translations.toSortedMap().values.toList()
         } catch (e: Exception) {
             throw AIClientException(
-                "Failed to parse translation response: ${e.message}. Response: $response"
+                "Failed to parse translation response: ${e.message}. Response: $response",
             )
         }
     }
@@ -596,32 +618,30 @@ Now, translate the above JSON input.
     /**
      * Escapes text for JSON string literal.
      */
-    private fun jsonEscape(text: String): String {
-        return text
+    private fun jsonEscape(text: String): String =
+        text
             .replace("\\", "\\\\")
             .replace("\"", "\\\"")
             .replace("\n", "\\n")
             .replace("\r", "\\r")
             .replace("\t", "\\t")
-    }
 
     /**
      * Unescapes JSON string literal.
      */
-    private fun unescapeJson(text: String): String {
-        return text
+    private fun unescapeJson(text: String): String =
+        text
             .replace("\\n", "\n")
             .replace("\\r", "\r")
             .replace("\\t", "\t")
             .replace("\\\"", "\"")
             .replace("\\\\", "\\")
-    }
 
     /**
      * Handles translation errors with user-friendly messages.
      */
-    private fun handleTranslationError(e: Exception): String {
-        return when {
+    private fun handleTranslationError(e: Exception): String =
+        when {
             e.message?.contains("rate limit", ignoreCase = true) == true ->
                 "Rate limit exceeded. Please try again later."
 
@@ -629,17 +649,16 @@ Now, translate the above JSON input.
                 "Invalid API key. Check your AI provider settings."
 
             e.message?.contains("timeout", ignoreCase = true) == true ||
-            e is SocketTimeoutException ->
+                e is SocketTimeoutException ->
                 "Translation timed out. Please check your connection."
 
             e.message?.contains("insufficient quota", ignoreCase = true) == true ||
-            e.message?.contains("quota exceeded", ignoreCase = true) == true ->
+                e.message?.contains("quota exceeded", ignoreCase = true) == true ->
                 "API quota exceeded. Please check your account."
 
             else ->
                 "Translation failed: ${e.message ?: "Unknown error"}"
         }
-    }
 
     private class AIClientException(
         message: String,

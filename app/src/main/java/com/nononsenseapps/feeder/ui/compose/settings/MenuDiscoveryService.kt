@@ -2,10 +2,7 @@ package com.nononsenseapps.feeder.ui.compose.settings
 
 import android.content.Context
 import android.content.pm.PackageManager
-import android.content.pm.ResolveInfo
 import android.os.Build
-import android.text.TextUtils
-import androidx.core.content.pm.ShortcutManagerCompat
 import com.nononsenseapps.feeder.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -21,7 +18,9 @@ import org.kodein.di.instance
  * - Feeder application actions (read_aloud, translate)
  * - Third-party apps that handle ACTION_PROCESS_TEXT
  */
-class MenuDiscoveryService(override val di: DI) : DIAware {
+class MenuDiscoveryService(
+    override val di: DI,
+) : DIAware {
     private val context: Context by instance()
 
     private val packageManager: PackageManager
@@ -32,22 +31,23 @@ class MenuDiscoveryService(override val di: DI) : DIAware {
      *
      * @return Flat list of all discovered menu items
      */
-    suspend fun discoverAll(): List<SelectionMenuItem> = withContext(Dispatchers.Default) {
-        val systemMenus = discoverSystemMenus()
-        val feederMenus = discoverFeederMenus()
-        val thirdPartyMenus = discoverThirdPartyMenus()
+    suspend fun discoverAll(): List<SelectionMenuItem> =
+        withContext(Dispatchers.Default) {
+            val systemMenus = discoverSystemMenus()
+            val feederMenus = discoverFeederMenus()
+            val thirdPartyMenus = discoverThirdPartyMenus()
 
-        // Return flat list (no sections)
-        systemMenus + feederMenus + thirdPartyMenus
-    }
+            // Return flat list (no sections)
+            systemMenus + feederMenus + thirdPartyMenus
+        }
 
     /**
      * Discover system menu items.
      *
      * @return List of system menu items
      */
-    private fun discoverSystemMenus(): List<SelectionMenuItem> {
-        return listOf(
+    private fun discoverSystemMenus(): List<SelectionMenuItem> =
+        listOf(
             SelectionMenuItem(
                 id = "android.intent.action.COPY",
                 name = context.getString(android.R.string.copy),
@@ -97,15 +97,14 @@ class MenuDiscoveryService(override val di: DI) : DIAware {
                 visible = true,
             ),
         )
-    }
 
     /**
      * Discover Feeder application menu items.
      *
      * @return List of Feeder menu items
      */
-    private fun discoverFeederMenus(): List<SelectionMenuItem> {
-        return listOf(
+    private fun discoverFeederMenus(): List<SelectionMenuItem> =
+        listOf(
             SelectionMenuItem(
                 id = "com.nononsenseapps.feeder.action.READ_ALOUD",
                 name = context.getString(R.string.selection_menu_read_aloud),
@@ -131,28 +130,29 @@ class MenuDiscoveryService(override val di: DI) : DIAware {
                 visible = true,
             ),
         )
-    }
 
     /**
      * Discover third-party menu items that handle ACTION_PROCESS_TEXT.
      *
      * @return List of third-party menu items sorted by display name
      */
-    private fun discoverThirdPartyMenus(): List<SelectionMenuItem> {
-        return try {
-            val intent = android.content.Intent(ACTION_PROCESS_TEXT).apply {
-                type = "text/plain"
-            }
+    private fun discoverThirdPartyMenus(): List<SelectionMenuItem> =
+        try {
+            val intent =
+                android.content.Intent(ACTION_PROCESS_TEXT).apply {
+                    type = "text/plain"
+                }
 
-            val resolveInfos = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                packageManager.queryIntentActivities(
-                    intent,
-                    PackageManager.ResolveInfoFlags.of(PMATCH_DEFAULT_ONLY.toLong()),
-                )
-            } else {
-                @Suppress("DEPRECATION")
-                packageManager.queryIntentActivities(intent, PMATCH_DEFAULT_ONLY)
-            }
+            val resolveInfos =
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    packageManager.queryIntentActivities(
+                        intent,
+                        PackageManager.ResolveInfoFlags.of(PMATCH_DEFAULT_ONLY.toLong()),
+                    )
+                } else {
+                    @Suppress("DEPRECATION")
+                    packageManager.queryIntentActivities(intent, PMATCH_DEFAULT_ONLY)
+                }
 
             resolveInfos
                 .mapNotNull { resolveInfo ->
@@ -167,10 +167,11 @@ class MenuDiscoveryService(override val di: DI) : DIAware {
                         SelectionMenuItem(
                             id = componentName.flattenToString(),
                             name = appName,
-                            description = context.getString(
-                                R.string.selection_menu_third_party_description,
-                                appName,
-                            ),
+                            description =
+                                context.getString(
+                                    R.string.selection_menu_third_party_description,
+                                    appName,
+                                ),
                             icon = null,
                             enabled = true,
                             type = MenuType.THIRD_PARTY,
@@ -187,7 +188,6 @@ class MenuDiscoveryService(override val di: DI) : DIAware {
             // Log error and return empty list
             emptyList()
         }
-    }
 
     companion object {
         private const val ACTION_PROCESS_TEXT = "android.intent.action.PROCESS_TEXT"

@@ -35,8 +35,8 @@ import com.nononsenseapps.feeder.ui.compose.navigation.SelectionMenuSettingsDest
 import com.nononsenseapps.feeder.ui.compose.navigation.SettingsDestination
 import com.nononsenseapps.feeder.ui.compose.navigation.SummarySettingsDestination
 import com.nononsenseapps.feeder.ui.compose.navigation.SyncScreenDestination
-import com.nononsenseapps.feeder.ui.compose.navigation.TranslationSettingsDestination
 import com.nononsenseapps.feeder.ui.compose.navigation.TextSettingsDestination
+import com.nononsenseapps.feeder.ui.compose.navigation.TranslationSettingsDestination
 import com.nononsenseapps.feeder.ui.compose.utils.withAllProviders
 import com.nononsenseapps.feeder.util.updateLeakCanaryNotificationState
 import kotlinx.coroutines.launch

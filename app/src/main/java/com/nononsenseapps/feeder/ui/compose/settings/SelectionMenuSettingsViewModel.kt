@@ -66,21 +66,23 @@ class SelectionMenuSettingsViewModel(
                 // Merge discovered items with saved configuration
                 val mergedItems = mergeWithConfig(discoveredItems, savedConfig)
 
-                _viewState.value = _viewState.value.copy(
-                    isLoading = false,
-                    items = mergedItems,
-                )
+                _viewState.value =
+                    _viewState.value.copy(
+                        isLoading = false,
+                        items = mergedItems,
+                    )
             } catch (e: Exception) {
-                _viewState.value = _viewState.value.copy(
-                    isLoading = false,
-                    error = e.message ?: "Unknown error occurred",
-                )
+                _viewState.value =
+                    _viewState.value.copy(
+                        isLoading = false,
+                        error = e.message ?: "Unknown error occurred",
+                    )
             }
         }
     }
 
-    private fun loadMenuConfig(): MenuConfig {
-        return try {
+    private fun loadMenuConfig(): MenuConfig =
+        try {
             val jsonString = sharedPreferences.getString(PREF_MENU_CONFIG, null)
             if (jsonString != null) {
                 MenuConfig.fromJson(jsonString)
@@ -90,16 +92,17 @@ class SelectionMenuSettingsViewModel(
         } catch (e: Exception) {
             MenuConfig.Default
         }
-    }
 
     private fun saveMenuConfig(items: List<SelectionMenuItem>) {
-        val config = MenuConfig(
-            order = items.map { it.id },
-            visibility = items.associate { it.id to it.visible },
-        )
+        val config =
+            MenuConfig(
+                order = items.map { it.id },
+                visibility = items.associate { it.id to it.visible },
+            )
 
         try {
-            sharedPreferences.edit()
+            sharedPreferences
+                .edit()
                 .putString(PREF_MENU_CONFIG, config.toJson())
                 .apply()
         } catch (e: Exception) {
@@ -149,10 +152,15 @@ class SelectionMenuSettingsViewModel(
         }
     }
 
-    private fun handleReorder(fromIndex: Int, toIndex: Int) {
+    private fun handleReorder(
+        fromIndex: Int,
+        toIndex: Int,
+    ) {
         val currentItems = _viewState.value.items.toMutableList()
-        if (fromIndex < 0 || fromIndex >= currentItems.size ||
-            toIndex < 0 || toIndex >= currentItems.size
+        if (fromIndex < 0 ||
+            fromIndex >= currentItems.size ||
+            toIndex < 0 ||
+            toIndex >= currentItems.size
         ) {
             return
         }
@@ -162,9 +170,10 @@ class SelectionMenuSettingsViewModel(
         currentItems.add(toIndex, item)
 
         // Update order property
-        val reorderedItems = currentItems.mapIndexed { index, menuItem ->
-            menuItem.copy(order = index)
-        }
+        val reorderedItems =
+            currentItems.mapIndexed { index, menuItem ->
+                menuItem.copy(order = index)
+            }
 
         _viewState.value = _viewState.value.copy(items = reorderedItems)
         saveMenuConfigDebounced(reorderedItems)
@@ -172,13 +181,14 @@ class SelectionMenuSettingsViewModel(
 
     private fun handleToggle(itemId: String) {
         val currentItems = _viewState.value.items
-        val updatedItems = currentItems.map { item ->
-            if (item.id == itemId) {
-                item.copy(visible = !item.visible)
-            } else {
-                item
+        val updatedItems =
+            currentItems.map { item ->
+                if (item.id == itemId) {
+                    item.copy(visible = !item.visible)
+                } else {
+                    item
+                }
             }
-        }
 
         _viewState.value = _viewState.value.copy(items = updatedItems)
         saveMenuConfigDebounced(updatedItems)
@@ -217,11 +227,16 @@ sealed class SelectionMenuEvent {
      * @property fromIndex The current index of the item to move
      * @property toIndex The new index for the item
      */
-    data class ReorderMenu(val fromIndex: Int, val toIndex: Int) : SelectionMenuEvent()
+    data class ReorderMenu(
+        val fromIndex: Int,
+        val toIndex: Int,
+    ) : SelectionMenuEvent()
 
     /**
      * Event to toggle item visibility.
      * @property itemId The ID of the menu item to toggle
      */
-    data class ToggleItem(val itemId: String) : SelectionMenuEvent()
+    data class ToggleItem(
+        val itemId: String,
+    ) : SelectionMenuEvent()
 }

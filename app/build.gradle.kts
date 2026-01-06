@@ -265,7 +265,11 @@ dependencies {
     implementation(libs.anthropic.java)
     implementation(libs.anthropic.java.okhttp)
 
-    // Markdown
+    // Markdown - Using Mikepenz library for improved rendering
+    implementation(libs.mikepenz.markdown)
+    implementation(libs.mikepenz.markdown.m3)
+    implementation(libs.mikepenz.markdown.coil3)
+    // TODO: Remove jetbrains-markdown after migration complete (Task 5.1)
     implementation(libs.jetbrains.markdown)
 
     // Drag and drop for reorderable lists

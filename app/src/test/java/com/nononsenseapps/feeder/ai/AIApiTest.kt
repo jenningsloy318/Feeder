@@ -1,16 +1,10 @@
 package com.nononsenseapps.feeder.ai
 
-import com.nononsenseapps.feeder.ai.model.AISettings
-import com.nononsenseapps.feeder.ai.model.OpenAISettings
 import com.nononsenseapps.feeder.archmodel.Repository
 import io.mockk.MockKAnnotations
-import io.mockk.every
 import io.mockk.impl.annotations.MockK
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import kotlin.test.Test
-import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 /**

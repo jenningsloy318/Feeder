@@ -10,7 +10,6 @@ import io.mockk.verify
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
@@ -34,13 +33,14 @@ class CustomFeederTextToolbarTest {
 
         every { mockMenuConfigStore.getConfig() } returns MenuConfig.Default
 
-        toolbar = CustomFeederTextToolbar(
-            context = mockContext,
-            menuConfigStore = mockMenuConfigStore,
-            activityLauncher = mockActivityLauncher,
-            onReadAloud = onReadAloud,
-            onTranslate = onTranslate,
-        )
+        toolbar =
+            CustomFeederTextToolbar(
+                context = mockContext,
+                menuConfigStore = mockMenuConfigStore,
+                activityLauncher = mockActivityLauncher,
+                onReadAloud = onReadAloud,
+                onTranslate = onTranslate,
+            )
     }
 
     @Test
@@ -141,10 +141,11 @@ class CustomFeederTextToolbarTest {
     @Test
     fun `getMenuConfig returns config from store`() {
         // Given
-        val expectedConfig = MenuConfig(
-            order = listOf("copy", "translate"),
-            visibility = mapOf("copy" to true, "translate" to true),
-        )
+        val expectedConfig =
+            MenuConfig(
+                order = listOf("copy", "translate"),
+                visibility = mapOf("copy" to true, "translate" to true),
+            )
         every { mockMenuConfigStore.getConfig() } returns expectedConfig
 
         // When

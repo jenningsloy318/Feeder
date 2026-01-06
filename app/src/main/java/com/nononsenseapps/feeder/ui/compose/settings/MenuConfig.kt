@@ -25,13 +25,12 @@ data class MenuConfig(
         /**
          * Create MenuConfig from JSON string.
          */
-        fun fromJson(jsonString: String): MenuConfig {
-            return try {
+        fun fromJson(jsonString: String): MenuConfig =
+            try {
                 Json.decodeFromString(jsonString)
             } catch (e: Exception) {
                 Default
             }
-        }
     }
 
     /**
@@ -46,14 +45,10 @@ data class MenuConfig(
      * @param itemId The menu item ID to check
      * @return true if visible, false otherwise
      */
-    fun isVisible(itemId: String): Boolean {
-        return visibility[itemId] ?: true
-    }
+    fun isVisible(itemId: String): Boolean = visibility[itemId] ?: true
 
     /**
      * Convert configuration to JSON string.
      */
-    fun toJson(): String {
-        return Json.encodeToString(this)
-    }
+    fun toJson(): String = Json.encodeToString(this)
 }

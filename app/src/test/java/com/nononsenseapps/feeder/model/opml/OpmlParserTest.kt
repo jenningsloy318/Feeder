@@ -2,7 +2,6 @@ package com.nononsenseapps.feeder.model.opml
 
 import com.nononsenseapps.feeder.ai.model.AnthropicSettings
 import com.nononsenseapps.feeder.ai.model.OpenAISettings
-import com.nononsenseapps.feeder.ai.provider.AIProvider
 import com.nononsenseapps.feeder.archmodel.DarkThemePreferences
 import com.nononsenseapps.feeder.archmodel.FeedItemStyle
 import com.nononsenseapps.feeder.archmodel.ItemOpener
@@ -37,14 +36,15 @@ import org.kodein.di.singleton
 
 class OpmlParserTest : DIAware {
     private val feedDao: FeedDao = mockk()
-    private val settingsStore: SettingsStore = mockk(relaxUnitFun = true) {
-        every { openAISettings } returns MutableStateFlow(OpenAISettings())
-        every { anthropicSettings } returns MutableStateFlow(AnthropicSettings())
-        every { setOpenAISettings(any()) } just Runs
-        every { setAnthropicSettings(any()) } just Runs
-        every { setAIProviderType(any()) } just Runs
-        every { setSummaryEnabled(any()) } just Runs
-    }
+    private val settingsStore: SettingsStore =
+        mockk(relaxUnitFun = true) {
+            every { openAISettings } returns MutableStateFlow(OpenAISettings())
+            every { anthropicSettings } returns MutableStateFlow(AnthropicSettings())
+            every { setOpenAISettings(any()) } just Runs
+            every { setAnthropicSettings(any()) } just Runs
+            every { setAIProviderType(any()) } just Runs
+            every { setSummaryEnabled(any()) } just Runs
+        }
     private val filePathProvider: FilePathProvider = mockk(relaxUnitFun = true)
     override val di =
         DI.lazy {

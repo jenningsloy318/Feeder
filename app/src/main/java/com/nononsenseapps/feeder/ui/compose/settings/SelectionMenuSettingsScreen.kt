@@ -1,7 +1,6 @@
 package com.nononsenseapps.feeder.ui.compose.settings
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,22 +28,20 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import sh.calvin.reorderable.ReorderableItem
-import sh.calvin.reorderable.rememberReorderableLazyListState
-import sh.calvin.reorderable.ReorderableCollectionItemScope
 import com.nononsenseapps.feeder.R
 import com.nononsenseapps.feeder.ui.compose.theme.LocalDimens
 import com.nononsenseapps.feeder.ui.compose.theme.SensibleTopAppBar
+import sh.calvin.reorderable.ReorderableCollectionItemScope
+import sh.calvin.reorderable.ReorderableItem
+import sh.calvin.reorderable.rememberReorderableLazyListState
 
 /**
  * Main screen for Selection Menu Configuration.
@@ -156,16 +153,17 @@ private fun MenuList(
     onEvent: (SelectionMenuEvent) -> Unit,
 ) {
     val lazyListState = rememberLazyListState()
-    val reorderableState = rememberReorderableLazyListState(
-        lazyListState = lazyListState,
-        onMove = { from, to ->
-            onEvent(SelectionMenuEvent.ReorderMenu(from.index, to.index))
-        }
-    )
+    val reorderableState =
+        rememberReorderableLazyListState(
+            lazyListState = lazyListState,
+            onMove = { from, to ->
+                onEvent(SelectionMenuEvent.ReorderMenu(from.index, to.index))
+            },
+        )
 
     LazyColumn(
         state = lazyListState,
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize(),
     ) {
         items(items, key = { it.id }) { item ->
             ReorderableItem(state = reorderableState, key = item.id) { isDragging ->
@@ -207,10 +205,12 @@ private fun MenuItemRow(
             Modifier
                 .fillMaxWidth()
                 .background(
-                    if (isDragging) MaterialTheme.colorScheme.secondaryContainer
-                    else MaterialTheme.colorScheme.surface
-                )
-                .padding(horizontal = 16.dp, vertical = 12.dp),
+                    if (isDragging) {
+                        MaterialTheme.colorScheme.secondaryContainer
+                    } else {
+                        MaterialTheme.colorScheme.surface
+                    },
+                ).padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(16.dp),
     ) {
@@ -260,11 +260,12 @@ private fun MenuItemRow(
         Icon(
             imageVector = Icons.Filled.DragHandle,
             contentDescription = stringResource(R.string.selection_menu_drag_to_reorder),
-            modifier = with(dragHandleScope) {
-                Modifier
-                    .size(24.dp)
-                    .draggableHandle()
-            },
+            modifier =
+                with(dragHandleScope) {
+                    Modifier
+                        .size(24.dp)
+                        .draggableHandle()
+                },
             tint = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
@@ -276,9 +277,7 @@ private fun MenuItemRow(
  * @param modifier Modifier for the loading state
  */
 @Composable
-private fun LoadingState(
-    modifier: Modifier = Modifier,
-) {
+private fun LoadingState(modifier: Modifier = Modifier) {
     Box(modifier = modifier) {
         CircularProgressIndicator()
     }
@@ -318,9 +317,7 @@ private fun ErrorState(
  * @param modifier Modifier for the empty state
  */
 @Composable
-private fun EmptyState(
-    modifier: Modifier = Modifier,
-) {
+private fun EmptyState(modifier: Modifier = Modifier) {
     Box(
         modifier = modifier,
         contentAlignment = Alignment.Center,

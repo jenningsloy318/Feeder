@@ -109,42 +109,53 @@ open class OPMLImporter(
             // AI Provider Type
             UserSettings.SETTING_AI_PROVIDER_TYPE ->
                 settingsStore.setAIProviderType(
-                    com.nononsenseapps.feeder.ai.provider.AIProvider.fromString(value),
+                    com.nononsenseapps.feeder.ai.provider.AIProvider
+                        .fromString(value),
                 )
 
             // OpenAI settings
-            UserSettings.SETTING_OPENAI_KEY -> settingsStore.setOpenAISettings(
-                settingsStore.openAISettings.value.copy(key = value),
-            )
-            UserSettings.SETTING_OPENAI_MODEL_ID -> settingsStore.setOpenAISettings(
-                settingsStore.openAISettings.value.copy(modelId = value),
-            )
-            UserSettings.SETTING_OPENAI_URL -> settingsStore.setOpenAISettings(
-                settingsStore.openAISettings.value.copy(baseUrl = value),
-            )
-            UserSettings.SETTING_OPENAI_AZURE_VERSION -> settingsStore.setOpenAISettings(
-                settingsStore.openAISettings.value.copy(azureApiVersion = value),
-            )
-            UserSettings.SETTING_OPENAI_AZURE_DEPLOYMENT_ID -> settingsStore.setOpenAISettings(
-                settingsStore.openAISettings.value.copy(azureDeploymentId = value),
-            )
-            UserSettings.SETTING_OPENAI_REQUEST_TIMEOUT_SECONDS -> settingsStore.setOpenAISettings(
-                settingsStore.openAISettings.value.copy(timeoutSeconds = value.toIntOrNull() ?: 90),
-            )
+            UserSettings.SETTING_OPENAI_KEY ->
+                settingsStore.setOpenAISettings(
+                    settingsStore.openAISettings.value.copy(key = value),
+                )
+            UserSettings.SETTING_OPENAI_MODEL_ID ->
+                settingsStore.setOpenAISettings(
+                    settingsStore.openAISettings.value.copy(modelId = value),
+                )
+            UserSettings.SETTING_OPENAI_URL ->
+                settingsStore.setOpenAISettings(
+                    settingsStore.openAISettings.value.copy(baseUrl = value),
+                )
+            UserSettings.SETTING_OPENAI_AZURE_VERSION ->
+                settingsStore.setOpenAISettings(
+                    settingsStore.openAISettings.value.copy(azureApiVersion = value),
+                )
+            UserSettings.SETTING_OPENAI_AZURE_DEPLOYMENT_ID ->
+                settingsStore.setOpenAISettings(
+                    settingsStore.openAISettings.value.copy(azureDeploymentId = value),
+                )
+            UserSettings.SETTING_OPENAI_REQUEST_TIMEOUT_SECONDS ->
+                settingsStore.setOpenAISettings(
+                    settingsStore.openAISettings.value.copy(timeoutSeconds = value.toIntOrNull() ?: 90),
+                )
 
             // Anthropic settings
-            UserSettings.SETTING_ANTHROPIC_KEY -> settingsStore.setAnthropicSettings(
-                settingsStore.anthropicSettings.value.copy(key = value),
-            )
-            UserSettings.SETTING_ANTHROPIC_MODEL_ID -> settingsStore.setAnthropicSettings(
-                settingsStore.anthropicSettings.value.copy(modelId = value),
-            )
-            UserSettings.SETTING_ANTHROPIC_URL -> settingsStore.setAnthropicSettings(
-                settingsStore.anthropicSettings.value.copy(baseUrl = value),
-            )
-            UserSettings.SETTING_ANTHROPIC_REQUEST_TIMEOUT_SECONDS -> settingsStore.setAnthropicSettings(
-                settingsStore.anthropicSettings.value.copy(timeoutSeconds = value.toIntOrNull() ?: 90),
-            )
+            UserSettings.SETTING_ANTHROPIC_KEY ->
+                settingsStore.setAnthropicSettings(
+                    settingsStore.anthropicSettings.value.copy(key = value),
+                )
+            UserSettings.SETTING_ANTHROPIC_MODEL_ID ->
+                settingsStore.setAnthropicSettings(
+                    settingsStore.anthropicSettings.value.copy(modelId = value),
+                )
+            UserSettings.SETTING_ANTHROPIC_URL ->
+                settingsStore.setAnthropicSettings(
+                    settingsStore.anthropicSettings.value.copy(baseUrl = value),
+                )
+            UserSettings.SETTING_ANTHROPIC_REQUEST_TIMEOUT_SECONDS ->
+                settingsStore.setAnthropicSettings(
+                    settingsStore.anthropicSettings.value.copy(timeoutSeconds = value.toIntOrNull() ?: 90),
+                )
 
             // Summary settings
             UserSettings.SETTING_SUMMARY_ENABLED -> settingsStore.setSummaryEnabled(value.toBoolean())

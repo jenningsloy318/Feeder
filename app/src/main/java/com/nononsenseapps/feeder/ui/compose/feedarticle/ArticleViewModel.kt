@@ -5,10 +5,13 @@ import androidx.compose.runtime.Immutable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.nononsenseapps.feeder.ApplicationCoroutineScope
+import com.nononsenseapps.feeder.ai.AIApi
+import com.nononsenseapps.feeder.ai.ElementType
+import com.nononsenseapps.feeder.ai.TranslatableText
+import com.nononsenseapps.feeder.ai.model.AISettings
 import com.nononsenseapps.feeder.archmodel.Article
 import com.nononsenseapps.feeder.archmodel.Enclosure
 import com.nononsenseapps.feeder.archmodel.LinkOpener
-import com.nononsenseapps.feeder.ai.model.AISettings
 import com.nononsenseapps.feeder.archmodel.Repository
 import com.nononsenseapps.feeder.archmodel.TextToDisplay
 import com.nononsenseapps.feeder.background.runOnceRssSync
@@ -31,9 +34,6 @@ import com.nononsenseapps.feeder.model.ThumbnailImage
 import com.nononsenseapps.feeder.model.UnsupportedContentType
 import com.nononsenseapps.feeder.model.html.HtmlLinearizer
 import com.nononsenseapps.feeder.model.html.LinearArticle
-import com.nononsenseapps.feeder.ai.AIApi
-import com.nononsenseapps.feeder.ai.ElementType
-import com.nononsenseapps.feeder.ai.TranslatableText
 import com.nononsenseapps.feeder.ui.compose.text.htmlToAnnotatedString
 import com.nononsenseapps.feeder.util.Either
 import com.nononsenseapps.feeder.util.FilePathProvider
@@ -209,7 +209,7 @@ class ArticleViewModel(
         viewModelScope.launch {
             combine(
                 articleFlow,
-                repository.summaryEnabled
+                repository.summaryEnabled,
             ) { article, summaryEnabled ->
                 article to summaryEnabled
             }.filterNotNull()
@@ -220,7 +220,8 @@ class ArticleViewModel(
                         // Check both user setting and feed setting
                         if ((summaryEnabled || feed?.summarizeOnOpen == true) &&
                             aiSummary.value is AISummaryState.Empty &&
-                            article?.link != null) {
+                            article?.link != null
+                        ) {
                             summarize()
                             return@collect // Only summarize on first load
                         }
@@ -234,7 +235,7 @@ class ArticleViewModel(
             combine(
                 articleFlow,
                 articleContentFlow,
-                repository.translationEnabled
+                repository.translationEnabled,
             ) { article, articleContent, translationEnabled ->
                 Triple(article, articleContent, translationEnabled)
             }.filterNotNull()
@@ -246,7 +247,8 @@ class ArticleViewModel(
                     if (translationEnabled &&
                         translationState.value is TranslationState.Empty &&
                         article?.link != null &&
-                        articleContent.elements.isNotEmpty()) {
+                        articleContent.elements.isNotEmpty()
+                    ) {
                         Log.d(LOG_TAG, "Auto-translate triggered for article ${article.id} with ${articleContent.elements.size} elements")
                         translate()
                         return@collect // Only translate on first load
@@ -468,7 +470,9 @@ class ArticleViewModel(
             } catch (e: Exception) {
                 aiSummary.value =
                     AISummaryState.Result(
-                        value = com.nononsenseapps.feeder.ai.AIClient.SummaryResult.Error(content = e.message ?: "Unknown error"),
+                        value =
+                            com.nononsenseapps.feeder.ai.AIClient.SummaryResult
+                                .Error(content = e.message ?: "Unknown error"),
                     )
             }
         }
@@ -497,9 +501,10 @@ class ArticleViewModel(
                 if (translatableTexts.isEmpty()) {
                     translationState.value =
                         TranslationState.Result(
-                            value = com.nononsenseapps.feeder.ai.AIClient.TranslationResult.Error(
-                                content = "No translatable content found",
-                            ),
+                            value =
+                                com.nononsenseapps.feeder.ai.AIClient.TranslationResult.Error(
+                                    content = "No translatable content found",
+                                ),
                         )
                     return@launch
                 }
@@ -512,9 +517,10 @@ class ArticleViewModel(
                 Log.e(LOG_TAG, "Translation failed", e)
                 translationState.value =
                     TranslationState.Result(
-                        value = com.nononsenseapps.feeder.ai.AIClient.TranslationResult.Error(
-                            content = e.message ?: "Translation failed",
-                        ),
+                        value =
+                            com.nononsenseapps.feeder.ai.AIClient.TranslationResult.Error(
+                                content = e.message ?: "Translation failed",
+                            ),
                     )
             }
         }
@@ -547,7 +553,7 @@ class ArticleViewModel(
         extractTranslatableTextRecursively(
             elements = content.elements,
             translatableTexts = translatableTexts,
-            nestingLevel = 0
+            nestingLevel = 0,
         )
 
         return translatableTexts
@@ -570,7 +576,7 @@ class ArticleViewModel(
     private fun extractTranslatableTextRecursively(
         elements: List<com.nononsenseapps.feeder.model.html.LinearElement>,
         translatableTexts: MutableList<TranslatableText>,
-        nestingLevel: Int = 0
+        nestingLevel: Int = 0,
     ) {
         for (element in elements) {
             when (element) {
@@ -587,7 +593,7 @@ class ArticleViewModel(
                                     text = text.trim(),
                                     elementType = elementType,
                                     nestingLevel = nestingLevel,
-                                )
+                                ),
                             )
                         }
                     }
@@ -599,7 +605,7 @@ class ArticleViewModel(
                     extractTranslatableTextRecursively(
                         elements = element.content,
                         translatableTexts = translatableTexts,
-                        nestingLevel = nestingLevel + 1
+                        nestingLevel = nestingLevel + 1,
                     )
                 }
                 is com.nononsenseapps.feeder.model.html.LinearBlockQuote -> {
@@ -608,7 +614,7 @@ class ArticleViewModel(
                     extractTranslatableTextRecursively(
                         elements = element.content,
                         translatableTexts = translatableTexts,
-                        nestingLevel = nestingLevel + 1
+                        nestingLevel = nestingLevel + 1,
                     )
                 }
                 // Skip other element types (images, videos, tables, etc.)
@@ -626,9 +632,7 @@ class ArticleViewModel(
      * @param annotations List of text annotations to check
      * @return ElementType representing the type of element (heading or paragraph)
      */
-    private fun getElementTypeFromAnnotations(
-        annotations: List<com.nononsenseapps.feeder.model.html.LinearTextAnnotation>
-    ): ElementType {
+    private fun getElementTypeFromAnnotations(annotations: List<com.nononsenseapps.feeder.model.html.LinearTextAnnotation>): ElementType {
         // Check for heading annotations
         for (annotation in annotations) {
             when (annotation.data) {

@@ -25,12 +25,13 @@ class ProviderListViewModel(
     /**
      * Stream of all configured providers.
      */
-    val providers: StateFlow<List<ProviderConfig>> = repository.providers
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.Eagerly,
-            initialValue = emptyList(),
-        )
+    val providers: StateFlow<List<ProviderConfig>> =
+        repository.providers
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.Eagerly,
+                initialValue = emptyList(),
+            )
 
     /**
      * Activate a provider (set it as the currently active one).

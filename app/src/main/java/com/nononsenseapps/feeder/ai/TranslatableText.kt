@@ -25,8 +25,8 @@ data class TranslatableText(
      * Returns a formatted string describing the structure context.
      * Used in prompts to AI translators.
      */
-    fun getStructureDescription(): String {
-        return when (elementType) {
+    fun getStructureDescription(): String =
+        when (elementType) {
             ElementType.PARAGRAPH -> "paragraph"
             ElementType.HEADING_1 -> "heading level 1"
             ElementType.HEADING_2 -> "heading level 2"
@@ -37,27 +37,23 @@ data class TranslatableText(
             ElementType.LIST_ITEM -> "list item${if (nestingLevel > 0) " (nesting level: $nestingLevel)" else ""}"
             ElementType.BLOCKQUOTE -> "blockquote${if (nestingLevel > 0) " (nesting level: $nestingLevel)" else ""}"
         }
-    }
 
     /**
      * Returns the text with structure context prepended.
      * Format: "[ElementType] text"
      */
-    fun withStructurePrefix(): String {
-        return "[${getStructureDescription()}] $text"
-    }
+    fun withStructurePrefix(): String = "[${getStructureDescription()}] $text"
 
     companion object {
         /**
          * Creates a TranslatableText from plain text with default settings.
          */
-        fun fromPlainText(text: String): TranslatableText {
-            return TranslatableText(
+        fun fromPlainText(text: String): TranslatableText =
+            TranslatableText(
                 text = text,
                 elementType = ElementType.PARAGRAPH,
                 nestingLevel = 0,
             )
-        }
     }
 }
 

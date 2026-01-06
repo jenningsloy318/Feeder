@@ -87,22 +87,23 @@ class MenuConfigStoreTest {
     }
 
     @Test
-    fun `getConfigFlow emits initial config`() = runTest {
-        // Given
-        val validJson = """{"order":["copy","translate"],"visibility":{"copy":true,"translate":false}}"""
-        every { mockSharedPreferences.getString("menu_config", null) } returns validJson
+    fun `getConfigFlow emits initial config`() =
+        runTest {
+            // Given
+            val validJson = """{"order":["copy","translate"],"visibility":{"copy":true,"translate":false}}"""
+            every { mockSharedPreferences.getString("menu_config", null) } returns validJson
 
-        // When
-        val store = MenuConfigStoreImpl(mockSharedPreferences)
-        val flow = store.getConfigFlow()
+            // When
+            val store = MenuConfigStoreImpl(mockSharedPreferences)
+            val flow = store.getConfigFlow()
 
-        // Then
-        flow.collect { config ->
-            assertEquals(listOf("copy", "translate"), config.order)
-            assertEquals(true, config.visibility["copy"])
-            assertEquals(false, config.visibility["translate"])
+            // Then
+            flow.collect { config ->
+                assertEquals(listOf("copy", "translate"), config.order)
+                assertEquals(true, config.visibility["copy"])
+                assertEquals(false, config.visibility["translate"])
+            }
         }
-    }
 
     @Test
     fun `getConfigFlow handles empty config`() {

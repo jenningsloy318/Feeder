@@ -39,13 +39,14 @@ data class OpenAISettings(
      * Check if settings are valid.
      */
     val isValid: Boolean
-        get() = modelId.isNotEmpty() &&
-            key.isNotEmpty() &&
-            if (isAzure) {
-                azureApiVersion.isNotBlank() && azureDeploymentId.isNotBlank()
-            } else {
-                true
-            }
+        get() =
+            modelId.isNotEmpty() &&
+                key.isNotEmpty() &&
+                if (isAzure) {
+                    azureApiVersion.isNotBlank() && azureDeploymentId.isNotBlank()
+                } else {
+                    true
+                }
 
     companion object {
         const val DEFAULT_MODEL = "gpt-4o-mini"
@@ -89,7 +90,9 @@ sealed interface AISettings {
      */
     @Suppress("DataClassShouldBeImmutable")
     data class OpenAI(
-        val openaiSettings: com.nononsenseapps.feeder.ai.model.OpenAISettings = com.nononsenseapps.feeder.ai.model.OpenAISettings(),
+        val openaiSettings: com.nononsenseapps.feeder.ai.model.OpenAISettings =
+            com.nononsenseapps.feeder.ai.model
+                .OpenAISettings(),
     ) : AISettings {
         override val providerType: AIProvider = AIProvider.OPENAI_COMPATIBLE
     }
@@ -99,7 +102,9 @@ sealed interface AISettings {
      */
     @Suppress("DataClassShouldBeImmutable")
     data class Anthropic(
-        val anthropicSettings: com.nononsenseapps.feeder.ai.model.AnthropicSettings = com.nononsenseapps.feeder.ai.model.AnthropicSettings(),
+        val anthropicSettings: com.nononsenseapps.feeder.ai.model.AnthropicSettings =
+            com.nononsenseapps.feeder.ai.model
+                .AnthropicSettings(),
     ) : AISettings {
         override val providerType: AIProvider = AIProvider.ANTHROPIC
     }

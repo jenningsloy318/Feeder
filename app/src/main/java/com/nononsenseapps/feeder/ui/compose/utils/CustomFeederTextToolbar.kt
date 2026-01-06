@@ -82,16 +82,17 @@ class CustomFeederTextToolbar(
 
         // Don't use clipboard workaround here as it dismisses text selection.
         // Store empty text for now - will extract on-demand for third-party actions.
-        _menuState.value = ToolbarState(
-            rect = rect,
-            text = "",  // Empty to preserve selection
-            onCopyRequested = onCopyRequested,
-            onPasteRequested = onPasteRequested,
-            onCutRequested = onCutRequested,
-            onSelectAllRequested = onSelectAllRequested,
-            onReadAloud = onReadAloud,
-            onTranslate = onTranslate,
-        )
+        _menuState.value =
+            ToolbarState(
+                rect = rect,
+                text = "", // Empty to preserve selection
+                onCopyRequested = onCopyRequested,
+                onPasteRequested = onPasteRequested,
+                onCutRequested = onCutRequested,
+                onSelectAllRequested = onSelectAllRequested,
+                onReadAloud = onReadAloud,
+                onTranslate = onTranslate,
+            )
     }
 
     /**
@@ -100,9 +101,7 @@ class CustomFeederTextToolbar(
      *
      * @return Current MenuConfig
      */
-    fun getMenuConfig(): MenuConfig {
-        return menuConfigStore.getConfig()
-    }
+    fun getMenuConfig(): MenuConfig = menuConfigStore.getConfig()
 }
 
 /**

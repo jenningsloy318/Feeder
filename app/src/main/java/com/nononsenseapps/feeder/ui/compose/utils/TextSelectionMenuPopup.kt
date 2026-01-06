@@ -1,18 +1,15 @@
 package com.nononsenseapps.feeder.ui.compose.utils
 
-import android.content.ClipData
 import android.content.ClipboardManager
-import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.widget.Toast
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -27,7 +24,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import com.nononsenseapps.feeder.R
@@ -66,21 +62,24 @@ fun TextSelectionMenuPopup(
     val enabledItems = rememberMenuItems(menuItems, menuConfig)
 
     // Calculate toolbar dimensions
-    val toolbarWidth = with(LocalDensity.current) {
-        (enabledItems.size * 80).dp.toPx()  // Approx 80dp per item
-    }.toInt()
+    val toolbarWidth =
+        with(LocalDensity.current) {
+            (enabledItems.size * 80).dp.toPx() // Approx 80dp per item
+        }.toInt()
 
-    val toolbarHeight = with(LocalDensity.current) {
-        48.dp.toPx()  // Material3 toolbar height
-    }.toInt()
+    val toolbarHeight =
+        with(LocalDensity.current) {
+            48.dp.toPx() // Material3 toolbar height
+        }.toInt()
 
     // Calculate intelligent toolbar position (prefers ABOVE first, like Android system)
-    val offset = calculateToolbarPosition(
-        selectionRect = state.rect,
-        toolbarWidth = toolbarWidth,
-        toolbarHeight = toolbarHeight,
-        density = LocalDensity.current,
-    )
+    val offset =
+        calculateToolbarPosition(
+            selectionRect = state.rect,
+            toolbarWidth = toolbarWidth,
+            toolbarHeight = toolbarHeight,
+            density = LocalDensity.current,
+        )
 
     Popup(
         alignment = androidx.compose.ui.Alignment.TopStart,
@@ -91,11 +90,12 @@ fun TextSelectionMenuPopup(
         },
         // Make popup non-focusable to preserve text selection
         // This prevents the toolbar from stealing focus from SelectionContainer
-        properties = PopupProperties(
-            focusable = false,
-            dismissOnBackPress = true,
-            dismissOnClickOutside = true,
-        ),
+        properties =
+            PopupProperties(
+                focusable = false,
+                dismissOnBackPress = true,
+                dismissOnClickOutside = true,
+            ),
     ) {
         Surface(
             modifier = Modifier,
@@ -137,14 +137,14 @@ private fun ToolbarItem(
 ) {
     Text(
         text = name,
-        modifier = Modifier
-            .clickable(
-                onClick = onClick,
-                // Don't steal focus when clicking toolbar item
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null,
-            )
-            .padding(horizontal = 12.dp, vertical = 8.dp),
+        modifier =
+            Modifier
+                .clickable(
+                    onClick = onClick,
+                    // Don't steal focus when clicking toolbar item
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null,
+                ).padding(horizontal = 12.dp, vertical = 8.dp),
         style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.primary,
     )
@@ -172,12 +172,13 @@ private fun executeAction(
     when (item.type) {
         MenuType.SYSTEM -> executeSystemAction(item.id, state)
         MenuType.APPLICATION -> executeApplicationAction(item.id, state, context)
-        MenuType.THIRD_PARTY -> executeThirdPartyAction(
-            item = item,
-            state = state,
-            context = context,
-            activityLauncher = activityLauncher,
-        )
+        MenuType.THIRD_PARTY ->
+            executeThirdPartyAction(
+                item = item,
+                state = state,
+                context = context,
+                activityLauncher = activityLauncher,
+            )
     }
 }
 
@@ -237,21 +238,23 @@ private fun executeThirdPartyAction(
     val selectedText = extractSelectedText(context, state)
 
     try {
-        val intent = Intent(Intent.ACTION_PROCESS_TEXT).apply {
-            type = "text/plain"
-            component = componentName
-            putExtra(Intent.EXTRA_PROCESS_TEXT, selectedText)
-        }
+        val intent =
+            Intent(Intent.ACTION_PROCESS_TEXT).apply {
+                type = "text/plain"
+                component = componentName
+                putExtra(Intent.EXTRA_PROCESS_TEXT, selectedText)
+            }
         activityLauncher.startActivity(
             openAdjacentIfSuitable = true,
             intent = intent,
         )
     } catch (e: Exception) {
-        Toast.makeText(
-            context,
-            context.getString(R.string.unable_to_open_app, item.name),
-            Toast.LENGTH_SHORT,
-        ).show()
+        Toast
+            .makeText(
+                context,
+                context.getString(R.string.unable_to_open_app, item.name),
+                Toast.LENGTH_SHORT,
+            ).show()
     }
 }
 
@@ -272,7 +275,11 @@ private fun extractSelectedText(
     state.onCopyRequested?.invoke()
 
     // Read the selected text from clipboard
-    val selectedText = clipboardManager.primaryClip?.getItemAt(0)?.text?.toString() ?: ""
+    val selectedText =
+        clipboardManager.primaryClip
+            ?.getItemAt(0)
+            ?.text
+            ?.toString() ?: ""
 
     // Restore previous clipboard content
     if (previousClip != null) {
@@ -327,34 +334,36 @@ private fun calculateToolbarPosition(
     val toolbarHeightWithMargin = toolbarHeight + marginVertical
 
     // Y-position: Prefer ABOVE first (like Android system)
-    val y = when {
-        // 1st choice: Position ABOVE with full margin
-        availableHeightAboveContent >= toolbarHeightWithMargin -> {
-            (selectionRect.top - toolbarHeightWithMargin).toInt()
+    val y =
+        when {
+            // 1st choice: Position ABOVE with full margin
+            availableHeightAboveContent >= toolbarHeightWithMargin -> {
+                (selectionRect.top - toolbarHeightWithMargin).toInt()
+            }
+            // 2nd choice: Position BELOW with full margin
+            availableHeightBelowContent >= toolbarHeightWithMargin -> {
+                selectionRect.bottom.toInt()
+            }
+            // 3rd choice: Position BELOW with reduced margin
+            availableHeightBelowContent >= toolbarHeight -> {
+                (selectionRect.bottom - marginVerticalReduced).toInt()
+            }
+            // 4th choice: Not enough space, position as high as possible
+            else -> {
+                maxOf(
+                    statusBarHeight.toFloat(),
+                    selectionRect.top - toolbarHeightWithMargin,
+                ).toInt()
+            }
         }
-        // 2nd choice: Position BELOW with full margin
-        availableHeightBelowContent >= toolbarHeightWithMargin -> {
-            selectionRect.bottom.toInt()
-        }
-        // 3rd choice: Position BELOW with reduced margin
-        availableHeightBelowContent >= toolbarHeight -> {
-            (selectionRect.bottom - marginVerticalReduced).toInt()
-        }
-        // 4th choice: Not enough space, position as high as possible
-        else -> {
-            maxOf(
-                statusBarHeight.toFloat(),
-                selectionRect.top - toolbarHeightWithMargin
-            ).toInt()
-        }
-    }
 
     // X-position: Center on selection, clamp to screen bounds
     val xCenter = (selectionRect.left + selectionRect.right) / 2
-    val x = minOf(
-        xCenter - toolbarWidth / 2,
-        screenWidth - toolbarWidth
-    ).toInt().coerceAtLeast(0)
+    val x =
+        minOf(
+            xCenter - toolbarWidth / 2,
+            screenWidth - toolbarWidth,
+        ).toInt().coerceAtLeast(0)
 
     return IntOffset(x, y)
 }
@@ -374,9 +383,10 @@ private fun rememberMenuItems(
     config: MenuConfig,
 ): List<SelectionMenuItem> {
     // Filter visible items
-    val visibleItems = allItems.filter { item ->
-        config.isVisible(item.id)
-    }
+    val visibleItems =
+        allItems.filter { item ->
+            config.isVisible(item.id)
+        }
 
     // Sort by custom order
     val orderMap = config.order.mapIndexed { index, id -> id to index }.toMap()

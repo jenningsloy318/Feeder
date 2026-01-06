@@ -133,7 +133,6 @@ enum class SummaryLanguage(
         /**
          * Parse language code to SummaryLanguage, defaulting to AUTO_DETECT.
          */
-        fun fromCode(code: String?): SummaryLanguage =
-            entries.firstOrNull { it.code == code } ?: AUTO_DETECT
+        fun fromCode(code: String?): SummaryLanguage = entries.firstOrNull { it.code == code } ?: AUTO_DETECT
     }
 }

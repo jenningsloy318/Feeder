@@ -5,11 +5,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
@@ -24,12 +24,10 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -48,7 +46,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -142,10 +139,11 @@ private fun AIProviderSectionItem(
     onNavigateToProviders: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val key = when (settings) {
-        is AISettings.OpenAI -> settings.openaiSettings.key
-        is AISettings.Anthropic -> settings.anthropicSettings.key
-    }
+    val key =
+        when (settings) {
+            is AISettings.OpenAI -> settings.openaiSettings.key
+            is AISettings.Anthropic -> settings.anthropicSettings.key
+        }
 
     Row(
         modifier =
@@ -168,11 +166,12 @@ private fun AIProviderSectionItem(
             },
             subtitle = {
                 Text(
-                    text = if (key.isNotBlank()) {
-                        stringResource(R.string.provider_configured)
-                    } else {
-                        stringResource(R.string.no_providers_configured)
-                    },
+                    text =
+                        if (key.isNotBlank()) {
+                            stringResource(R.string.provider_configured)
+                        } else {
+                            stringResource(R.string.no_providers_configured)
+                        },
                     style = MaterialTheme.typography.bodySmall,
                 )
             },
@@ -269,10 +268,11 @@ fun AIProviderSectionEdit(
 
     val currentOpenAISettings = (current as? AISettings.OpenAI)?.openaiSettings ?: OpenAISettings()
     val currentAnthropicSettings = (current as? AISettings.Anthropic)?.anthropicSettings ?: AnthropicSettings()
-    val timeoutSeconds = when (current) {
-        is AISettings.OpenAI -> current.openaiSettings.timeoutSeconds
-        is AISettings.Anthropic -> current.anthropicSettings.timeoutSeconds
-    }
+    val timeoutSeconds =
+        when (current) {
+            is AISettings.OpenAI -> current.openaiSettings.timeoutSeconds
+            is AISettings.Anthropic -> current.anthropicSettings.timeoutSeconds
+        }
     var timeoutString by remember { mutableStateOf(timeoutSeconds.toString()) }
 
     val isTimeoutInputValid =
@@ -312,8 +312,11 @@ fun AIProviderSectionEdit(
                 trailingIcon = {
                     IconButton(onClick = { providerMenuExpanded = !providerMenuExpanded }) {
                         Icon(
-                            if (providerMenuExpanded) Icons.Filled.ExpandLess
-                            else Icons.Filled.ExpandMore,
+                            if (providerMenuExpanded) {
+                                Icons.Filled.ExpandLess
+                            } else {
+                                Icons.Filled.ExpandMore
+                            },
                             contentDescription = null,
                         )
                     }
@@ -345,10 +348,11 @@ fun AIProviderSectionEdit(
         }
 
         // API Key
-        val key = when (current) {
-            is AISettings.OpenAI -> current.openaiSettings.key
-            is AISettings.Anthropic -> current.anthropicSettings.key
-        }
+        val key =
+            when (current) {
+                is AISettings.OpenAI -> current.openaiSettings.key
+                is AISettings.Anthropic -> current.anthropicSettings.key
+            }
         TextField(
             modifier = Modifier.fillMaxWidth(),
             value = key,
@@ -378,10 +382,11 @@ fun AIProviderSectionEdit(
         )
 
         // Model ID
-        val modelId = when (current) {
-            is AISettings.OpenAI -> current.openaiSettings.modelId
-            is AISettings.Anthropic -> current.anthropicSettings.modelId
-        }
+        val modelId =
+            when (current) {
+                is AISettings.OpenAI -> current.openaiSettings.modelId
+                is AISettings.Anthropic -> current.anthropicSettings.modelId
+            }
         TextField(
             modifier = Modifier.fillMaxWidth(),
             value = modelId,
@@ -444,10 +449,11 @@ fun AIProviderSectionEdit(
         )
 
         // Base URL
-        val baseUrl = when (current) {
-            is AISettings.OpenAI -> current.openaiSettings.baseUrl
-            is AISettings.Anthropic -> current.anthropicSettings.baseUrl
-        }
+        val baseUrl =
+            when (current) {
+                is AISettings.OpenAI -> current.openaiSettings.baseUrl
+                is AISettings.Anthropic -> current.anthropicSettings.baseUrl
+            }
         TextField(
             modifier = Modifier.fillMaxWidth(),
             value = baseUrl,

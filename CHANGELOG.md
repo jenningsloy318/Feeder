@@ -8,6 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### 🚀 Features
+- **NEW: Async translation with progress tracking** - Added support for translating long-form content (30,000+ words) that previously timed out
+  - Parallel chunk processing with configurable concurrency (3 concurrent chunks by default)
+  - Real-time progress reporting via Flow<TranslationProgress>
+  - Automatic content size detection - short content uses fast path, long content chunks automatically
+  - Intelligent retry logic with exponential backoff for network errors
+  - Per-chunk error tracking and partial success handling
+  - Cancellation support via coroutine scope
+  - Fixed critical bug in TranslationChunker where startIndex calculation used cleared chunk size
+  - Added division-by-zero protection in TranslationProgress progress calculation
 - Added import functionality for saved articles to complement existing export feature
 - Added dedicated Summary settings screen with enable/disable toggle for AI summaries
 - Improved AI Integration settings UX with separate configuration screen for summary language and enabled state
@@ -16,6 +25,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### 🐛 Bug Fixes & Minor Changes
 - Refactored AI summary API to respect user's enabled state before generating summaries
 - Updated AI Provider settings section to navigate to dedicated Summary screen
+- Fixed TranslationChunker chunk index calculation bug that caused incorrect text slicing
+- Added safety check to prevent division by zero in TranslationProgress.getProgressPercentage()
 
 ## [2.16.1] - 2025-11-23
 

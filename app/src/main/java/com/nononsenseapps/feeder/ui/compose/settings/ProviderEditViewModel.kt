@@ -1,3 +1,5 @@
+@file:Suppress("REQUIRES_OPT_IN", "OPT_IN_IS_BETA", "OPT_IN_USAGE")
+
 package com.nononsenseapps.feeder.ui.compose.settings
 
 import androidx.lifecycle.SavedStateHandle
@@ -53,6 +55,11 @@ data class ProviderEditUiState(
 
     val modelId: String
         get() = provider.openAISettings?.modelId ?: provider.anthropicSettings?.modelId ?: ""
+
+    val maxTokens: String
+        get() = provider.openAISettings?.maxTokens?.toString()
+            ?: provider.anthropicSettings?.maxTokens?.toString()
+            ?: ""
 
     val isActive: Boolean
         get() = provider.isActive
@@ -123,6 +130,8 @@ class ProviderEditViewModel(
      */
     @OptIn(ExperimentalCoroutinesApi::class)
     val uiState: StateFlow<ProviderEditUiState> =
+        @Suppress("REQUIRES_OPT_IN", "OPT_IN_USAGE")
+        @OptIn(ExperimentalCoroutinesApi::class)
         object : StateFlow<ProviderEditUiState> {
             override val value: ProviderEditUiState
                 get() = toUiState(viewModelState.value)
@@ -262,6 +271,40 @@ class ProviderEditViewModel(
                             current.anthropicSettings?.copy(modelId = modelId)
                                 ?: com.nononsenseapps.feeder.ai.model
                                     .AnthropicSettings(modelId = modelId),
+                    )
+            }
+        updateProvider(updatedProvider)
+    }
+
+    /**
+     * Update the max tokens setting.
+     * Validates the input and converts to Int or null.
+     */
+    fun updateMaxTokens(maxTokens: String) {
+        val current = _internalState.value.provider
+        val parsedTokens =
+            when {
+                maxTokens.isBlank() -> null
+                else ->
+                    maxTokens.toIntOrNull()?.takeIf {
+                        it in 1..128_000
+                    }
+            }
+        val updatedProvider =
+            when (current.providerType) {
+                AIProvider.OPENAI_COMPATIBLE ->
+                    current.copy(
+                        openAISettings =
+                            current.openAISettings?.copy(maxTokens = parsedTokens)
+                                ?: com.nononsenseapps.feeder.ai.model
+                                    .OpenAISettings(maxTokens = parsedTokens),
+                    )
+                AIProvider.ANTHROPIC ->
+                    current.copy(
+                        anthropicSettings =
+                            current.anthropicSettings?.copy(maxTokens = parsedTokens)
+                                ?: com.nononsenseapps.feeder.ai.model
+                                    .AnthropicSettings(maxTokens = parsedTokens),
                     )
             }
         updateProvider(updatedProvider)

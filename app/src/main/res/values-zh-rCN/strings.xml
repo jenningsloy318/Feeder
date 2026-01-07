@@ -254,6 +254,9 @@
     <string name="openai_settings">AI 集成</string>
     <string name="api_key">API 密钥</string>
     <string name="model_id">模型 Id</string>
+    <string name="max_tokens">最大令牌数</string>
+    <string name="max_tokens_hint">1-128000</string>
+    <string name="max_tokens_supporting">留空使用模型默认值</string>
     <string name="summarize">概述</string>
     <string name="azure_api_version">Azure API 版本</string>
     <string name="unable_to_load_models">无法加载模型。</string>

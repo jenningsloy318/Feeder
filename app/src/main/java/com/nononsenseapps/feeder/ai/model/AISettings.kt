@@ -10,6 +10,7 @@ import kotlinx.serialization.Serializable
  * @property modelId Model identifier (e.g., "gpt-4o-mini")
  * @property baseUrl Custom base URL for API requests (empty for default OpenAI endpoint)
  * @property timeoutSeconds Request timeout in seconds (30-600 range, default 90)
+ * @property maxTokens Maximum tokens for response (1-128000 range, null for default)
  * @property azureApiVersion Azure API version (Azure OpenAI only)
  * @property azureDeploymentId Azure deployment ID (Azure OpenAI only)
  */
@@ -19,6 +20,7 @@ data class OpenAISettings(
     val modelId: String = "",
     val baseUrl: String = "",
     val timeoutSeconds: Int = 90,
+    val maxTokens: Int? = null,
     val azureApiVersion: String = "",
     val azureDeploymentId: String = "",
 ) {
@@ -60,6 +62,7 @@ data class OpenAISettings(
  * @property modelId Model identifier (e.g., "claude-3-5-sonnet-20241022")
  * @property baseUrl Custom base URL for API requests (empty for default Anthropic endpoint)
  * @property timeoutSeconds Request timeout in seconds (30-600 range, default 90)
+ * @property maxTokens Maximum tokens for response (1-128000 range, null for default)
  */
 @Serializable
 data class AnthropicSettings(
@@ -67,6 +70,7 @@ data class AnthropicSettings(
     val modelId: String = "",
     val baseUrl: String = "",
     val timeoutSeconds: Int = 90,
+    val maxTokens: Int? = null,
 ) {
     /**
      * Check if settings are valid.

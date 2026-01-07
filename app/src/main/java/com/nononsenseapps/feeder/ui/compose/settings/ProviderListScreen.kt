@@ -186,6 +186,7 @@ fun ProviderListItem(
     onDelete: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    @Suppress("DEPRECATION")
     val dismissState =
         rememberSwipeToDismissBoxState(
             confirmValueChange = { dismissValue ->

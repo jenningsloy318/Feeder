@@ -281,6 +281,9 @@
   <string name="ai_provider_anthropic_compatible">Anthropic-compatible</string>
   <string name="api_key">API key</string>
   <string name="model_id">Model Id</string>
+  <string name="max_tokens">Max Tokens</string>
+  <string name="max_tokens_hint">1-128000</string>
+  <string name="max_tokens_supporting">Leave empty to use model default</string>
   <string name="summary_language_title">Summary Language</string>
   <string name="summary_language_description">Choose the language for AI-generated summaries</string>
   <string name="summary_language_auto_detect">Auto-detect</string>

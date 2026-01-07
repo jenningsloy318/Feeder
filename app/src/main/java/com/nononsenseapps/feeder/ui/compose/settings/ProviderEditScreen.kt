@@ -135,6 +135,7 @@ fun ProviderEditScreen(
                         onApiKeyChange = viewModel::updateApiKey,
                         onBaseUrlChange = viewModel::updateBaseUrl,
                         onModelIdChange = viewModel::updateModelId,
+                        onMaxTokensChange = viewModel::updateMaxTokens,
                         onIsActiveChange = viewModel::updateIsActive,
                         onSave = {
                             focusManager.clearFocus()
@@ -160,6 +161,7 @@ fun ProviderEditForm(
     onApiKeyChange: (String) -> Unit,
     onBaseUrlChange: (String) -> Unit,
     onModelIdChange: (String) -> Unit,
+    onMaxTokensChange: (String) -> Unit,
     onIsActiveChange: (Boolean) -> Unit,
     onSave: () -> Unit,
     onCancel: () -> Unit,
@@ -352,6 +354,34 @@ fun ProviderEditForm(
             keyboardOptions =
                 KeyboardOptions(
                     keyboardType = KeyboardType.Ascii,
+                    imeAction = ImeAction.Next,
+                ),
+            keyboardActions =
+                androidx.compose.foundation.text.KeyboardActions(
+                    onNext = {
+                        focusManager.moveFocus(FocusDirection.Down)
+                    },
+                ),
+            modifier = Modifier.fillMaxWidth(),
+        )
+
+        // Max Tokens
+        OutlinedTextField(
+            value = uiState.maxTokens,
+            onValueChange = onMaxTokensChange,
+            label = {
+                Text(stringResource(R.string.max_tokens))
+            },
+            placeholder = {
+                Text(stringResource(R.string.max_tokens_hint))
+            },
+            singleLine = true,
+            supportingText = {
+                Text(stringResource(R.string.max_tokens_supporting))
+            },
+            keyboardOptions =
+                KeyboardOptions(
+                    keyboardType = KeyboardType.Number,
                     imeAction = ImeAction.Done,
                 ),
             keyboardActions =

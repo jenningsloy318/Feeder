@@ -227,6 +227,8 @@ kotlin {
     compilerOptions {
         allWarningsAsErrors = false
         jvmTarget = JvmTarget.JVM_11
+        freeCompilerArgs.add("-Xannotation-default-target=param-property")
+        freeCompilerArgs.add("-Xopt-in=kotlinx.coroutines.ExperimentalCoroutinesApi")
     }
 }
 

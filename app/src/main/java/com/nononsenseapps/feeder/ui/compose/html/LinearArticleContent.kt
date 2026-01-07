@@ -263,7 +263,6 @@ fun LazyListScope.linearArticleContent(
                 is LinearTable -> "table_${index}_${element.rowCount}x${element.colCount}"
                 is LinearBlockQuote -> "blockquote_${index}_${element.cite?.hashCode() ?: index}"
                 is LinearListItem -> "listitem_${index}_${element.orderedIndex ?: "bullet"}_$index"
-                else -> "element_$index"
             }
         },
         contentType = { index -> articleContent.elements[index].lazyListContentType },

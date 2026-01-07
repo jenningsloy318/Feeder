@@ -106,7 +106,9 @@ class ActivityLauncher(
                 CustomTabsIntent
                     .Builder()
                     .apply {
+                        @Suppress("DEPRECATION")
                         setToolbarColor(toolbarColor)
+                        @Suppress("DEPRECATION")
                         addDefaultShareMenuItem()
                     }.build()
                     .intent

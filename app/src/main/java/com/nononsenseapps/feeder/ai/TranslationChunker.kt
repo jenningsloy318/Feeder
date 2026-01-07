@@ -58,6 +58,7 @@ class TranslationChunker(
             // Start new chunk if current chunk would exceed max size
             // AND current chunk is not empty (avoid empty chunks)
             if (wouldExceed && currentChunk.isNotEmpty()) {
+                val chunkSize = currentChunk.size
                 chunks.add(
                     TranslationChunk(
                         id = chunkId++,
@@ -65,13 +66,13 @@ class TranslationChunker(
                         characterCount = currentSize,
                         estimatedTokens = currentSize / 4,
                         startIndex = startIndex,
-                        endIndex = startIndex + currentChunk.size,
+                        endIndex = startIndex + chunkSize,
                     ),
                 )
 
                 currentChunk = mutableListOf()
                 currentSize = 0
-                startIndex += currentChunk.size
+                startIndex += chunkSize  // Fixed: use saved size before clearing
             }
 
             // Add text to current chunk

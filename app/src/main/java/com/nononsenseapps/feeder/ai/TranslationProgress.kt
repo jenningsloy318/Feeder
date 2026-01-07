@@ -84,8 +84,8 @@ sealed class TranslationProgress {
      */
     fun getProgressPercentage(): Int? =
         when (this) {
-            is Translating -> (current * 100) / total
-            is ChunkComplete -> (current * 100) / total
+            is Translating -> if (total > 0) (current * 100) / total else 0
+            is ChunkComplete -> if (total > 0) (current * 100) / total else 0
             is Starting -> 0
             else -> null
         }

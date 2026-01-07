@@ -105,6 +105,22 @@ interface AIClient {
     ): TranslationResult
 
     /**
+     * Translate a single chunk of content.
+     *
+     * This method is optimized for translating smaller chunks (typically 1500-2500 characters)
+     * to avoid timeouts with long-form content. It uses the same translation logic as the
+     * regular translate() method but is designed for chunked processing.
+     *
+     * @param chunk TranslationChunk containing texts to translate
+     * @param targetLanguage Target language for translation
+     * @return ChunkTranslationResult with translated texts or error
+     */
+    suspend fun translateChunk(
+        chunk: TranslationChunk,
+        targetLanguage: com.nononsenseapps.feeder.ai.model.TranslationLanguage,
+    ): ChunkTranslationResult
+
+    /**
      * Result of a model listing request.
      */
     sealed interface ModelsResult {

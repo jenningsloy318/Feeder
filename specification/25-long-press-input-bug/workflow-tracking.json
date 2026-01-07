@@ -1,0 +1,30 @@
+{
+  "featureName": "Fix AI Dictionary JSON Parsing Error",
+  "startedAt": "2026-01-07T11:28:27+08:00",
+  "phases": [
+    { "id": 0, "name": "Apply Dev Rules", "status": "complete", "startedAt": "2026-01-07T11:28:27+08:00", "completedAt": "2026-01-07T11:28:27+08:00" },
+    { "id": 1, "name": "Specification Setup", "status": "in_progress", "startedAt": "2026-01-07T11:28:27+08:00", "completedAt": null },
+    { "id": 2, "name": "Requirements Clarification", "status": "pending", "startedAt": null, "completedAt": null },
+    { "id": 3, "name": "Research", "status": "pending", "startedAt": null, "completedAt": null },
+    { "id": 4, "name": "Debug Analysis", "status": "pending", "startedAt": null, "completedAt": null },
+    { "id": 5, "name": "Code Assessment", "status": "pending", "startedAt": null, "completedAt": null },
+    { "id": 6, "name": "Specification Writing", "status": "pending", "startedAt": null, "completedAt": null },
+    { "id": 7, "name": "Specification Review", "status": "pending", "startedAt": null, "completedAt": null },
+    { "id": 8, "name": "Execution & QA", "status": "pending", "startedAt": null, "completedAt": null },
+    { "id": 9, "name": "Code Review", "status": "pending", "startedAt": null, "completedAt": null },
+    { "id": 10, "name": "Documentation Update", "status": "pending", "startedAt": null, "completedAt": null },
+    { "id": 11, "name": "Cleanup", "status": "pending", "startedAt": null, "completedAt": null },
+    { "id": 12, "name": "Commit & Push", "status": "pending", "startedAt": null, "completedAt": null },
+    { "id": 13, "name": "Final Verification", "status": "pending", "startedAt": null, "completedAt": null }
+  ],
+  "tasks": [],
+  "iteration": {
+    "loops": 0,
+    "lastReviewVerdict": null
+  },
+  "status": {
+    "allPhasesComplete": false,
+    "allTasksComplete": false,
+    "workflowDone": false
+  }
+}

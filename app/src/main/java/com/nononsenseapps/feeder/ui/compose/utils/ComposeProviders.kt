@@ -39,8 +39,10 @@ fun DIAwareComponentActivity.withAllProviders(content: @Composable () -> Unit) {
                             WithFeederTextToolbar(
                                 onReadAloud = null,
                                 onTranslate = null,
-                                content = content,
-                            )
+                            ) {
+                                TextSelectionMenuHandler()
+                                content()
+                            }
                         }
                     }
                 }

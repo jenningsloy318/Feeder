@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -182,37 +181,35 @@ fun ProviderEditForm(
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         // Provider Name
-        SelectionContainer {
-            OutlinedTextField(
-                value = uiState.name,
-                onValueChange = onNameChange,
-                label = {
-                    Text(stringResource(R.string.provider_name))
-                },
-                placeholder = {
-                    Text(stringResource(R.string.provider_name_hint))
-                },
-                singleLine = true,
-                isError = showValidationError && uiState.name.isBlank(),
-                supportingText = {
-                    if (showValidationError && uiState.name.isBlank()) {
-                        Text(stringResource(R.string.provider_name_required))
-                    }
-                },
-                keyboardOptions =
-                    KeyboardOptions(
-                        keyboardType = KeyboardType.Text,
-                        imeAction = ImeAction.Next,
-                    ),
-                keyboardActions =
-                    androidx.compose.foundation.text.KeyboardActions(
-                        onNext = {
-                            focusManager.moveFocus(FocusDirection.Down)
-                        },
-                    ),
-                modifier = Modifier.fillMaxWidth(),
-            )
-        }
+        OutlinedTextField(
+            value = uiState.name,
+            onValueChange = onNameChange,
+            label = {
+                Text(stringResource(R.string.provider_name))
+            },
+            placeholder = {
+                Text(stringResource(R.string.provider_name_hint))
+            },
+            singleLine = true,
+            isError = showValidationError && uiState.name.isBlank(),
+            supportingText = {
+                if (showValidationError && uiState.name.isBlank()) {
+                    Text(stringResource(R.string.provider_name_required))
+                }
+            },
+            keyboardOptions =
+                KeyboardOptions(
+                    keyboardType = KeyboardType.Text,
+                    imeAction = ImeAction.Next,
+                ),
+            keyboardActions =
+                androidx.compose.foundation.text.KeyboardActions(
+                    onNext = {
+                        focusManager.moveFocus(FocusDirection.Down)
+                    },
+                ),
+            modifier = Modifier.fillMaxWidth(),
+        )
 
         // Provider Type Selector
         @OptIn(ExperimentalMaterial3Api::class)
@@ -220,36 +217,34 @@ fun ProviderEditForm(
             expanded = showProviderTypeMenu,
             onExpandedChange = { showProviderTypeMenu = it },
         ) {
-            SelectionContainer {
-                OutlinedTextField(
-                    value =
-                        stringResource(
-                            id =
-                                when (uiState.providerType) {
-                                    AIProvider.OPENAI_COMPATIBLE -> R.string.ai_provider_openai_compatible
-                                    AIProvider.ANTHROPIC -> R.string.ai_provider_anthropic_compatible
-                                },
+            OutlinedTextField(
+                value =
+                    stringResource(
+                        id =
+                            when (uiState.providerType) {
+                                AIProvider.OPENAI_COMPATIBLE -> R.string.ai_provider_openai_compatible
+                                AIProvider.ANTHROPIC -> R.string.ai_provider_anthropic_compatible
+                            },
+                    ),
+                onValueChange = {},
+                readOnly = true,
+                label = {
+                    Text(stringResource(R.string.ai_provider))
+                },
+                trailingIcon = {
+                    Icon(
+                        Icons.Filled.ExpandMore,
+                        contentDescription = null,
+                    )
+                },
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .menuAnchor(
+                            type = androidx.compose.material3.ExposedDropdownMenuAnchorType.PrimaryNotEditable,
+                            enabled = true,
                         ),
-                    onValueChange = {},
-                    readOnly = true,
-                    label = {
-                        Text(stringResource(R.string.ai_provider))
-                    },
-                    trailingIcon = {
-                        Icon(
-                            Icons.Filled.ExpandMore,
-                            contentDescription = null,
-                        )
-                    },
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .menuAnchor(
-                                type = androidx.compose.material3.ExposedDropdownMenuAnchorType.PrimaryNotEditable,
-                                enabled = true,
-                            ),
-                )
-            }
+            )
 
             androidx.compose.material3.DropdownMenu(
                 expanded = showProviderTypeMenu,
@@ -314,68 +309,64 @@ fun ProviderEditForm(
                 AIProvider.ANTHROPIC -> "https://api.anthropic.com"
             }
 
-        SelectionContainer {
-            OutlinedTextField(
-                value = uiState.baseUrl,
-                onValueChange = onBaseUrlChange,
-                label = {
-                    Text(stringResource(R.string.url))
-                },
-                placeholder = {
-                    Text(baseUrlPlaceholder)
-                },
-                singleLine = true,
-                keyboardOptions =
-                    KeyboardOptions(
-                        keyboardType = KeyboardType.Uri,
-                        imeAction = ImeAction.Next,
-                    ),
-                keyboardActions =
-                    androidx.compose.foundation.text.KeyboardActions(
-                        onNext = {
-                            focusManager.moveFocus(FocusDirection.Down)
-                        },
-                    ),
-                modifier = Modifier.fillMaxWidth(),
-            )
-        }
+        OutlinedTextField(
+            value = uiState.baseUrl,
+            onValueChange = onBaseUrlChange,
+            label = {
+                Text(stringResource(R.string.url))
+            },
+            placeholder = {
+                Text(baseUrlPlaceholder)
+            },
+            singleLine = true,
+            keyboardOptions =
+                KeyboardOptions(
+                    keyboardType = KeyboardType.Uri,
+                    imeAction = ImeAction.Next,
+                ),
+            keyboardActions =
+                androidx.compose.foundation.text.KeyboardActions(
+                    onNext = {
+                        focusManager.moveFocus(FocusDirection.Down)
+                    },
+                ),
+            modifier = Modifier.fillMaxWidth(),
+        )
 
         // Model ID
-        SelectionContainer {
-            OutlinedTextField(
-                value = uiState.modelId,
-                onValueChange = onModelIdChange,
-                label = {
-                    Text(stringResource(R.string.model_id))
-                },
-                placeholder = {
-                    Text(
-                        when (uiState.providerType) {
-                            AIProvider.OPENAI_COMPATIBLE -> "gpt-4o"
-                            AIProvider.ANTHROPIC -> "claude-3-5-sonnet-20241022"
-                        },
-                    )
-                },
-                singleLine = true,
-                keyboardOptions =
-                    KeyboardOptions(
-                        keyboardType = KeyboardType.Ascii,
-                        imeAction = ImeAction.Done,
-                    ),
-                keyboardActions =
-                    androidx.compose.foundation.text.KeyboardActions(
-                        onDone = {
-                            focusManager.clearFocus()
-                            if (isFormValid) {
-                                onSave()
-                            } else {
-                                showValidationError = true
-                            }
-                        },
-                    ),
-                modifier = Modifier.fillMaxWidth(),
-            )
-        }
+        OutlinedTextField(
+            value = uiState.modelId,
+            onValueChange = onModelIdChange,
+            label = {
+                Text(stringResource(R.string.model_id))
+            },
+            placeholder = {
+                Text(
+                    when (uiState.providerType) {
+                        AIProvider.OPENAI_COMPATIBLE -> "gpt-4o"
+                        AIProvider.ANTHROPIC -> "claude-3-5-sonnet-20241022"
+                    },
+                )
+            },
+            singleLine = true,
+            keyboardOptions =
+                KeyboardOptions(
+                    keyboardType = KeyboardType.Ascii,
+                    imeAction = ImeAction.Done,
+                ),
+            keyboardActions =
+                androidx.compose.foundation.text.KeyboardActions(
+                    onDone = {
+                        focusManager.clearFocus()
+                        if (isFormValid) {
+                            onSave()
+                        } else {
+                            showValidationError = true
+                        }
+                    },
+                ),
+            modifier = Modifier.fillMaxWidth(),
+        )
 
         // Set as Default checkbox
         Row(

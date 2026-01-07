@@ -21,7 +21,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -345,37 +344,35 @@ fun ColumnScope.LeftContent(
 
     var showTagSuggestions by rememberSaveable { mutableStateOf(false) }
 
-    SelectionContainer {
-        TextField(
-            value = viewState.feedUrl,
-            onValueChange = { viewState.feedUrl = it.trim() },
-            label = {
-                Text(stringResource(id = R.string.url))
-            },
-            isError = viewState.isNotValidUrl,
-            keyboardOptions =
-                KeyboardOptions(
-                    capitalization = KeyboardCapitalization.None,
-                    autoCorrectEnabled = false,
-                    keyboardType = KeyboardType.Uri,
-                    imeAction = ImeAction.Next,
-                ),
-            keyboardActions =
-                KeyboardActions(
-                    onNext = {
-                        focusManager.moveFocus(focusDirection = FocusDirection.Down)
-                    },
-                ),
-            singleLine = true,
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .heightIn(min = 64.dp)
-                    .interceptKey(Key.Enter) {
-                        focusManager.moveFocus(FocusDirection.Down)
-                    },
-        )
-    }
+    TextField(
+        value = viewState.feedUrl,
+        onValueChange = { viewState.feedUrl = it.trim() },
+        label = {
+            Text(stringResource(id = R.string.url))
+        },
+        isError = viewState.isNotValidUrl,
+        keyboardOptions =
+            KeyboardOptions(
+                capitalization = KeyboardCapitalization.None,
+                autoCorrectEnabled = false,
+                keyboardType = KeyboardType.Uri,
+                imeAction = ImeAction.Next,
+            ),
+        keyboardActions =
+            KeyboardActions(
+                onNext = {
+                    focusManager.moveFocus(focusDirection = FocusDirection.Down)
+                },
+            ),
+        singleLine = true,
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .heightIn(min = 64.dp)
+                .interceptKey(Key.Enter) {
+                    focusManager.moveFocus(FocusDirection.Down)
+                },
+    )
     AnimatedVisibility(visible = viewState.isNotValidUrl) {
         Text(
             textAlign = TextAlign.Center,
@@ -383,39 +380,37 @@ fun ColumnScope.LeftContent(
             style = MaterialTheme.typography.labelMedium.copy(color = MaterialTheme.colorScheme.error),
         )
     }
-    SelectionContainer {
-        OutlinedTextField(
-            value = viewState.feedTitle,
-            onValueChange = { viewState.feedTitle = it },
-            placeholder = {
-                Text(viewState.defaultTitle)
-            },
-            label = {
-                Text(stringResource(id = R.string.title))
-            },
-            singleLine = true,
-            keyboardOptions =
-                KeyboardOptions(
-                    capitalization = KeyboardCapitalization.Words,
-                    autoCorrectEnabled = true,
-                    keyboardType = KeyboardType.Text,
-                    imeAction = ImeAction.Next,
-                ),
-            keyboardActions =
-                KeyboardActions(
-                    onNext = {
-                        focusManager.moveFocus(focusDirection = FocusDirection.Down)
-                    },
-                ),
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .heightIn(min = 64.dp)
-                    .interceptKey(Key.Enter) {
-                        focusManager.moveFocus(FocusDirection.Down)
-                    },
-        )
-    }
+    OutlinedTextField(
+        value = viewState.feedTitle,
+        onValueChange = { viewState.feedTitle = it },
+        placeholder = {
+            Text(viewState.defaultTitle)
+        },
+        label = {
+            Text(stringResource(id = R.string.title))
+        },
+        singleLine = true,
+        keyboardOptions =
+            KeyboardOptions(
+                capitalization = KeyboardCapitalization.Words,
+                autoCorrectEnabled = true,
+                keyboardType = KeyboardType.Text,
+                imeAction = ImeAction.Next,
+            ),
+        keyboardActions =
+            KeyboardActions(
+                onNext = {
+                    focusManager.moveFocus(focusDirection = FocusDirection.Down)
+                },
+            ),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .heightIn(min = 64.dp)
+                .interceptKey(Key.Enter) {
+                    focusManager.moveFocus(FocusDirection.Down)
+                },
+    )
 
     AutoCompleteResults(
         modifier =
@@ -448,38 +443,36 @@ fun ColumnScope.LeftContent(
             }
         },
     ) {
-        SelectionContainer {
-            OutlinedTextField(
-                value = viewState.feedTag,
-                onValueChange = { viewState.feedTag = it },
-                label = {
-                    Text(stringResource(id = R.string.tag))
-                },
-                singleLine = true,
-                keyboardOptions =
-                    KeyboardOptions(
-                        capitalization = KeyboardCapitalization.Words,
-                        autoCorrectEnabled = true,
-                        keyboardType = KeyboardType.Text,
-                        imeAction = ImeAction.Done,
-                    ),
-                keyboardActions =
-                    KeyboardActions(
-                        onDone = {
-                            showTagSuggestions = false
-                            keyboardController?.hide()
-                            rightFocusRequester.requestFocus()
-                        },
-                    ),
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .heightIn(min = 64.dp)
-                        .interceptKey(Key.Enter) {
-                            rightFocusRequester.requestFocus()
-                        },
-            )
-        }
+        OutlinedTextField(
+            value = viewState.feedTag,
+            onValueChange = { viewState.feedTag = it },
+            label = {
+                Text(stringResource(id = R.string.tag))
+            },
+            singleLine = true,
+            keyboardOptions =
+                KeyboardOptions(
+                    capitalization = KeyboardCapitalization.Words,
+                    autoCorrectEnabled = true,
+                    keyboardType = KeyboardType.Text,
+                    imeAction = ImeAction.Done,
+                ),
+            keyboardActions =
+                KeyboardActions(
+                    onDone = {
+                        showTagSuggestions = false
+                        keyboardController?.hide()
+                        rightFocusRequester.requestFocus()
+                    },
+                ),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 64.dp)
+                    .interceptKey(Key.Enter) {
+                        rightFocusRequester.requestFocus()
+                    },
+        )
     }
 }
 

@@ -634,11 +634,23 @@ private fun SummarySection(summary: AISummaryState) {
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }
-            is AISummaryState.Result ->
+            is AISummaryState.Result -> {
+                // Fix for spec-26: Prevent raw JSON from being displayed to users
+                // If content looks like JSON, show error message instead
+                val displayContent = summary.value.content.trim()
+                val safeContent = if (displayContent.startsWith("{") || displayContent.startsWith("[")) {
+                    // This looks like raw JSON - shouldn't happen, but add safety check
+                    android.util.Log.w("ArticleScreen", "Detected raw JSON in summary, replacing with error message")
+                    "Could not generate summary. Please try again."
+                } else {
+                    displayContent
+                }
+
                 MarkdownText(
                     modifier = Modifier.padding(8.dp),
-                    markdown = summary.value.content,
+                    markdown = safeContent,
                 )
+            }
         }
     }
 }

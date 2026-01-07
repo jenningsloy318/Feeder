@@ -159,6 +159,10 @@
     <string name="open_in_reader">閱讀器</string>
     <string name="close_menu">關閉選單</string>
     <string name="export_saved_articles">匯出已儲存的文章</string>
+    <string name="import_saved_articles">匯入已儲存的文章</string>
+    <string name="failed_to_import_saved_articles">未能匯入已儲存的文章</string>
+    <string name="import_file_not_found">無法開啟匯入檔案</string>
+    <string name="failed_to_read_import_file">讀取匯入檔案失敗</string>
     <string name="new_based_on_this">在此基礎上新建</string>
     <string name="only_available_on_android_n">只適用於 Android %1$s 及更高版本</string>
     <string name="description_for_read_aloud">自動偵測文章語言</string>

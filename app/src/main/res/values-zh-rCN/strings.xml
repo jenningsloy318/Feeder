@@ -245,6 +245,10 @@
     <string name="close_menu">关闭菜单</string>
     <string name="export_saved_articles">导出已保存的文章</string>
     <string name="failed_to_export_saved_articles">未能导出已保存的文章</string>
+    <string name="import_saved_articles">导入已保存的文章</string>
+    <string name="failed_to_import_saved_articles">未能导入已保存的文章</string>
+    <string name="import_file_not_found">无法打开导入文件</string>
+    <string name="failed_to_read_import_file">读取导入文件失败</string>
     <string name="skip_duplicate_articles">跳过重复的文章</string>
     <string name="skip_duplicate_articles_desc">忽略链接或标题和现存文章相同的新文章</string>
     <string name="feed_item_style_compact_card">紧凑卡片</string>

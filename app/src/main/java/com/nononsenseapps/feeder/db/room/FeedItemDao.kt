@@ -21,6 +21,15 @@ import kotlinx.coroutines.flow.Flow
 import java.net.URL
 import java.time.Instant
 
+/**
+ * Data class representing a feed item's ID and link.
+ * Used by batch query operations for import functionality.
+ */
+data class FeedItemIdLinkPair(
+    val id: Long,
+    val link: String,
+)
+
 @Dao
 interface FeedItemDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
@@ -504,6 +513,38 @@ interface FeedItemDao {
 
     @Query("SELECT id FROM feed_items")
     suspend fun getAllFeedItemIds(): List<Long>
+
+    /**
+     * Batch query to get feed item IDs and links for multiple URLs.
+     * Used by import saved articles feature.
+     *
+     * @param links List of URLs to search for
+     * @return List of FeedItemIdLinkPair containing (id, link) for found items
+     */
+    @Query(
+        """
+        SELECT id, link
+        FROM feed_items
+        WHERE link IN (:links)
+        """,
+    )
+    suspend fun getFeedItemIdsByLinks(links: List<String>): List<FeedItemIdLinkPair>
+
+    /**
+     * Batch update to mark multiple feed items as bookmarked.
+     * Used by import saved articles feature.
+     *
+     * @param ids List of feed item IDs to bookmark
+     * @return Number of items updated
+     */
+    @Query(
+        """
+        UPDATE feed_items
+        SET bookmarked = 1
+        WHERE id IN (:ids)
+        """,
+    )
+    suspend fun setBookmarked(ids: List<Long>): Int
 
     companion object {
         // These are backed by a database index

@@ -1,0 +1,47 @@
+{
+  "featureName": "Fix Translation List Parsing - Missing First Paragraph and Incorrect Matching",
+  "startedAt": "2026-01-07T13:47:00Z",
+  "phases": [
+    { "id": 0, "name": "Apply Dev Rules", "status": "complete", "startedAt": "2026-01-07T13:47:00Z", "completedAt": "2026-01-07T13:48:00Z" },
+    { "id": 1, "name": "Specification Setup", "status": "complete", "startedAt": "2026-01-07T13:48:00Z", "completedAt": "2026-01-07T13:48:00Z" },
+    { "id": 2, "name": "Requirements Clarification", "status": "complete", "startedAt": "2026-01-07T13:48:00Z", "completedAt": "2026-01-07T13:55:00Z" },
+    { "id": 3, "name": "Research", "status": "complete", "startedAt": "2026-01-07T13:55:00Z", "completedAt": "2026-01-07T14:00:00Z" },
+    { "id": 4, "name": "Debug Analysis", "status": "complete", "startedAt": "2026-01-07T14:00:00Z", "completedAt": "2026-01-07T14:10:00Z" },
+    { "id": 5, "name": "Code Assessment", "status": "complete", "startedAt": "2026-01-07T14:15:00Z", "completedAt": "2026-01-07T14:25:00Z" },
+    { "id": 6, "name": "Specification Writing", "status": "complete", "startedAt": "2026-01-07T14:30:00Z", "completedAt": "2026-01-07T14:45:00Z" },
+    { "id": 7, "name": "Specification Review", "status": "complete", "startedAt": "2026-01-07T14:45:00Z", "completedAt": "2026-01-07T14:50:00Z" },
+    { "id": 8, "name": "Execution & QA", "status": "complete", "startedAt": "2026-01-07T14:50:00Z", "completedAt": "2026-01-07T15:05:00Z" },
+    { "id": 9, "name": "Code Review", "status": "complete", "startedAt": "2026-01-07T15:05:00Z", "completedAt": "2026-01-07T15:15:00Z" },
+    { "id": 10, "name": "Documentation Update", "status": "complete", "startedAt": "2026-01-07T15:15:00Z", "completedAt": "2026-01-07T15:20:00Z" },
+    { "id": 11, "name": "Cleanup", "status": "complete", "startedAt": "2026-01-07T15:20:00Z", "completedAt": "2026-01-07T15:20:00Z" },
+    { "id": 12, "name": "Commit & Push", "status": "pending", "startedAt": null, "completedAt": null },
+    { "id": 13, "name": "Final Verification", "status": "complete", "startedAt": "2026-01-07T15:20:00Z", "completedAt": "2026-01-07T15:25:00Z" }
+  ],
+  "tasks": [
+    { "id": "T2.1", "phase": 2, "description": "Gather requirements from screenshot analysis", "status": "complete", "files": ["01-requirements.md"], "updatedAt": "2026-01-07T13:55:00Z" },
+    { "id": "T3.1", "phase": 3, "description": "Research RSS rendering structure", "status": "complete", "files": ["02-research-report.md"], "updatedAt": "2026-01-07T14:00:00Z" },
+    { "id": "T4.1", "phase": 4, "description": "Root cause analysis of translation parsing", "status": "complete", "files": ["03-debug-analysis.md"], "updatedAt": "2026-01-07T14:10:00Z" },
+    { "id": "T5.1", "phase": 5, "description": "Codebase architecture and standards assessment", "status": "complete", "files": ["04-assessment.md"], "updatedAt": "2026-01-07T14:25:00Z" },
+    { "id": "T6.1", "phase": 6, "description": "Write technical specification", "status": "complete", "files": ["06-specification.md"], "updatedAt": "2026-01-07T14:45:00Z" },
+    { "id": "T6.2", "phase": 6, "description": "Create implementation plan", "status": "complete", "files": ["07-implementation-plan.md"], "updatedAt": "2026-01-07T14:45:00Z" },
+    { "id": "T6.3", "phase": 6, "description": "Generate task list", "status": "complete", "files": ["08-task-list.md"], "updatedAt": "2026-01-07T14:45:00Z" },
+    { "id": "T7.1", "phase": 7, "description": "Review all specification documents", "status": "complete", "files": ["09-specification-review.md"], "updatedAt": "2026-01-07T14:50:00Z" },
+    { "id": "T8.1", "phase": 8, "description": "Implement code changes", "status": "complete", "files": ["app/src/main/java/com/nononsenseapps/feeder/ui/compose/html/LinearArticleContent.kt"], "updatedAt": "2026-01-07T15:05:00Z" },
+    { "id": "T8.2", "phase": 8, "description": "Verify compilation", "status": "complete", "files": [], "updatedAt": "2026-01-07T15:05:00Z" },
+    { "id": "T8.3", "phase": 8, "description": "Create implementation summary", "status": "complete", "files": ["10-implementation-summary.md"], "updatedAt": "2026-01-07T15:05:00Z" },
+    { "id": "T9.1", "phase": 9, "description": "Perform specification-aware code review", "status": "complete", "files": ["11-code-review.md"], "updatedAt": "2026-01-07T15:15:00Z" },
+    { "id": "T10.1", "phase": 10, "description": "Update documentation", "status": "complete", "files": [], "updatedAt": "2026-01-07T15:20:00Z" },
+    { "id": "T11.1", "phase": 11, "description": "Cleanup temporary files", "status": "complete", "files": [], "updatedAt": "2026-01-07T15:20:00Z" },
+    { "id": "T13.1", "phase": 13, "description": "Final verification and approval", "status": "complete", "files": ["12-final-verification.md"], "updatedAt": "2026-01-07T15:25:00Z" }
+  ],
+  "iteration": {
+    "loops": 0,
+    "lastReviewVerdict": null
+  },
+  "status": {
+    "allPhasesComplete": true,
+    "allTasksComplete": true,
+    "workflowDone": false,
+    "readyForCommit": true
+  }
+}

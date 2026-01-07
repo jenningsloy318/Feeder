@@ -130,9 +130,10 @@ private const val LOG_TAG = "FEEDER_LINEARCON"
  * - Key: element index in the elements array
  * - Value: paragraph index to translate (null if this position shouldn't show translation)
  *
- * NOTE: For nested structures (LinearListItem, LinearBlockQuote), the translation is
- * assigned to the parent element only. The nested content will be handled recursively
- * by passing through the parent's translation to its children.
+ * For nested structures (LinearListItem, LinearBlockQuote), the container stores
+ * the STARTING index for its nested content (not its own translation). This starting
+ * index is used by computeChildTranslationIndices() to properly assign translations
+ * to individual text elements within the nested content.
  */
 private fun computeParagraphIndices(
     elements: List<LinearElement>,
@@ -165,6 +166,10 @@ private class ParagraphCounter {
 /**
  * Recursively computes paragraph indices for an element and its nested content.
  * This MUST match the logic in extractTranslatableTextRecursively().
+ *
+ * For LinearText elements, assigns a translation index if the text is translatable.
+ * For LinearListItem and LinearBlockQuote elements, stores the STARTING index for
+ * nested content and advances the counter by counting translatable texts.
  */
 private fun computeParagraphIndexRecursive(
     element: LinearElement,
@@ -182,27 +187,35 @@ private fun computeParagraphIndexRecursive(
             }
         }
         is LinearListItem -> {
-            // Check if list item has translatable text content at the top level
-            val hasTranslatableText =
-                element.content
-                    .filterIsInstance<LinearText>()
-                    .filter { it.blockStyle == LinearTextBlockStyle.TEXT }
-                    .any { it.text.isNotBlank() }
+            // Store the STARTING index for nested content
+            result[elementIndex] = paragraphCounter.index
 
-            if (hasTranslatableText) {
-                // Assign a translation to this list item
-                result[elementIndex] = paragraphCounter.increment()
-            } else {
-                // This list item itself doesn't get a translation
-                result[elementIndex] = null
+            // Count translatable texts in nested content to advance the counter
+            // This matches extractTranslatableTextRecursively behavior
+            element.content.forEach { nested ->
+                when (nested) {
+                    is LinearText -> {
+                        if (nested.blockStyle == LinearTextBlockStyle.TEXT && nested.text.isNotBlank()) {
+                            paragraphCounter.increment()
+                        }
+                    }
+                    is LinearListItem -> {
+                        // Count translatable text in nested list items
+                        val hasTranslatableText =
+                            nested.content
+                                .filterIsInstance<LinearText>()
+                                .filter { it.blockStyle == LinearTextBlockStyle.TEXT }
+                                .any { it.text.isNotBlank() }
+                        if (hasTranslatableText) {
+                            paragraphCounter.increment()
+                        }
+                    }
+                    else -> {}
+                }
             }
-
-            // Note: Nested list items within this content will have their own translations
-            // and are rendered as separate elements in the parent's content iteration
         }
         is LinearBlockQuote -> {
-            // Block quotes don't get their own translation at the container level
-            // Store the STARTING index for blockquote content translations
+            // Store the STARTING index for nested content
             result[elementIndex] = paragraphCounter.index
 
             // Recursively count translatable content within blockquote to advance counter
@@ -331,7 +344,8 @@ fun LinearElementContent(
                 modifier = modifier,
                 idToIndex = idToIndex,
                 translatedParagraphs = translatedParagraphs,
-                childTranslationStartIndex = (parentTranslationIndex ?: -1) + 1,
+                // parentTranslationIndex is now the STARTING index for nested content
+                childTranslationStartIndex = parentTranslationIndex ?: 0,
             )
 
         is LinearImage ->
@@ -349,7 +363,8 @@ fun LinearElementContent(
                 modifier = modifier,
                 idToIndex = idToIndex,
                 translatedParagraphs = translatedParagraphs,
-                blockQuoteTranslationStartIndex = parentTranslationIndex ?: -1,
+                // parentTranslationIndex is now the STARTING index for nested content
+                blockQuoteTranslationStartIndex = parentTranslationIndex ?: 0,
             )
         }
 
@@ -637,7 +652,8 @@ fun LinearListItemContent(
 /**
  * Computes translation indices for nested content within a list item.
  * Returns a map of child element index to translation paragraph index.
- * Only includes indices for translatable elements (LinearText with TEXT blockStyle, LinearListItem).
+ * Only includes indices for translatable elements (LinearText with TEXT blockStyle).
+ * For LinearListItem children, stores the STARTING index for their nested content.
  */
 private fun computeChildTranslationIndices(
     content: List<LinearElement>,
@@ -657,8 +673,18 @@ private fun computeChildTranslationIndices(
                 }
             }
             is LinearListItem -> {
-                // Nested list items get their own translation
-                result[childIndex] = translationIndex++
+                // Store the STARTING index for this list item's nested content
+                result[childIndex] = translationIndex
+
+                // Count translatable texts in the nested list item to advance the counter
+                val hasTranslatableText =
+                    element.content
+                        .filterIsInstance<LinearText>()
+                        .filter { it.blockStyle == LinearTextBlockStyle.TEXT }
+                        .any { it.text.isNotBlank() }
+                if (hasTranslatableText) {
+                    translationIndex++
+                }
             }
             else -> {
                 result[childIndex] = null
@@ -673,7 +699,8 @@ private fun computeChildTranslationIndices(
 /**
  * Computes translation indices for nested content within a blockquote.
  * Returns a map of child element index to translation paragraph index.
- * Only includes indices for translatable elements (LinearText with TEXT blockStyle, LinearListItem).
+ * Only includes indices for translatable elements (LinearText with TEXT blockStyle).
+ * For LinearListItem children, stores the STARTING index for their nested content.
  *
  * This matches the logic in extractTranslatableTextRecursively for blockquote content.
  */
@@ -695,8 +722,18 @@ private fun computeBlockQuoteContentTranslationIndices(
                 }
             }
             is LinearListItem -> {
-                // Nested list items get their own translation
-                result[childIndex] = translationIndex++
+                // Store the STARTING index for this list item's nested content
+                result[childIndex] = translationIndex
+
+                // Count translatable texts in the nested list item to advance the counter
+                val hasTranslatableText =
+                    element.content
+                        .filterIsInstance<LinearText>()
+                        .filter { it.blockStyle == LinearTextBlockStyle.TEXT }
+                        .any { it.text.isNotBlank() }
+                if (hasTranslatableText) {
+                    translationIndex++
+                }
             }
             else -> {
                 result[childIndex] = null
@@ -963,7 +1000,8 @@ fun LinearBlockQuoteContent(
                             idToIndex = idToIndex,
                             onLinkClick = onLinkClick,
                             translatedParagraphs = translatedParagraphs,
-                            childTranslationStartIndex = contentTranslationIndices[currentContentIndex - 1] ?: -1,
+                            // contentTranslationIndices[childIndex] is now the STARTING index for nested content
+                            childTranslationStartIndex = contentTranslationIndices[currentContentIndex - 1] ?: 0,
                         )
                     }
                     else -> {

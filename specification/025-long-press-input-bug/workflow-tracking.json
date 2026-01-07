@@ -25,6 +25,12 @@
   "status": {
     "allPhasesComplete": false,
     "allTasksComplete": false,
-    "workflowDone": false
+    "workflowDone": false,
+    "currentPhase": 8,
+    "filesCompleted": 2,
+    "filesTotal": 7,
+    "commitMade": true,
+    "pushedToRemote": true,
+    "commitHash": "9f1829b6"
   }
 }

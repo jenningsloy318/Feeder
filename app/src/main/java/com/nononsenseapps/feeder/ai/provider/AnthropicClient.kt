@@ -398,11 +398,22 @@ Now, summarize the following article:
             } else {
                 ""
             }
+
+        // Fix for spec-26: Check if content is raw JSON and prevent displaying it to users
         val summary =
             if (lines.firstOrNull()?.startsWith("Lang:") == true) {
                 lines.drop(1).joinToString("\n").trim()
             } else {
-                content.trim()
+                // Check if content looks like JSON (starts with '{')
+                val trimmedContent = content.trim()
+                if (trimmedContent.startsWith("{") || trimmedContent.startsWith("[")) {
+                    // This is likely raw JSON - don't show it to users
+                    android.util.Log.w(TAG, "Detected raw JSON in legacy parser, returning error message")
+                    "Could not generate summary. Please try again."
+                } else {
+                    // Not JSON, return as-is (plain text summary)
+                    trimmedContent
+                }
             }
 
         return SummaryResponseData(

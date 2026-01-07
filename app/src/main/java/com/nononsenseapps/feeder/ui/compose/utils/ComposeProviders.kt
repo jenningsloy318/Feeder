@@ -36,11 +36,7 @@ fun DIAwareComponentActivity.withAllProviders(content: @Composable () -> Unit) {
                             darkThemePreference = darkThemePreference,
                             dynamicColors = dynamicColors,
                         ) {
-                            WithFeederTextToolbar(
-                                onReadAloud = null,
-                                onTranslate = null,
-                                content = content,
-                            )
+                            content()
                         }
                     }
                 }

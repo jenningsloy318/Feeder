@@ -30,6 +30,10 @@ class AnthropicClient(
 ) : AIClient {
     private val client: AnthropicClientAsync by lazy { buildClient() }
 
+    companion object {
+        private const val TAG = "AnthropicClient"
+    }
+
     override suspend fun listModels(): List<String> {
         // Anthropic doesn't provide a models endpoint and users input model ID directly
         // Return empty list - UI should not show dropdown for Anthropic
@@ -286,6 +290,7 @@ Now, summarize the following article:
         val keyPoints: List<String> = emptyList(),
         val summary: String = "",
         val sentiment: String = "",
+        val isValid: Boolean = true,  // Track if parsing succeeded
     )
 
     /**
@@ -322,18 +327,36 @@ Now, summarize the following article:
 
             val summary = jsonObject["summary"]?.jsonPrimitive?.content ?: ""
 
+            // Fix for spec-26: Prevent raw JSON display to users
+            // When summary field is empty or missing, show user-friendly error message
+            // instead of displaying the entire raw JSON response.
+            val hasUsefulContent = summary.isNotBlank() ||
+                                   title.isNotBlank() ||
+                                   keyPoints.isNotEmpty()
+
+            val finalSummary = when {
+                summary.isNotBlank() -> summary
+                title.isNotBlank() || keyPoints.isNotEmpty() ->
+                    "Summary text not available, but article analysis succeeded."
+                else ->
+                    "Could not generate summary. Please try again."
+            }
+
             SummaryResponseData(
                 language = language,
                 title = title,
                 keyPoints = keyPoints,
-                summary = summary.ifEmpty { content }, // Fallback to original content
+                summary = finalSummary,  // User-friendly message instead of raw JSON
                 sentiment = sentiment,
+                isValid = hasUsefulContent,  // Track validity
             )
         } catch (e: SerializationException) {
             // JSON parsing failed, fall back to legacy format
+            android.util.Log.e(TAG, "JSON parsing failed for summary", e)
             parseLegacySummaryResponse(content)
         } catch (e: Exception) {
             // Any other error, fall back to legacy format
+            android.util.Log.e(TAG, "Unexpected error parsing summary", e)
             parseLegacySummaryResponse(content)
         }
     }

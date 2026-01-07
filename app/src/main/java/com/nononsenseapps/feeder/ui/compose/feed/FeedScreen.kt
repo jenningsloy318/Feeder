@@ -117,6 +117,7 @@ import com.nononsenseapps.feeder.db.room.ID_SAVED_ARTICLES
 import com.nononsenseapps.feeder.db.room.ID_UNSET
 import com.nononsenseapps.feeder.model.LocaleOverride
 import com.nononsenseapps.feeder.model.export.exportSavedArticles
+import com.nononsenseapps.feeder.model.export.importSavedArticles
 import com.nononsenseapps.feeder.model.opml.exportOpml
 import com.nononsenseapps.feeder.model.opml.importOpml
 import com.nononsenseapps.feeder.ui.compose.components.safeSemantics
@@ -207,6 +208,17 @@ fun FeedScreen(
                 val applicationCoroutineScope: ApplicationCoroutineScope by di.instance()
                 applicationCoroutineScope.launch {
                     importOpml(di, uri)
+                }
+            }
+        }
+    val savedArticleImporter =
+        rememberLauncherForActivityResult(
+            ActivityResultContracts.OpenDocument(),
+        ) { uri ->
+            if (uri != null) {
+                val applicationCoroutineScope: ApplicationCoroutineScope by di.instance()
+                applicationCoroutineScope.launch {
+                    importSavedArticles(di, uri)
                 }
             }
         }
@@ -360,6 +372,16 @@ fun FeedScreen(
                     }
                 }
             },
+            onImportSavedArticles = {
+                try {
+                    savedArticleImporter.launch(arrayOf("text/*"))
+                } catch (_: Exception) {
+                    // ActivityNotFoundException in particular
+                    coroutineScope.launch {
+                        toastMaker.makeToast(R.string.failed_to_import_saved_articles)
+                    }
+                }
+            },
             drawerState = drawerState,
             markAsUnread = { itemId, unread ->
                 if (unread) {
@@ -447,6 +469,7 @@ fun FeedScreen(
     onImport: () -> Unit,
     onExportOPML: () -> Unit,
     onExportSavedArticles: () -> Unit,
+    onImportSavedArticles: () -> Unit,
     drawerState: DrawerState,
     markAsUnread: (Long, Boolean) -> Unit,
     markAsReadOnSwipe: (id: Long, unread: Boolean, saved: Boolean) -> Unit,
@@ -843,6 +866,21 @@ fun FeedScreen(
                                 },
                                 text = {
                                     Text(stringResource(id = R.string.export_saved_articles))
+                                },
+                            )
+                            DropdownMenuItem(
+                                onClick = {
+                                    onShowToolbarMenu(false)
+                                    onImportSavedArticles()
+                                },
+                                leadingIcon = {
+                                    Icon(
+                                        Icons.Default.ImportExport,
+                                        contentDescription = null,
+                                    )
+                                },
+                                text = {
+                                    Text(stringResource(id = R.string.import_saved_articles))
                                 },
                             )
                             HorizontalDivider()

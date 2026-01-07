@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### 🚀 Features
+- Added import functionality for saved articles to complement existing export feature
 - Added dedicated Summary settings screen with enable/disable toggle for AI summaries
 - Improved AI Integration settings UX with separate configuration screen for summary language and enabled state
 - Added OPML import/export support for AI summary settings

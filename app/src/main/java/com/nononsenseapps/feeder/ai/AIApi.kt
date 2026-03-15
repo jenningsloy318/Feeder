@@ -2,8 +2,6 @@ package com.nononsenseapps.feeder.ai
 
 import com.nononsenseapps.feeder.ai.model.AISettings
 import com.nononsenseapps.feeder.archmodel.Repository
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.serialization.Serializable
 
@@ -152,116 +150,6 @@ class AIApi(
             translatedParagraphs
         } catch (e: Exception) {
             AIClient.TranslationResult.Error(content = e.message ?: e.cause?.message ?: "Translation failed")
-        }
-    }
-
-    /**
-     * Translate content with chunking for long-form articles.
-     *
-     * This method automatically detects if content needs chunking and:
-     * - For short content: Uses regular translate() for efficiency
-     * - For long content: Chunks content and translates in parallel with progress updates
-     *
-     * Emits real-time progress updates including:
-     * - Starting state (total chunk count)
-     * - Translating state (current progress)
-     * - ChunkComplete state (each chunk completion)
-     * - Complete state (final assembled translation)
-     * - Error state (any failures)
-     *
-     * @param translatableTexts List of translatable texts with structure metadata
-     * @param scope Coroutine scope for structured concurrency
-     * @param concurrency Maximum parallel chunk translations (default: 3)
-     * @param maxRetries Maximum retry attempts per chunk (default: 3)
-     * @return Flow<TranslationProgress> with real-time translation updates
-     */
-    suspend fun translateWithProgress(
-        translatableTexts: List<TranslatableText>,
-        scope: CoroutineScope,
-        concurrency: Int = ChunkTranslationCoordinator.DEFAULT_CONCURRENCY,
-        maxRetries: Int = ChunkTranslationCoordinator.DEFAULT_MAX_RETRIES,
-    ): Flow<TranslationProgress> {
-        if (translatableTexts.isEmpty()) {
-            return kotlinx.coroutines.flow.flow {
-                emit(TranslationProgress.Error("No translatable content found in this article"))
-            }
-        }
-
-        // Get target language
-        val language = try {
-            repository.translationLanguage.first()
-        } catch (e: Exception) {
-            return kotlinx.coroutines.flow.flow {
-                emit(TranslationProgress.Error("Failed to get translation language: ${e.message}"))
-            }
-        }
-
-        // Create chunker
-        val chunker = TranslationChunker(maxChunkSize = TranslationChunk.DEFAULT_MAX_CHUNK_SIZE)
-
-        // Check if chunking is needed
-        return if (!chunker.needsChunking(translatableTexts)) {
-            // Content is short enough, use regular translation
-            kotlinx.coroutines.flow.flow {
-                try {
-                    emit(TranslationProgress.Starting(totalChunks = 1))
-                    emit(TranslationProgress.Translating(current = 1, total = 1))
-
-                    val result = translate(translatableTexts)
-
-                    when (result) {
-                        is AIClient.TranslationResult.Success -> {
-                            emit(
-                                TranslationProgress.Complete(
-                                    translatedParagraphs = result.paragraphs,
-                                ),
-                            )
-                        }
-                        is AIClient.TranslationResult.Error -> {
-                            emit(TranslationProgress.Error(result.content))
-                        }
-                    }
-                } catch (e: Exception) {
-                    emit(TranslationProgress.Error(e.message ?: "Translation failed"))
-                }
-            }
-        } else {
-            // Content needs chunking - use parallel chunk translation
-            val chunks = chunker.createChunks(translatableTexts)
-
-            // Get translation timeout for client configuration
-            val translationTimeout = try {
-                repository.translationTimeout.first()
-            } catch (e: Exception) {
-                60  // Use default 60 seconds
-            }
-
-            // Create client with translation-specific timeout
-            val settingsWithTimeout =
-                when (val settings = aiSettings) {
-                    is AISettings.OpenAI -> {
-                        val updatedSettings =
-                            settings.openaiSettings.copy(timeoutSeconds = translationTimeout)
-                        AISettings.OpenAI(updatedSettings)
-                    }
-                    is AISettings.Anthropic -> {
-                        val updatedSettings =
-                            settings.anthropicSettings.copy(timeoutSeconds = translationTimeout)
-                        AISettings.Anthropic(updatedSettings)
-                    }
-                }
-
-            // Create coordinator
-            val coordinator =
-                ChunkTranslationCoordinator(
-                    aiClient = AIClient.create(settingsWithTimeout),
-                    concurrency = concurrency,
-                    maxRetries = maxRetries,
-                    scope = scope,
-                )
-
-            // Translate chunks with progress
-            coordinator.translateChunks(chunks, language)
         }
     }
 

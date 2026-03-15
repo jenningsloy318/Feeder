@@ -1,0 +1,16 @@
+{
+  "featureName": "Parallel Paragraph Translation with Per-Paragraph Tracking",
+  "specDirectory": "specification/031-parallel-paragraph-translation",
+  "worktreePath": ".worktree/spec-31-parallel-paragraph-translation",
+  "startedAt": "2026-03-15T00:00:00Z",
+  "phases": [
+    { "id": 0, "name": "Apply Dev Rules", "status": "complete", "startedAt": "2026-03-15T00:00:00Z", "completedAt": "2026-03-15T00:00:00Z" },
+    { "id": 1, "name": "Specification Setup", "status": "complete", "startedAt": "2026-03-15T00:00:00Z", "completedAt": "2026-03-15T00:01:00Z" }
+  ],
+  "tasks": [
+    { "id": "T1.1", "phase": 1, "description": "Specification Setup", "status": "complete", "files": ["specification/031-parallel-paragraph-translation/"], "updatedAt": "2026-03-15T00:01:00Z" }
+  ],
+  "iteration": { "loops": 0, "lastReviewVerdict": null },
+  "team": { "name": "super-dev-031-parallel-paragraph-translation", "teammates": [], "messages": [] },
+  "status": { "allPhasesComplete": false, "allTasksComplete": false, "workflowDone": false }
+}

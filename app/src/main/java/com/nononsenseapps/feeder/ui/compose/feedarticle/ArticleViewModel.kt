@@ -5,8 +5,13 @@ import androidx.compose.runtime.Immutable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.nononsenseapps.feeder.ApplicationCoroutineScope
+import com.nononsenseapps.feeder.ai.AIClient
 import com.nononsenseapps.feeder.ai.AIApi
+import com.nononsenseapps.feeder.ai.ArticleTranslation
 import com.nononsenseapps.feeder.ai.ElementType
+import com.nononsenseapps.feeder.ai.ParagraphTranslation
+import com.nononsenseapps.feeder.ai.ParagraphTranslationCoordinator
+import com.nononsenseapps.feeder.ai.ParagraphTranslationProgress
 import com.nononsenseapps.feeder.ai.TranslatableText
 import com.nononsenseapps.feeder.ai.model.AISettings
 import com.nononsenseapps.feeder.archmodel.Article
@@ -491,37 +496,100 @@ class ArticleViewModel(
     fun translate() {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                translationState.value = TranslationState.Loading
-                Log.d(LOG_TAG, "Starting structure-aware translation for article $itemId")
-
-                // Extract translatable paragraphs with structure context
+                // Step 1: Extract paragraphs
                 val translatableTexts = extractTranslatableParagraphs()
-                Log.d(LOG_TAG, "Extracted ${translatableTexts.size} paragraphs for translation")
-
                 if (translatableTexts.isEmpty()) {
-                    translationState.value =
-                        TranslationState.Result(
-                            value =
-                                com.nononsenseapps.feeder.ai.AIClient.TranslationResult.Error(
-                                    content = "No translatable content found",
-                                ),
-                        )
+                    translationState.value = TranslationState.Error(
+                        errorMessage = "No translatable content found",
+                    )
                     return@launch
                 }
 
-                // Call AI API to translate with structure context
-                val result = aiApi.translate(translatableTexts)
-                translationState.value = TranslationState.Result(value = result)
-                Log.d(LOG_TAG, "Translation completed with result: $result")
+                // Step 2: Build initial ArticleTranslation
+                val initialArticleTranslation = ArticleTranslation(
+                    contents = translatableTexts.mapIndexed { zeroBasedIndex, translatableText ->
+                        ParagraphTranslation(
+                            index = zeroBasedIndex + 1,
+                            text = translatableText.text,
+                            translation = "",
+                            translated = 0,
+                        )
+                    },
+                    status = "translating",
+                )
+
+                // Step 3: Set initial translating state
+                translationState.value = TranslationState.Translating(
+                    articleTranslation = initialArticleTranslation,
+                )
+
+                // Step 4: Get target language and create coordinator
+                val targetLanguage = repository.translationLanguage.first()
+                val translationTimeout = repository.translationTimeout.first()
+                val settingsWithTimeout = createSettingsWithTimeout(translationTimeout)
+                val paragraphCoordinator = ParagraphTranslationCoordinator(
+                    aiClient = AIClient.create(settingsWithTimeout),
+                )
+
+                // Step 5: Collect progress and update per-paragraph
+                paragraphCoordinator.translateParagraphs(translatableTexts, targetLanguage)
+                    .collect { paragraphProgress ->
+                        translationState.update { currentState ->
+                            if (currentState !is TranslationState.Translating) return@update currentState
+
+                            val currentArticleTranslation = currentState.articleTranslation
+                            val updatedContents = currentArticleTranslation.contents.toMutableList()
+
+                            when (paragraphProgress) {
+                                is ParagraphTranslationProgress.ParagraphComplete -> {
+                                    val targetIndex = paragraphProgress.paragraphIndex - 1
+                                    updatedContents[targetIndex] = updatedContents[targetIndex].copy(
+                                        translation = paragraphProgress.translatedText,
+                                        translated = 1,
+                                    )
+                                }
+                                is ParagraphTranslationProgress.ParagraphFailed -> {
+                                    val targetIndex = paragraphProgress.paragraphIndex - 1
+                                    updatedContents[targetIndex] = updatedContents[targetIndex].copy(
+                                        translated = -1,
+                                    )
+                                }
+                            }
+
+                            val updatedArticleTranslation = currentArticleTranslation.copy(
+                                contents = updatedContents,
+                                status = if (updatedContents.all { it.translated != 0 }) "translated" else "translating",
+                            )
+
+                            // Step 6: Transition to Translated when all resolved
+                            if (updatedArticleTranslation.status == "translated") {
+                                TranslationState.Translated(articleTranslation = updatedArticleTranslation)
+                            } else {
+                                TranslationState.Translating(articleTranslation = updatedArticleTranslation)
+                            }
+                        }
+                    }
             } catch (e: Exception) {
-                Log.e(LOG_TAG, "Translation failed", e)
-                translationState.value =
-                    TranslationState.Result(
-                        value =
-                            com.nononsenseapps.feeder.ai.AIClient.TranslationResult.Error(
-                                content = e.message ?: "Translation failed",
-                            ),
-                    )
+                translationState.value = TranslationState.Error(
+                    errorMessage = e.message ?: "Translation failed",
+                )
+            }
+        }
+    }
+
+    private fun createSettingsWithTimeout(translationTimeoutSeconds: Int): AISettings {
+        return when (val currentSettings = repository.aiSettings) {
+            is AISettings.OpenAI -> {
+                val updatedOpenAiSettings = currentSettings.openaiSettings.copy(
+                    timeoutSeconds = translationTimeoutSeconds,
+                )
+                AISettings.OpenAI(updatedOpenAiSettings)
+            }
+            is AISettings.Anthropic -> {
+                val updatedAnthropicSettings = currentSettings.anthropicSettings.copy(
+                    timeoutSeconds = translationTimeoutSeconds,
+                )
+                AISettings.Anthropic(updatedAnthropicSettings)
             }
         }
     }
@@ -750,24 +818,23 @@ sealed interface AISummaryState {
     ) : AISummaryState
 }
 
-/**
- * Sealed interface representing the state of article translation.
- *
- * States:
- * - Empty: No translation has been requested
- * - Loading: Translation is in progress
- * - Result: Translation completed (success or error)
- */
 sealed interface TranslationState {
     /** No translation has been requested */
     data object Empty : TranslationState
 
-    /** Translation is in progress */
-    data object Loading : TranslationState
+    /** Translation in progress with per-paragraph tracking */
+    data class Translating(
+        val articleTranslation: ArticleTranslation,
+    ) : TranslationState
 
-    /** Translation completed with result */
-    data class Result(
-        val value: com.nononsenseapps.feeder.ai.AIClient.TranslationResult,
+    /** Translation completed (all paragraphs resolved) */
+    data class Translated(
+        val articleTranslation: ArticleTranslation,
+    ) : TranslationState
+
+    /** Fatal error preventing translation from starting */
+    data class Error(
+        val errorMessage: String,
     ) : TranslationState
 }
 

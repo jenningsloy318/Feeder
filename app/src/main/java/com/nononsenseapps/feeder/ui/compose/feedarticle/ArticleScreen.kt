@@ -64,7 +64,6 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nononsenseapps.feeder.R
-import com.nononsenseapps.feeder.ai.AIClient
 import com.nononsenseapps.feeder.archmodel.TextToDisplay
 import com.nononsenseapps.feeder.db.room.ID_UNSET
 import com.nononsenseapps.feeder.model.LocaleOverride
@@ -284,15 +283,15 @@ private fun ArticleScreenInternal(
                     // Translate button (conditional)
                     if (viewState.showSummarize) {
                         PlainTooltipBox(tooltip = { Text(stringResource(R.string.translate)) }) {
-                            val isLoading = viewState.translation is TranslationState.Loading
+                            val isTranslationInProgress = viewState.translation is TranslationState.Translating
                             IconButton(
                                 onClick = onTranslate,
-                                enabled = !isLoading,
+                                enabled = !isTranslationInProgress,
                             ) {
                                 Icon(
                                     Icons.Default.Translate,
                                     contentDescription =
-                                        if (isLoading) {
+                                        if (isTranslationInProgress) {
                                             "Translating article, please wait"
                                         } else {
                                             stringResource(R.string.translate_article_content_description)
@@ -554,11 +553,12 @@ fun ArticleContent(
                     // Extract translated paragraphs if available
                     val translatedParagraphs =
                         when (val translation = viewState.translation) {
-                            is TranslationState.Result ->
-                                when (val result = translation.value) {
-                                    is AIClient.TranslationResult.Success -> result.paragraphs
-                                    else -> null
-                                }
+                            is TranslationState.Translating ->
+                                translation.articleTranslation.buildTranslatedParagraphsList()
+                                    .map { it ?: "" }
+                            is TranslationState.Translated ->
+                                translation.articleTranslation.buildTranslatedParagraphsList()
+                                    .map { it ?: "" }
                             else -> null
                         }
 
@@ -695,34 +695,43 @@ private fun MarkdownText(
 private fun TranslationStatusSection(translation: TranslationState) {
     when (translation) {
         TranslationState.Empty -> {}
-        TranslationState.Loading ->
-            OutlinedCard(
-                modifier = Modifier.fillMaxWidth(),
-            ) {
+
+        is TranslationState.Translating -> {
+            val articleTranslation = translation.articleTranslation
+            val completedCount = articleTranslation.paragraphCompletedCount
+            val totalCount = articleTranslation.paragraphTotalCount
+            val progressFraction = if (totalCount > 0) completedCount.toFloat() / totalCount else 0f
+
+            OutlinedCard(modifier = Modifier.fillMaxWidth()) {
                 Column(
                     modifier = Modifier.padding(16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Text(
-                        text = stringResource(R.string.translating_progress),
+                        text = "$completedCount/$totalCount paragraphs translated",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     LinearProgressIndicator(
+                        progress = { progressFraction },
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }
             }
-        is TranslationState.Result ->
-            when (val result = translation.value) {
-                is AIClient.TranslationResult.Error ->
-                    TranslationErrorSection(errorMessage = result.content)
-                is AIClient.TranslationResult.Success -> {
-                    // Success - translations will be displayed inline with paragraphs
-                    // Nothing to show here
-                }
+        }
+
+        is TranslationState.Translated -> {
+            val failedCount = translation.articleTranslation.paragraphFailedCount
+            if (failedCount > 0) {
+                TranslationErrorSection(
+                    errorMessage = "$failedCount paragraph(s) failed to translate",
+                )
             }
+        }
+
+        is TranslationState.Error ->
+            TranslationErrorSection(errorMessage = translation.errorMessage)
     }
 }
 

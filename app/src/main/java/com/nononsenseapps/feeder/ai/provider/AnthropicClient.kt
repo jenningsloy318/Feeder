@@ -4,9 +4,7 @@ import com.anthropic.client.AnthropicClientAsync
 import com.anthropic.client.okhttp.AnthropicOkHttpClientAsync
 import com.anthropic.models.messages.MessageCreateParams
 import com.nononsenseapps.feeder.ai.AIClient
-import com.nononsenseapps.feeder.ai.ChunkTranslationResult
 import com.nononsenseapps.feeder.ai.TranslatableText
-import com.nononsenseapps.feeder.ai.TranslationChunk
 import com.nononsenseapps.feeder.ai.model.AnthropicSettings
 import com.nononsenseapps.feeder.ai.model.SummaryLanguage
 import com.nononsenseapps.feeder.ai.model.TranslationLanguage
@@ -263,71 +261,6 @@ Now, summarize the following article:
         } catch (e: Exception) {
             AIClient.TranslationResult.Error(
                 content = handleTranslationError(e),
-            )
-        }
-    }
-
-    /**
-     * Translates a single chunk of content using Anthropic Claude API.
-     *
-     * This method is optimized for chunked translation of long-form content.
-     * It uses the same translation logic as translate() but processes smaller
-     * chunks (typically 1500-2500 characters) to avoid timeouts.
-     *
-     * @param chunk TranslationChunk containing texts to translate
-     * @param targetLanguage Target language for translation
-     * @return ChunkTranslationResult with translated texts or error
-     */
-    override suspend fun translateChunk(
-        chunk: TranslationChunk,
-        targetLanguage: TranslationLanguage,
-    ): ChunkTranslationResult {
-        if (chunk.texts.isEmpty()) {
-            return ChunkTranslationResult.Error(
-                chunkId = chunk.id,
-                error = "Empty chunk - no texts to translate",
-                canRetry = false,
-            )
-        }
-
-        return try {
-            val prompt = buildTranslationPrompt(chunk.texts, targetLanguage)
-
-            val params =
-                MessageCreateParams
-                    .builder()
-                    .model(settings.modelId)
-                    .maxTokens(8192L)
-                    .addUserMessage(prompt)
-                    .build()
-
-            val response =
-                withContext(Dispatchers.IO) {
-                    client.messages().create(params).get()
-                }
-
-            // Get content blocks from the response
-            val translatedText =
-                response.content().joinToString("") { contentBlock ->
-                    contentBlock.text().getOrNull()?.text() ?: ""
-                }
-
-            val translatedParagraphs =
-                parseTranslationResponse(
-                    translatedText,
-                    chunk.texts.size,
-                )
-
-            ChunkTranslationResult.Success(
-                chunkId = chunk.id,
-                translatedTexts = translatedParagraphs,
-            )
-        } catch (e: Exception) {
-            val canRetry = isRetryableError(e)
-            ChunkTranslationResult.Error(
-                chunkId = chunk.id,
-                error = handleTranslationError(e),
-                canRetry = canRetry,
             )
         }
     }
@@ -759,32 +692,6 @@ Now, translate the above JSON input.
 
             else ->
                 "Translation failed: ${e.message ?: "Unknown error"}"
-        }
-
-    /**
-     * Determines if an error is retryable for chunk translation.
-     *
-     * Retryable errors:
-     * - Timeouts (temporary network issues)
-     * - Rate limits (can retry after delay)
-     * - Server errors (5xx)
-     *
-     * Non-retryable errors:
-     * - Invalid API key (configuration issue)
-     * - Quota exceeded (account issue)
-     * - Invalid request (4xx client errors)
-     */
-    private fun isRetryableError(e: Exception): Boolean =
-        when {
-            e is SocketTimeoutException -> true
-            e.message?.contains("timeout", ignoreCase = true) == true -> true
-            e.message?.contains("rate limit", ignoreCase = true) == true -> true
-            e.message?.contains("server error", ignoreCase = true) == true -> true
-            e.message?.contains("5", ignoreCase = true) == true -> true  // 5xx errors
-            e.message?.contains("invalid api key", ignoreCase = true) == true -> false
-            e.message?.contains("quota exceeded", ignoreCase = true) == true -> false
-            e.message?.contains("insufficient quota", ignoreCase = true) == true -> false
-            else -> false  // Default to non-retryable for unknown errors
         }
 
     private class AIClientException(

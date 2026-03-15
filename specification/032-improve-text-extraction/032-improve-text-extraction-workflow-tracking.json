@@ -1,0 +1,16 @@
+{
+  "featureName": "Improve Text Extraction to JSON for Translation",
+  "specDirectory": "specification/032-improve-text-extraction",
+  "worktreePath": ".worktree/spec-32-improve-text-extraction",
+  "startedAt": "2026-03-15T00:00:00Z",
+  "phases": [
+    { "id": 0, "name": "Apply Dev Rules", "status": "complete", "startedAt": "2026-03-15T00:00:00Z", "completedAt": "2026-03-15T00:00:00Z" },
+    { "id": 1, "name": "Specification Setup", "status": "complete", "startedAt": "2026-03-15T00:00:00Z", "completedAt": "2026-03-15T00:00:00Z" }
+  ],
+  "tasks": [
+    { "id": "T1.1", "phase": 1, "description": "Specification Setup", "status": "complete", "files": ["specification/032-improve-text-extraction/032-improve-text-extraction-workflow-tracking.json"], "updatedAt": "2026-03-15T00:00:00Z" }
+  ],
+  "iteration": { "loops": 0, "lastReviewVerdict": null },
+  "team": { "name": "super-dev-spec-32-improve-text-extraction", "teammates": [], "messages": [] },
+  "status": { "allPhasesComplete": false, "allTasksComplete": false, "workflowDone": false }
+}

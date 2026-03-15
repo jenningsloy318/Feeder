@@ -642,6 +642,7 @@ fun LinearListItemContent(
                     onLinkClick = onLinkClick,
                     idToIndex = idToIndex,
                     translatedParagraphs = translatedParagraphs,
+                    parentTranslationIndex = childTranslationIndices[currentChildIndex - 1],
                 )
             }
         }

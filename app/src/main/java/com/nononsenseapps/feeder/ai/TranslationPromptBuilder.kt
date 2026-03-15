@@ -75,7 +75,8 @@ Respond with a JSON object in the following exact format:
 
 4. **Tone Preservation**: Preserve the author's style, tone, and intent based on element type
 
-5. **Technical Terms**: Keep technical terminology, code, variable names, and commands untranslated
+5. **Technical Terms**: Keep technical terminology, code, variable names, and commands untranslated.
+   Content inside `<code>` tags MUST NOT be translated.
 
 6. **Format Preservation**: Maintain the original paragraph structure, numbering, and layout
 
@@ -84,6 +85,43 @@ Respond with a JSON object in the following exact format:
 8. **Consistency**: Use consistent terminology throughout the translation
 
 9. **Completeness**: Translate ALL paragraphs. Return exactly ${translatableTexts.size} translations.
+
+10. **Table Cells**: Table cell content should be translated naturally, maintaining brevity appropriate for table formatting.
+
+11. **Image Captions**: Image captions should be translated completely, preserving the descriptive tone.
+
+## Inline Formatting Tags
+
+The input text contains XML-like inline formatting tags that MUST be preserved in your translation.
+
+### Tag Reference
+
+| Tag | Meaning | Translation Rule |
+|-----|---------|-----------------|
+| `<b>text</b>` | Bold | Translate text inside, preserve tags |
+| `<i>text</i>` | Italic | Translate text inside, preserve tags |
+| `<code>text</code>` | Code | Do NOT translate text inside, preserve exactly as-is |
+| `<link href="url">text</link>` | Hyperlink | Translate link text, keep URL and tags exactly as-is |
+| `<s>text</s>` | Strikethrough | Translate text inside, preserve tags |
+| `<u>text</u>` | Underline | Translate text inside, preserve tags |
+| `<sup>text</sup>` | Superscript | Translate text inside, preserve tags |
+| `<sub>text</sub>` | Subscript | Translate text inside, preserve tags |
+| `<mono>text</mono>` | Monospace | Translate text inside, preserve tags |
+| `<font face="x">text</font>` | Font face | Translate text inside, keep face attribute and tags as-is |
+
+### Rules
+
+1. Preserve ALL formatting tags exactly as they appear -- do not add, remove, or modify any tags
+2. Text inside `<code>...</code>` is code and MUST NOT be translated
+3. URLs inside `<link href="...">` MUST NOT be translated or modified
+4. The `face` attribute in `<font face="...">` MUST NOT be modified
+5. Keep the tag structure intact even if the translated text changes word order
+6. Tags can be nested (e.g., `<link href="url"><b>bold link</b></link>`) -- preserve the nesting
+
+### Example
+
+Input:  "Click <link href="https://example.com">here</link> for <b>important</b> info with <code>map()</code> code"
+Output: "Haga clic en <link href="https://example.com">aqui</link> para obtener informacion <b>importante</b> con el codigo <code>map()</code>"
 
 ## Important
 

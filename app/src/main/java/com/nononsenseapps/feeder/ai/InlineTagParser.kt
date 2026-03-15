@@ -107,7 +107,13 @@ object InlineTagParser {
                             // Find and pop matching open tag from stack
                             val matchIndex = styleStack.indexOfLast { it.tagName == tagInfo.name }
                             if (matchIndex >= 0) {
-                                styleStack.removeAt(matchIndex)
+                                val entry = styleStack.removeAt(matchIndex)
+                                // Pop the corresponding style/link from the builder
+                                if (entry.linkHref != null && entry.tagName == "link") {
+                                    builder.pop()
+                                } else if (entry.style != null) {
+                                    builder.pop()
+                                }
                             }
                             // If no match found, ignore the close tag (tolerance)
                         } else {

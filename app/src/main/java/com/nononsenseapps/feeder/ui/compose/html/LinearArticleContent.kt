@@ -61,6 +61,7 @@ import coil3.size.Precision
 import coil3.size.Scale
 import coil3.size.Size
 import com.nononsenseapps.feeder.R
+import com.nononsenseapps.feeder.ai.InlineTagParser
 import com.nononsenseapps.feeder.model.html.Coordinate
 import com.nononsenseapps.feeder.model.html.LinearArticle
 import com.nononsenseapps.feeder.model.html.LinearAudio
@@ -349,6 +350,7 @@ fun LinearElementContent(
                 onLinkClick = onLinkClick,
                 modifier = modifier,
                 idToIndex = idToIndex,
+                captionTranslation = translation,
             )
 
         is LinearBlockQuote -> {
@@ -404,6 +406,8 @@ fun LinearElementContent(
                 onLinkClick = onLinkClick,
                 modifier = modifier,
                 idToIndex = idToIndex,
+                translatedParagraphs = translatedParagraphs,
+                tableTranslationStartIndex = parentTranslationIndex ?: 0,
             )
 
         is LinearAudio ->
@@ -702,6 +706,7 @@ fun LinearImageContent(
     idToIndex: Map<String, Int>,
     onLinkClick: (url: String, index: Int?) -> Unit,
     modifier: Modifier = Modifier,
+    captionTranslation: String? = null,
 ) {
     if (linearImage.sources.isEmpty()) {
         return
@@ -809,6 +814,7 @@ fun LinearImageContent(
             ) {
                 LinearTextContent(
                     linearText = caption,
+                    translation = captionTranslation,
                     idToIndex = idToIndex,
                     onLinkClick = onLinkClick,
                 )
@@ -864,8 +870,12 @@ fun LinearTextContent(
             if (translation != null) {
                 Spacer(modifier = Modifier.height(8.dp))
                 WithBidiDeterminedLayoutDirection(translation) {
-                    Text(
+                    val annotatedTranslation = InlineTagParser.parse(
                         text = translation,
+                        onLinkClick = { url -> onLinkClick(url, null) },
+                    )
+                    Text(
+                        text = annotatedTranslation,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(start = 16.dp),
                         softWrap = softWrap,
@@ -1104,8 +1114,27 @@ fun LinearTableContent(
     idToIndex: Map<String, Int>,
     onLinkClick: (url: String, index: Int?) -> Unit,
     modifier: Modifier = Modifier,
+    translatedParagraphs: List<String>? = null,
+    tableTranslationStartIndex: Int = 0,
 ) {
     val borderColor = MaterialTheme.colorScheme.outlineVariant
+
+    // Pre-compute translation start index for each cell (row-major order, matching extraction order)
+    val cellTranslationStartIndices = remember(linearTable, tableTranslationStartIndex, translatedParagraphs) {
+        if (translatedParagraphs == null) return@remember emptyMap<Coordinate, Int>()
+        val map = mutableMapOf<Coordinate, Int>()
+        var currentIndex = tableTranslationStartIndex
+        for (row in 0 until linearTable.rowCount) {
+            for (col in 0 until linearTable.colCount) {
+                val cell = linearTable.cellAt(row, col) ?: continue
+                if (cell.isFiller) continue
+                map[Coordinate(row, col)] = currentIndex
+                currentIndex += countTranslatableTexts(cell.content)
+            }
+        }
+        map
+    }
+
     Table(
         tableData = linearTable.toTableData(),
         modifier = modifier,
@@ -1175,13 +1204,25 @@ fun LinearTableContent(
                                 )
                             },
                     ) {
-                        for (element in it.content) {
+                        val cellStartIndex = cellTranslationStartIndices[Coordinate(row, column)] ?: 0
+                        val cellChildIndices = if (translatedParagraphs != null) {
+                            computeContentTranslationIndices(it.content, cellStartIndex)
+                        } else {
+                            emptyMap()
+                        }
+                        it.content.forEachIndexed { elementIndex, element ->
+                            val cellTranslation = cellChildIndices[elementIndex]?.let { idx ->
+                                translatedParagraphs?.getOrNull(idx)
+                            }
                             LinearElementContent(
                                 linearElement = element,
+                                translation = cellTranslation,
                                 allowHorizontalScroll = false,
                                 onLinkClick = onLinkClick,
                                 modifier = Modifier.fillMaxWidth(),
                                 idToIndex = idToIndex,
+                                translatedParagraphs = translatedParagraphs,
+                                parentTranslationIndex = cellChildIndices[elementIndex],
                             )
                         }
                     }

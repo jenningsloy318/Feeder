@@ -8,11 +8,11 @@ import com.nononsenseapps.feeder.ApplicationCoroutineScope
 import com.nononsenseapps.feeder.ai.AIClient
 import com.nononsenseapps.feeder.ai.AIApi
 import com.nononsenseapps.feeder.ai.ArticleTranslation
-import com.nononsenseapps.feeder.ai.ElementType
 import com.nononsenseapps.feeder.ai.ParagraphTranslation
 import com.nononsenseapps.feeder.ai.ParagraphTranslationCoordinator
 import com.nononsenseapps.feeder.ai.ParagraphTranslationProgress
 import com.nononsenseapps.feeder.ai.TranslatableText
+import com.nononsenseapps.feeder.ai.TranslatableTextExtractor
 import com.nononsenseapps.feeder.ai.model.AISettings
 import com.nononsenseapps.feeder.archmodel.Article
 import com.nononsenseapps.feeder.archmodel.Enclosure
@@ -615,108 +615,7 @@ class ArticleViewModel(
      */
     private fun extractTranslatableParagraphs(): List<TranslatableText> {
         val content = viewState.value.articleContent
-        val translatableTexts = mutableListOf<TranslatableText>()
-
-        // Recursively extract all translatable text with structure context
-        extractTranslatableTextRecursively(
-            elements = content.elements,
-            translatableTexts = translatableTexts,
-            nestingLevel = 0,
-        )
-
-        return translatableTexts
-    }
-
-    /**
-     * Recursively extracts translatable text with structure context from a list of elements.
-     *
-     * This helper function performs a depth-first traversal of the element tree,
-     * extracting text from LinearText elements with their element type and recursing
-     * into container elements like LinearListItem and LinearBlockQuote.
-     *
-     * For LinearText elements, it detects heading levels (H1-H6) from annotations
-     * to provide proper element type context to the translator.
-     *
-     * @param elements The list of elements to traverse
-     * @param translatableTexts Mutable list to accumulate TranslatableText (in-out parameter)
-     * @param nestingLevel Current nesting depth (0 for top-level, incremented for nested content)
-     */
-    private fun extractTranslatableTextRecursively(
-        elements: List<com.nononsenseapps.feeder.model.html.LinearElement>,
-        translatableTexts: MutableList<TranslatableText>,
-        nestingLevel: Int = 0,
-    ) {
-        for (element in elements) {
-            when (element) {
-                is com.nononsenseapps.feeder.model.html.LinearText -> {
-                    // Only translate regular text (not code blocks or pre-formatted text)
-                    if (element.blockStyle == com.nononsenseapps.feeder.model.html.LinearTextBlockStyle.TEXT) {
-                        val text = element.text
-                        if (text.isNotBlank()) {
-                            // Detect element type from annotations
-                            val elementType = getElementTypeFromAnnotations(element.annotations)
-
-                            translatableTexts.add(
-                                TranslatableText(
-                                    text = text.trim(),
-                                    elementType = elementType,
-                                    nestingLevel = nestingLevel,
-                                ),
-                            )
-                        }
-                    }
-                    // Skip PRE_FORMATTED and CODE_BLOCK
-                }
-                is com.nononsenseapps.feeder.model.html.LinearListItem -> {
-                    // Recursively extract text from list item content
-                    // This handles nested lists at any depth
-                    extractTranslatableTextRecursively(
-                        elements = element.content,
-                        translatableTexts = translatableTexts,
-                        nestingLevel = nestingLevel + 1,
-                    )
-                }
-                is com.nononsenseapps.feeder.model.html.LinearBlockQuote -> {
-                    // Recursively extract text from blockquote content
-                    // This handles paragraphs and other content within blockquotes
-                    extractTranslatableTextRecursively(
-                        elements = element.content,
-                        translatableTexts = translatableTexts,
-                        nestingLevel = nestingLevel + 1,
-                    )
-                }
-                // Skip other element types (images, videos, tables, etc.)
-                else -> {}
-            }
-        }
-    }
-
-    /**
-     * Determines the element type from text annotations.
-     *
-     * Checks if the text has heading annotations (H1-H6) and returns the
-     * corresponding ElementType. Defaults to PARAGRAPH if no heading annotation found.
-     *
-     * @param annotations List of text annotations to check
-     * @return ElementType representing the type of element (heading or paragraph)
-     */
-    private fun getElementTypeFromAnnotations(annotations: List<com.nononsenseapps.feeder.model.html.LinearTextAnnotation>): ElementType {
-        // Check for heading annotations
-        for (annotation in annotations) {
-            when (annotation.data) {
-                is com.nononsenseapps.feeder.model.html.LinearTextAnnotationH1 -> return ElementType.HEADING_1
-                is com.nononsenseapps.feeder.model.html.LinearTextAnnotationH2 -> return ElementType.HEADING_2
-                is com.nononsenseapps.feeder.model.html.LinearTextAnnotationH3 -> return ElementType.HEADING_3
-                is com.nononsenseapps.feeder.model.html.LinearTextAnnotationH4 -> return ElementType.HEADING_4
-                is com.nononsenseapps.feeder.model.html.LinearTextAnnotationH5 -> return ElementType.HEADING_5
-                is com.nononsenseapps.feeder.model.html.LinearTextAnnotationH6 -> return ElementType.HEADING_6
-                else -> {
-                    // Continue checking other annotations
-                }
-            }
-        }
-        // Default to paragraph if no heading annotation found
-        return ElementType.PARAGRAPH
+        return TranslatableTextExtractor.extract(content.elements)
     }
 
     private suspend fun loadArticleContent(): String {

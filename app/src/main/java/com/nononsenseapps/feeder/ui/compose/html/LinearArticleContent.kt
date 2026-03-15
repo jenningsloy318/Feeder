@@ -164,12 +164,45 @@ private class ParagraphCounter {
 }
 
 /**
+ * Counts the number of translatable text elements in a list of LinearElements.
+ * Must mirror TranslatableTextExtractor.extractRecursively() exactly.
+ */
+private fun countTranslatableTexts(elements: List<LinearElement>): Int {
+    var count = 0
+    for (element in elements) {
+        when (element) {
+            is LinearText -> {
+                if (element.blockStyle == LinearTextBlockStyle.TEXT && element.text.isNotBlank()) {
+                    count++
+                }
+            }
+            is LinearListItem -> count += countTranslatableTexts(element.content)
+            is LinearBlockQuote -> count += countTranslatableTexts(element.content)
+            is LinearTable -> {
+                for (row in 0 until element.rowCount) {
+                    for (col in 0 until element.colCount) {
+                        val cell = element.cellAt(row, col) ?: continue
+                        if (cell.isFiller) continue
+                        count += countTranslatableTexts(cell.content)
+                    }
+                }
+            }
+            is LinearImage -> {
+                element.caption?.let { caption ->
+                    if (caption.blockStyle == LinearTextBlockStyle.TEXT && caption.text.isNotBlank()) {
+                        count++
+                    }
+                }
+            }
+            else -> {}
+        }
+    }
+    return count
+}
+
+/**
  * Recursively computes paragraph indices for an element and its nested content.
- * This MUST match the logic in extractTranslatableTextRecursively().
- *
- * For LinearText elements, assigns a translation index if the text is translatable.
- * For LinearListItem and LinearBlockQuote elements, stores the STARTING index for
- * nested content and advances the counter by counting translatable texts.
+ * This MUST match the logic in TranslatableTextExtractor.extractRecursively().
  */
 private fun computeParagraphIndexRecursive(
     element: LinearElement,
@@ -179,7 +212,6 @@ private fun computeParagraphIndexRecursive(
 ) {
     when (element) {
         is LinearText -> {
-            // Only translate regular text (not code blocks or pre-formatted text)
             if (element.blockStyle == LinearTextBlockStyle.TEXT && element.text.isNotBlank()) {
                 result[elementIndex] = paragraphCounter.increment()
             } else {
@@ -187,62 +219,25 @@ private fun computeParagraphIndexRecursive(
             }
         }
         is LinearListItem -> {
-            // Store the STARTING index for nested content
             result[elementIndex] = paragraphCounter.index
-
-            // Count translatable texts in nested content to advance the counter
-            // This matches extractTranslatableTextRecursively behavior
-            element.content.forEach { nested ->
-                when (nested) {
-                    is LinearText -> {
-                        if (nested.blockStyle == LinearTextBlockStyle.TEXT && nested.text.isNotBlank()) {
-                            paragraphCounter.increment()
-                        }
-                    }
-                    is LinearListItem -> {
-                        // Count translatable text in nested list items
-                        val hasTranslatableText =
-                            nested.content
-                                .filterIsInstance<LinearText>()
-                                .filter { it.blockStyle == LinearTextBlockStyle.TEXT }
-                                .any { it.text.isNotBlank() }
-                        if (hasTranslatableText) {
-                            paragraphCounter.increment()
-                        }
-                    }
-                    else -> {}
-                }
-            }
+            paragraphCounter.index += countTranslatableTexts(element.content)
         }
         is LinearBlockQuote -> {
-            // Store the STARTING index for nested content
             result[elementIndex] = paragraphCounter.index
-
-            // Recursively count translatable content within blockquote to advance counter
-            // This matches extractTranslatableTextRecursively behavior
-            element.content.forEach { nested ->
-                when (nested) {
-                    is LinearText -> {
-                        if (nested.blockStyle == LinearTextBlockStyle.TEXT && nested.text.isNotBlank()) {
-                            paragraphCounter.increment()
-                        }
-                    }
-                    is LinearListItem -> {
-                        // Count translatable text in nested list items
-                        val hasTranslatableText =
-                            nested.content
-                                .filterIsInstance<LinearText>()
-                                .filter { it.blockStyle == LinearTextBlockStyle.TEXT }
-                                .any { it.text.isNotBlank() }
-                        if (hasTranslatableText) {
-                            paragraphCounter.increment()
-                        }
-                    }
-                    else -> {}
-                }
+            paragraphCounter.index += countTranslatableTexts(element.content)
+        }
+        is LinearTable -> {
+            result[elementIndex] = paragraphCounter.index
+            paragraphCounter.index += countTranslatableTexts(listOf(element))
+        }
+        is LinearImage -> {
+            val caption = element.caption
+            if (caption != null && caption.blockStyle == LinearTextBlockStyle.TEXT && caption.text.isNotBlank()) {
+                result[elementIndex] = paragraphCounter.increment()
+            } else {
+                result[elementIndex] = null
             }
         }
-        // Other element types don't get translations
         else -> {
             result[elementIndex] = null
         }
@@ -609,7 +604,7 @@ fun LinearListItemContent(
             // This matches the logic in computeParagraphIndexRecursive for nested elements
             val childTranslationIndices =
                 if (translatedParagraphs != null) {
-                    computeChildTranslationIndices(listItem.content, childTranslationStartIndex)
+                    computeContentTranslationIndices(listItem.content, childTranslationStartIndex)
                 } else {
                     emptyMap()
                 }
@@ -650,12 +645,11 @@ fun LinearListItemContent(
 }
 
 /**
- * Computes translation indices for nested content within a list item.
+ * Computes translation indices for nested content within a container element.
  * Returns a map of child element index to translation paragraph index.
- * Only includes indices for translatable elements (LinearText with TEXT blockStyle).
- * For LinearListItem children, stores the STARTING index for their nested content.
+ * Uses countTranslatableTexts() for correct deep counting at all nesting levels.
  */
-private fun computeChildTranslationIndices(
+private fun computeContentTranslationIndices(
     content: List<LinearElement>,
     startIndex: Int,
 ): Map<Int, Int?> {
@@ -673,66 +667,23 @@ private fun computeChildTranslationIndices(
                 }
             }
             is LinearListItem -> {
-                // Store the STARTING index for this list item's nested content
                 result[childIndex] = translationIndex
-
-                // Count translatable texts in the nested list item to advance the counter
-                val hasTranslatableText =
-                    element.content
-                        .filterIsInstance<LinearText>()
-                        .filter { it.blockStyle == LinearTextBlockStyle.TEXT }
-                        .any { it.text.isNotBlank() }
-                if (hasTranslatableText) {
-                    translationIndex++
-                }
+                translationIndex += countTranslatableTexts(element.content)
             }
-            else -> {
-                result[childIndex] = null
+            is LinearBlockQuote -> {
+                result[childIndex] = translationIndex
+                translationIndex += countTranslatableTexts(element.content)
             }
-        }
-        childIndex++
-    }
-
-    return result
-}
-
-/**
- * Computes translation indices for nested content within a blockquote.
- * Returns a map of child element index to translation paragraph index.
- * Only includes indices for translatable elements (LinearText with TEXT blockStyle).
- * For LinearListItem children, stores the STARTING index for their nested content.
- *
- * This matches the logic in extractTranslatableTextRecursively for blockquote content.
- */
-private fun computeBlockQuoteContentTranslationIndices(
-    content: List<LinearElement>,
-    startIndex: Int,
-): Map<Int, Int?> {
-    val result = mutableMapOf<Int, Int?>()
-    var translationIndex = startIndex
-    var childIndex = 0
-
-    for (element in content) {
-        when (element) {
-            is LinearText -> {
-                if (element.blockStyle == LinearTextBlockStyle.TEXT && element.text.isNotBlank()) {
+            is LinearTable -> {
+                result[childIndex] = translationIndex
+                translationIndex += countTranslatableTexts(listOf(element))
+            }
+            is LinearImage -> {
+                val caption = element.caption
+                if (caption != null && caption.blockStyle == LinearTextBlockStyle.TEXT && caption.text.isNotBlank()) {
                     result[childIndex] = translationIndex++
                 } else {
                     result[childIndex] = null
-                }
-            }
-            is LinearListItem -> {
-                // Store the STARTING index for this list item's nested content
-                result[childIndex] = translationIndex
-
-                // Count translatable texts in the nested list item to advance the counter
-                val hasTranslatableText =
-                    element.content
-                        .filterIsInstance<LinearText>()
-                        .filter { it.blockStyle == LinearTextBlockStyle.TEXT }
-                        .any { it.text.isNotBlank() }
-                if (hasTranslatableText) {
-                    translationIndex++
                 }
             }
             else -> {
@@ -951,7 +902,7 @@ fun LinearBlockQuoteContent(
             // This matches the logic in extractTranslatableTextRecursively
             val contentTranslationIndices =
                 if (translatedParagraphs != null) {
-                    computeBlockQuoteContentTranslationIndices(blockQuote.content, blockQuoteTranslationStartIndex)
+                    computeContentTranslationIndices(blockQuote.content, blockQuoteTranslationStartIndex)
                 } else {
                     emptyMap()
                 }

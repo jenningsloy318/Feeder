@@ -36,6 +36,8 @@ data class TranslatableText(
             ElementType.HEADING_6 -> "heading level 6"
             ElementType.LIST_ITEM -> "list item${if (nestingLevel > 0) " (nesting level: $nestingLevel)" else ""}"
             ElementType.BLOCKQUOTE -> "blockquote${if (nestingLevel > 0) " (nesting level: $nestingLevel)" else ""}"
+            ElementType.TABLE_CELL -> "table cell"
+            ElementType.IMAGE_CAPTION -> "image caption"
         }
 
     /**
@@ -88,4 +90,10 @@ enum class ElementType {
 
     /** Blockquote content - can be nested */
     BLOCKQUOTE,
+
+    /** Table cell content */
+    TABLE_CELL,
+
+    /** Image caption */
+    IMAGE_CAPTION,
 }

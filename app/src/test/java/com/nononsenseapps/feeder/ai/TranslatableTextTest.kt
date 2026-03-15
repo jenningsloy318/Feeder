@@ -97,6 +97,30 @@ class TranslatableTextTest {
     }
 
     @Test
+    fun testGetStructureDescription_TableCell() {
+        val tt =
+            TranslatableText(
+                text = "cell content",
+                elementType = ElementType.TABLE_CELL,
+                nestingLevel = 0,
+            )
+
+        assertEquals("table cell", tt.getStructureDescription())
+    }
+
+    @Test
+    fun testGetStructureDescription_ImageCaption() {
+        val tt =
+            TranslatableText(
+                text = "caption text",
+                elementType = ElementType.IMAGE_CAPTION,
+                nestingLevel = 0,
+            )
+
+        assertEquals("image caption", tt.getStructureDescription())
+    }
+
+    @Test
     fun testWithStructurePrefix_Paragraph() {
         val tt =
             TranslatableText(

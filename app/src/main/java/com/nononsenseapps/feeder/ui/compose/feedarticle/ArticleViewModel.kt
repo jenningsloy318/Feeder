@@ -6,6 +6,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.nononsenseapps.feeder.ApplicationCoroutineScope
 import com.nononsenseapps.feeder.ai.AIClient
+import com.nononsenseapps.feeder.ai.SummaryResponseParser
 import com.nononsenseapps.feeder.ai.AIApi
 import com.nononsenseapps.feeder.ai.ArticleTranslation
 import com.nononsenseapps.feeder.ai.ParagraphTranslation
@@ -483,8 +484,11 @@ class ArticleViewModel(
                 aiSummary.value =
                     AISummaryState.Result(
                         value =
-                            com.nononsenseapps.feeder.ai.AIClient.SummaryResult
-                                .Error(content = e.message ?: "Unknown error"),
+                            AIClient.SummaryResult
+                                .Error(
+                                    content = SummaryResponseParser
+                                        .sanitizeErrorMessage(e.message),
+                                ),
                     )
             }
         }

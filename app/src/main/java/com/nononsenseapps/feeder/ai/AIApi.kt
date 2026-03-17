@@ -104,7 +104,9 @@ class AIApi(
             val language = repository.summaryLanguage.first()
             AIClient.create(settingsWithTimeout).generateSummary(content, language)
         } catch (e: Exception) {
-            AIClient.SummaryResult.Error(content = e.message ?: e.cause?.message ?: "")
+            AIClient.SummaryResult.Error(
+                content = SummaryResponseParser.sanitizeErrorMessage(e.message ?: e.cause?.message),
+            )
         }
     }
 

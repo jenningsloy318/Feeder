@@ -1,0 +1,16 @@
+{
+  "featureName": "Fix Summary Raw JSON Display Bug",
+  "specDirectory": "specification/034-fix-summary-raw-json",
+  "worktreePath": ".worktree/034-fix-summary-raw-json",
+  "startedAt": "2026-03-17T00:00:00Z",
+  "phases": [
+    { "id": 0, "name": "Apply Dev Rules", "status": "complete", "startedAt": "2026-03-17T00:00:00Z", "completedAt": "2026-03-17T00:00:00Z" },
+    { "id": 1, "name": "Specification Setup", "status": "complete", "startedAt": "2026-03-17T00:00:00Z", "completedAt": "2026-03-17T00:00:00Z" }
+  ],
+  "tasks": [
+    { "id": "T1.1", "phase": 1, "description": "Specification Setup", "status": "complete", "files": [], "updatedAt": "2026-03-17T00:00:00Z" }
+  ],
+  "iteration": { "loops": 0, "lastReviewVerdict": null },
+  "team": { "name": "super-dev-034-fix-summary-raw-json", "teammates": [], "messages": [] },
+  "status": { "allPhasesComplete": false, "allTasksComplete": false, "workflowDone": false }
+}

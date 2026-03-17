@@ -1,6 +1,7 @@
 package com.nononsenseapps.feeder.ui.compose.feedarticle
 
 import android.content.Intent
+import com.nononsenseapps.feeder.ai.SummaryResponseParser
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.foundation.BorderStroke
@@ -664,11 +665,10 @@ private fun SummarySection(summary: AISummaryState) {
             AISummaryState.Empty -> {}
             AISummaryState.Loading -> {}
             is AISummaryState.Result -> {
-                // Fix for spec-26: Prevent raw JSON from being displayed to users
-                // If content looks like JSON, show error message instead
                 val displayContent = summary.value.content.trim()
-                val safeContent = if (displayContent.startsWith("{") || displayContent.startsWith("[")) {
-                    // This looks like raw JSON - shouldn't happen, but add safety check
+                val safeContent = if (
+                    SummaryResponseParser.containsRawJson(displayContent)
+                ) {
                     android.util.Log.w("ArticleScreen", "Detected raw JSON in summary, replacing with error message")
                     "Could not generate summary. Please try again."
                 } else {

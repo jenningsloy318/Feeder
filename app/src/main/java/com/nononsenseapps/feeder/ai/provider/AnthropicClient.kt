@@ -4,6 +4,7 @@ import com.anthropic.client.AnthropicClientAsync
 import com.anthropic.client.okhttp.AnthropicOkHttpClientAsync
 import com.anthropic.models.messages.MessageCreateParams
 import com.nononsenseapps.feeder.ai.AIClient
+import com.nononsenseapps.feeder.ai.SummaryResponseParser
 import com.nononsenseapps.feeder.ai.TranslatableText
 import com.nononsenseapps.feeder.ai.TranslationPromptBuilder
 import com.nononsenseapps.feeder.ai.model.AnthropicSettings
@@ -11,12 +12,6 @@ import com.nononsenseapps.feeder.ai.model.SummaryLanguage
 import com.nononsenseapps.feeder.ai.model.TranslationLanguage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.SerializationException
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonArray
-import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
 import java.time.Duration
 import kotlin.jvm.optionals.getOrNull
 
@@ -177,7 +172,7 @@ Now, summarize the following article:
                     contentBlock.text().getOrNull()?.text() ?: ""
                 }
 
-            val summaryData = parseSummaryJsonResponse(text)
+            val summaryData = SummaryResponseParser.parse(text)
 
             // Get usage info - usage() returns Usage directly
             val usage = response.usage()
@@ -202,7 +197,9 @@ Now, summarize the following article:
                 sentiment = summaryData.sentiment,
             )
         } catch (e: Exception) {
-            AIClient.SummaryResult.Error(content = e.message ?: e.cause?.message ?: "Unknown error")
+            AIClient.SummaryResult.Error(
+                content = SummaryResponseParser.sanitizeErrorMessage(e.message ?: e.cause?.message),
+            )
         }
     }
 
@@ -278,160 +275,6 @@ Now, summarize the following article:
         }
 
         return builder.build()
-    }
-
-    /**
-     * Data class representing the structured JSON summary response.
-     */
-    @Serializable
-    private data class SummaryResponseData(
-        val language: String = "",
-        val title: String = "",
-        val keyPoints: List<String> = emptyList(),
-        val summary: String = "",
-        val sentiment: String = "",
-        val isValid: Boolean = true,  // Track if parsing succeeded
-    )
-
-    /**
-     * Parses JSON-structured summary response.
-     *
-     * Extracts and validates all fields from the JSON response with fallback handling.
-     */
-    private fun parseSummaryJsonResponse(content: String): SummaryResponseData {
-        val jsonContent = extractJsonFromMarkdown(content)
-
-        return try {
-            val jsonElement = Json.parseToJsonElement(jsonContent)
-
-            val jsonObject = jsonElement.jsonObject
-
-            val language = jsonObject["language"]?.jsonPrimitive?.content ?: ""
-            val title = jsonObject["title"]?.jsonPrimitive?.content ?: ""
-            val sentiment = jsonObject["sentiment"]?.jsonPrimitive?.content ?: ""
-
-            // Parse keyPoints array
-            val keyPoints =
-                try {
-                    val keyPointsElement = jsonObject["keyPoints"]
-                    if (keyPointsElement is JsonArray) {
-                        keyPointsElement.mapNotNull { item ->
-                            item.jsonPrimitive.content.takeIf { it.isNotEmpty() }
-                        }
-                    } else {
-                        emptyList()
-                    }
-                } catch (e: Exception) {
-                    emptyList()
-                }
-
-            val summary = jsonObject["summary"]?.jsonPrimitive?.content ?: ""
-
-            // Fix for spec-26: Prevent raw JSON display to users
-            // When summary field is empty or missing, show user-friendly error message
-            // instead of displaying the entire raw JSON response.
-            val hasUsefulContent = summary.isNotBlank() ||
-                                   title.isNotBlank() ||
-                                   keyPoints.isNotEmpty()
-
-            val finalSummary = when {
-                summary.isNotBlank() -> summary
-                title.isNotBlank() || keyPoints.isNotEmpty() ->
-                    "Summary text not available, but article analysis succeeded."
-                else ->
-                    "Could not generate summary. Please try again."
-            }
-
-            SummaryResponseData(
-                language = language,
-                title = title,
-                keyPoints = keyPoints,
-                summary = finalSummary,  // User-friendly message instead of raw JSON
-                sentiment = sentiment,
-                isValid = hasUsefulContent,  // Track validity
-            )
-        } catch (e: SerializationException) {
-            // JSON parsing failed, fall back to legacy format
-            android.util.Log.e(TAG, "JSON parsing failed for summary", e)
-            parseLegacySummaryResponse(content)
-        } catch (e: Exception) {
-            // Any other error, fall back to legacy format
-            android.util.Log.e(TAG, "Unexpected error parsing summary", e)
-            parseLegacySummaryResponse(content)
-        }
-    }
-
-    /**
-     * Extracts JSON from markdown code blocks.
-     */
-    private fun extractJsonFromMarkdown(content: String): String {
-        // Try ```json code blocks
-        val jsonCodeBlock = Regex("""```json\s*([\s\S]*?)\s*```""").find(content)
-        if (jsonCodeBlock != null) {
-            return jsonCodeBlock.groupValues[1].trim()
-        }
-
-        // Try ``` code blocks
-        val codeBlock = Regex("""```\s*([\s\S]*?)\s*```""").find(content)
-        if (codeBlock != null) {
-            return codeBlock.groupValues[1].trim()
-        }
-
-        // Return as-is
-        return content.trim()
-    }
-
-    /**
-     * Parses legacy summary response format.
-     *
-     * Handles "Lang: XX" prefix format for backward compatibility.
-     */
-    private fun parseLegacySummaryResponse(content: String): SummaryResponseData {
-        val lines = content.lines()
-        val lang =
-            if (lines.firstOrNull()?.startsWith("Lang:") == true) {
-                lines
-                    .first()
-                    .removePrefix("Lang:")
-                    .trim()
-                    .take(2)
-            } else {
-                ""
-            }
-
-        // Fix for spec-26: Check if content is raw JSON and prevent displaying it to users
-        val summary =
-            if (lines.firstOrNull()?.startsWith("Lang:") == true) {
-                lines.drop(1).joinToString("\n").trim()
-            } else {
-                // Check if content looks like JSON (starts with '{')
-                val trimmedContent = content.trim()
-                if (trimmedContent.startsWith("{") || trimmedContent.startsWith("[")) {
-                    // This is likely raw JSON - don't show it to users
-                    android.util.Log.w(TAG, "Detected raw JSON in legacy parser, returning error message")
-                    "Could not generate summary. Please try again."
-                } else {
-                    // Not JSON, return as-is (plain text summary)
-                    trimmedContent
-                }
-            }
-
-        return SummaryResponseData(
-            language = lang,
-            title = "",
-            keyPoints = emptyList(),
-            summary = summary,
-            sentiment = "",
-        )
-    }
-
-    /**
-     * Legacy parseSummaryResponse for backward compatibility.
-     * @deprecated Use parseSummaryJsonResponse instead.
-     */
-    private fun parseSummaryResponse(content: String): Pair<String, String> {
-        val summaryData = parseSummaryJsonResponse(content)
-        return summaryData.language to summaryData.summary
     }
 
 }

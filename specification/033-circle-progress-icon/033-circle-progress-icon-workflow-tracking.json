@@ -1,0 +1,16 @@
+{
+  "featureName": "Circle Progress Icon for Summarize/Translate",
+  "specDirectory": "specification/033-circle-progress-icon",
+  "worktreePath": ".worktree/033-circle-progress-icon",
+  "startedAt": "2026-03-17T00:00:00Z",
+  "phases": [
+    { "id": 0, "name": "Apply Dev Rules", "status": "complete", "startedAt": "2026-03-17T00:00:00Z", "completedAt": "2026-03-17T00:00:00Z" },
+    { "id": 1, "name": "Specification Setup", "status": "complete", "startedAt": "2026-03-17T00:00:00Z", "completedAt": "2026-03-17T00:00:00Z" }
+  ],
+  "tasks": [
+    { "id": "T1.1", "phase": 1, "description": "Specification Setup", "status": "complete", "files": ["specification/033-circle-progress-icon/"], "updatedAt": "2026-03-17T00:00:00Z" }
+  ],
+  "iteration": { "loops": 0, "lastReviewVerdict": null },
+  "team": { "name": "super-dev-033-circle-progress-icon", "teammates": [], "messages": [] },
+  "status": { "allPhasesComplete": false, "allTasksComplete": false, "workflowDone": false }
+}

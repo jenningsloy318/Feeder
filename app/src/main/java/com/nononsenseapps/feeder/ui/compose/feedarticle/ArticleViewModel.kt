@@ -43,7 +43,9 @@ import com.nononsenseapps.feeder.ui.compose.text.htmlToAnnotatedString
 import com.nononsenseapps.feeder.util.Either
 import com.nononsenseapps.feeder.util.FilePathProvider
 import com.nononsenseapps.feeder.util.logDebug
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -121,8 +123,10 @@ class ArticleViewModel(
         MutableStateFlow(state["toolbarMenuVisible"] ?: false)
 
     private val aiSummary: MutableStateFlow<AISummaryState> = MutableStateFlow(AISummaryState.Empty)
+    private var summarizeJob: Job? = null
 
     private val translationState: MutableStateFlow<TranslationState> = MutableStateFlow(TranslationState.Empty)
+    private var translateJob: Job? = null
 
     val viewState: StateFlow<ArticleScreenViewState> =
         combine(
@@ -464,7 +468,8 @@ class ArticleViewModel(
     }
 
     fun summarize() {
-        viewModelScope.launch(Dispatchers.IO) {
+        summarizeJob?.cancel()
+        summarizeJob = viewModelScope.launch(Dispatchers.IO) {
             try {
                 aiSummary.value = AISummaryState.Loading
                 val content = loadArticleContent()
@@ -472,6 +477,8 @@ class ArticleViewModel(
                     AISummaryState.Result(
                         value = aiApi.summarize(content),
                     )
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 aiSummary.value =
                     AISummaryState.Result(
@@ -481,6 +488,12 @@ class ArticleViewModel(
                     )
             }
         }
+    }
+
+    fun cancelSummarize() {
+        summarizeJob?.cancel()
+        summarizeJob = null
+        aiSummary.value = AISummaryState.Empty
     }
 
     /**
@@ -494,7 +507,8 @@ class ArticleViewModel(
      * Users can tap the translate button again to retry if translation fails.
      */
     fun translate() {
-        viewModelScope.launch(Dispatchers.IO) {
+        translateJob?.cancel()
+        translateJob = viewModelScope.launch(Dispatchers.IO) {
             try {
                 // Step 1: Extract paragraphs
                 val translatableTexts = extractTranslatableParagraphs()
@@ -569,12 +583,20 @@ class ArticleViewModel(
                             }
                         }
                     }
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 translationState.value = TranslationState.Error(
                     errorMessage = e.message ?: "Translation failed",
                 )
             }
         }
+    }
+
+    fun cancelTranslation() {
+        translateJob?.cancel()
+        translateJob = null
+        translationState.value = TranslationState.Empty
     }
 
     private fun createSettingsWithTimeout(translationTimeoutSeconds: Int): AISettings {

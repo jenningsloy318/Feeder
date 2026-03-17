@@ -274,8 +274,12 @@
   <string name="summarize">Summarize</string>
   <string name="summarize_on_open">Summarize on open</string>
   <string name="summarizing_progress">Summarizing...</string>
+  <string name="cancel_summarize">Cancel summarize</string>
+  <string name="summarizing_tap_to_cancel">Summarizing in progress, tap to cancel</string>
   <string name="translate">Translate</string>
   <string name="translating_progress">Translating...</string>
+  <string name="cancel_translation">Cancel translation</string>
+  <string name="translating_x_of_y_tap_to_cancel">Translating %1$d of %2$d paragraphs, tap to cancel</string>
   <string name="translation_error">Translation Error</string>
   <string name="translation_error_no_content">No translatable content found in this article</string>
   <string name="translate_article_content_description">Translate article content</string>

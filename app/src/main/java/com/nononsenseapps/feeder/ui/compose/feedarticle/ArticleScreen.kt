@@ -38,7 +38,6 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
@@ -149,6 +148,12 @@ fun ArticleScreen(
         onTranslate = {
             viewModel.translate()
         },
+        onCancelSummarize = {
+            viewModel.cancelSummarize()
+        },
+        onCancelTranslation = {
+            viewModel.cancelTranslation()
+        },
     )
 }
 
@@ -174,6 +179,8 @@ fun ArticleScreen(
     onNavigateUp: () -> Unit,
     onSummarize: () -> Unit,
     onTranslate: () -> Unit,
+    onCancelSummarize: () -> Unit,
+    onCancelTranslation: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     // Wrap with custom text toolbar to enable selection menu
@@ -199,6 +206,8 @@ fun ArticleScreen(
             onNavigateUp = onNavigateUp,
             onSummarize = onSummarize,
             onTranslate = onTranslate,
+            onCancelSummarize = onCancelSummarize,
+            onCancelTranslation = onCancelTranslation,
             modifier = modifier,
         )
     }
@@ -226,6 +235,8 @@ private fun ArticleScreenInternal(
     onNavigateUp: () -> Unit,
     onSummarize: () -> Unit,
     onTranslate: () -> Unit,
+    onCancelSummarize: () -> Unit,
+    onCancelTranslation: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
@@ -268,36 +279,68 @@ private fun ArticleScreenInternal(
                 actions = {
                     // Summarize button (conditional)
                     if (viewState.showSummarize) {
-                        PlainTooltipBox(tooltip = { Text(stringResource(R.string.summarize)) }) {
-                            IconButton(
-                                onClick = onSummarize,
-                            ) {
-                                Icon(
-                                    Icons.Default.AutoFixHigh,
-                                    contentDescription = stringResource(R.string.summarize),
+                        val isSummarizing = viewState.aiSummary is AISummaryState.Loading
+                        PlainTooltipBox(
+                            tooltip = {
+                                Text(
+                                    stringResource(
+                                        if (isSummarizing) R.string.cancel_summarize
+                                        else R.string.summarize,
+                                    ),
                                 )
-                            }
+                            },
+                        ) {
+                            CircleProgressIconButton(
+                                isInProgress = isSummarizing,
+                                progressFraction = null,
+                                icon = Icons.Default.AutoFixHigh,
+                                idleContentDescription = stringResource(R.string.summarize),
+                                progressContentDescription = stringResource(R.string.summarizing_tap_to_cancel),
+                                onAction = onSummarize,
+                                onCancel = onCancelSummarize,
+                            )
                         }
                     }
 
                     // Translate button (conditional)
                     if (viewState.showSummarize) {
-                        PlainTooltipBox(tooltip = { Text(stringResource(R.string.translate)) }) {
-                            val isTranslationInProgress = viewState.translation is TranslationState.Translating
-                            IconButton(
-                                onClick = onTranslate,
-                                enabled = !isTranslationInProgress,
-                            ) {
-                                Icon(
-                                    Icons.Default.Translate,
-                                    contentDescription =
-                                        if (isTranslationInProgress) {
-                                            "Translating article, please wait"
-                                        } else {
-                                            stringResource(R.string.translate_article_content_description)
-                                        },
+                        val isTranslating = viewState.translation is TranslationState.Translating
+                        val translationProgressFraction: (() -> Float)? = if (isTranslating) {
+                            val articleTranslation = (viewState.translation as TranslationState.Translating).articleTranslation
+                            val completed = articleTranslation.paragraphCompletedCount
+                            val total = articleTranslation.paragraphTotalCount
+                            { if (total > 0) completed.toFloat() / total else 0f }
+                        } else {
+                            null
+                        }
+                        PlainTooltipBox(
+                            tooltip = {
+                                Text(
+                                    stringResource(
+                                        if (isTranslating) R.string.cancel_translation
+                                        else R.string.translate,
+                                    ),
                                 )
-                            }
+                            },
+                        ) {
+                            CircleProgressIconButton(
+                                isInProgress = isTranslating,
+                                progressFraction = translationProgressFraction,
+                                icon = Icons.Default.Translate,
+                                idleContentDescription = stringResource(R.string.translate_article_content_description),
+                                progressContentDescription = if (isTranslating) {
+                                    val articleTranslation = (viewState.translation as TranslationState.Translating).articleTranslation
+                                    stringResource(
+                                        R.string.translating_x_of_y_tap_to_cancel,
+                                        articleTranslation.paragraphCompletedCount,
+                                        articleTranslation.paragraphTotalCount,
+                                    )
+                                } else {
+                                    stringResource(R.string.translate_article_content_description)
+                                },
+                                onAction = onTranslate,
+                                onCancel = onCancelTranslation,
+                            )
                         }
                     }
 
@@ -531,7 +574,7 @@ fun ArticleContent(
     ) { indexOffset ->
         var offsetCounter = indexOffset
 
-        if (viewState.aiSummary !is AISummaryState.Empty) {
+        if (viewState.aiSummary is AISummaryState.Result) {
             offsetCounter++
             item {
                 SummarySection(viewState.aiSummary)
@@ -539,7 +582,7 @@ fun ArticleContent(
         }
 
         // Translation status section (loading or error)
-        if (viewState.translation !is TranslationState.Empty) {
+        if (viewState.translation is TranslationState.Translated || viewState.translation is TranslationState.Error) {
             offsetCounter++
             item {
                 TranslationStatusSection(viewState.translation)
@@ -619,21 +662,7 @@ private fun SummarySection(summary: AISummaryState) {
     ) {
         when (summary) {
             AISummaryState.Empty -> {}
-            AISummaryState.Loading ->
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    Text(
-                        text = stringResource(R.string.summarizing_progress),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    LinearProgressIndicator(
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                }
+            AISummaryState.Loading -> {}
             is AISummaryState.Result -> {
                 // Fix for spec-26: Prevent raw JSON from being displayed to users
                 // If content looks like JSON, show error message instead
@@ -696,30 +725,7 @@ private fun TranslationStatusSection(translation: TranslationState) {
     when (translation) {
         TranslationState.Empty -> {}
 
-        is TranslationState.Translating -> {
-            val articleTranslation = translation.articleTranslation
-            val completedCount = articleTranslation.paragraphCompletedCount
-            val totalCount = articleTranslation.paragraphTotalCount
-            val progressFraction = if (totalCount > 0) completedCount.toFloat() / totalCount else 0f
-
-            OutlinedCard(modifier = Modifier.fillMaxWidth()) {
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    Text(
-                        text = "$completedCount/$totalCount paragraphs translated",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    LinearProgressIndicator(
-                        progress = { progressFraction },
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                }
-            }
-        }
+        is TranslationState.Translating -> {}
 
         is TranslationState.Translated -> {
             val failedCount = translation.articleTranslation.paragraphFailedCount

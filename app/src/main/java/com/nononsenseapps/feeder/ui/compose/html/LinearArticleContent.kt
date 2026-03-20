@@ -38,6 +38,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
@@ -291,6 +293,54 @@ fun LazyListScope.linearArticleContent(
         ) {
             BoxWithConstraints(
                 modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.Center,
+            ) {
+                LinearElementContent(
+                    linearElement = element,
+                    translation = translation,
+                    idToIndex = articleContent.idToIndex,
+                    allowHorizontalScroll = true,
+                    onLinkClick = onLinkClick,
+                    modifier =
+                        Modifier
+                            .widthIn(max = minOf(maxWidth, LocalDimens.current.maxReaderWidth))
+                            .fillMaxWidth(),
+                    translatedParagraphs = translatedParagraphs,
+                    parentTranslationIndex = paragraphIndexForPosition[index],
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun ColumnArticleContent(
+    articleContent: LinearArticle,
+    onLinkClick: (url: String, index: Int?) -> Unit,
+    modifier: Modifier = Modifier,
+    translatedParagraphs: List<String>? = null,
+    onElementPosition: (index: Int, yPosition: Float) -> Unit = { _, _ -> },
+) {
+    val paragraphIndexForPosition = computeParagraphIndices(articleContent.elements, translatedParagraphs)
+
+    articleContent.elements.forEachIndexed { index, element ->
+        val translation =
+            paragraphIndexForPosition[index]?.let { paragraphIndex ->
+                translatedParagraphs?.getOrNull(paragraphIndex)
+            }
+
+        ProvideTextStyle(
+            MaterialTheme.typography.bodyLarge.merge(
+                TextStyle(color = MaterialTheme.colorScheme.onBackground),
+            ),
+        ) {
+            BoxWithConstraints(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .onGloballyPositioned { coordinates ->
+                            onElementPosition(index, coordinates.positionInRoot().y)
+                        },
                 contentAlignment = Alignment.Center,
             ) {
                 LinearElementContent(

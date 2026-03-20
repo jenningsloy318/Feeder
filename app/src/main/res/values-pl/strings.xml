@@ -149,7 +149,7 @@
     <string name="or_open_device_sync_link">Alternatywnie otwórz link na swoim urządzeniu.</string>
     <string name="qr_code">Kod QR</string>
     <string name="leave_sync_chain">Opuść łańcuch synchronizacji</string>
-    <string name="feeder_device_sync_code">Kod synchronizacji urządzenia Feeder</string>
+    <string name="feeder_device_sync_code">Kod synchronizacji urządzenia z Feederem</string>
     <string name="scan_or_enter_code">Zeskanuj lub wprowadź kod synchronizacji</string>
     <string name="sync_code">Kod synchronizacji</string>
     <string name="secret_key">Klucz tajny</string>
@@ -226,7 +226,7 @@
     <string name="failed_to_parse_json_feed">Nie udało się przetworzyć kanału JSON</string>
     <string name="failed_to_parse_full_article">Nie udało się przetworzyć całego artykułu</string>
     <string name="no_url">Brak adresu URL</string>
-    <string name="theme_e_ink">E Ink</string>
+    <string name="theme_e_ink">E-papier</string>
     <string name="add_anyway">Dodaj mimo to</string>
     <string name="open_browser_in_split_screen">Otwieraj przeglądarkę na podzielonym ekranie</string>
     <string name="show_reading_time">Pokazuj szacowany czas czytania</string>
@@ -253,10 +253,10 @@
     <string name="model_id">Identyfikator modelu</string>
     <string name="azure_api_version">Wersja Azure API</string>
     <string name="azure_deployment_id">Identyfikator wdrożenia Azure</string>
-    <string name="summarize">Streść</string>
+    <string name="summarize">Podsumuj</string>
     <string name="openai_settings">Integracja z AI</string>
     <string name="api_key">Klucz API</string>
-    <string name="unable_to_load_models">Nie udało się załadować modeli</string>
+    <string name="unable_to_load_models">Nie udało się załadować modeli.</string>
     <string name="no_models_were_found">Nie znaleziono modeli</string>
     <string name="list_of_available_models">Lista dostępnych modeli</string>
     <string name="show_message">Pokaż wiadomość</string>
@@ -284,4 +284,12 @@
     <string name="summarize_on_open">Podsumowuj przy otwieraniu</string>
     <string name="feed_search_suggestions_header">Sugestie</string>
     <string name="openai_settings_info">Kompatybilne z wieloma dostawcami AI, ale nie ze wszystkimi</string>
+    <string name="apply_blocklist_to_summaries">Zastosuj do podsumowań</string>
+    <string name="open_article_in_reader">Otwórz w czytniku</string>
+    <string name="open_article_in_default_browser">Otwórz w domyślnej przeglądarce</string>
+    <string name="open_article_in_custom_tab">Otwórz w niestandardowej karcie</string>
+    <string name="no_article_link_browser">Nie udało się otworzyć artykułu w przeglądarce</string>
+    <string name="no_article_link_custom_tab">Nie udało się otworzyć artykułu w niestandardowej karcie</string>
+    <string name="widget_title">Feeder</string>
+    <string name="widget_refreshing">Odświeżanie</string>
 </resources>

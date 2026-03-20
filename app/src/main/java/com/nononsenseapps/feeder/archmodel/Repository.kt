@@ -101,6 +101,8 @@ class Repository(
 
     val currentFeedAndTag: StateFlow<Pair<Long, String>> = settingsStore.currentFeedAndTag
 
+    val currentWidgetFeedAndTag: StateFlow<Pair<Long, String>> = settingsStore.currentWidgetFeedAndTag
+
     fun getUnreadCount(
         feedId: Long,
         tag: String = "",
@@ -132,6 +134,13 @@ class Repository(
         if (settingsStore.setCurrentFeedAndTag(feedId, tag)) {
             setMinReadTime(Instant.now())
         }
+    }
+
+    fun setCurrentWidgetFeedAndTag(
+        feedId: Long,
+        tag: String,
+    ) {
+        settingsStore.setCurrentWidgetFeedAndTag(feedId, tag)
     }
 
     val isArticleOpen: StateFlow<Boolean> = settingsStore.isArticleOpen
@@ -212,6 +221,13 @@ class Repository(
 
     suspend fun removeBlocklistPattern(pattern: String) {
         settingsStore.removeBlocklistPattern(pattern)
+        runOnceBlocklistUpdate(di)
+    }
+
+    val applyBlocklistToSummaries: StateFlow<Boolean> = settingsStore.applyBlocklistToSummaries
+
+    suspend fun setApplyBlocklistToSummaries(value: Boolean) {
+        settingsStore.setApplyBlocklistToSummaries(value)
         runOnceBlocklistUpdate(di)
     }
 
@@ -447,6 +463,12 @@ class Repository(
                 filter = it.filter,
                 search = it.search,
             )
+        }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    fun getCurrentWidgetFeedListItems(): Flow<List<FeedListItem>> =
+        currentWidgetFeedAndTag.flatMapLatest { (feedId, tag) ->
+            feedItemStore.getWidgetFeedListItems(feedId = feedId, tag = tag)
         }
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -848,6 +870,18 @@ class Repository(
 
     fun setOpenAdjacent(value: Boolean) {
         settingsStore.setOpenAdjacent(value)
+    }
+
+    val isPagingMode: StateFlow<Boolean> = settingsStore.isPagingMode
+
+    fun setIsPagingMode(value: Boolean) {
+        settingsStore.setIsPagingMode(value)
+    }
+
+    val isAnimatedPaging: StateFlow<Boolean> = settingsStore.isAnimatedPaging
+
+    fun setIsAnimatedPaging(value: Boolean) {
+        settingsStore.setIsAnimatedPaging(value)
     }
 
     val showReadingTime: StateFlow<Boolean> = settingsStore.showReadingTime

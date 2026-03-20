@@ -2,6 +2,7 @@ package com.nononsenseapps.feeder.ui.compose.feedarticle
 
 import android.util.Log
 import androidx.compose.runtime.Immutable
+import androidx.compose.ui.text.AnnotatedString
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.nononsenseapps.feeder.ApplicationCoroutineScope
@@ -405,7 +406,7 @@ class ArticleViewModel(
             val textToRead =
                 when (readFullText) {
                     false ->
-                        Either.catching(
+                        Either.catching<TSSError, List<AnnotatedString>>(
                             onCatch = {
                                 when (it) {
                                     is FileNotFoundException -> TTSFileNotFound
@@ -422,7 +423,7 @@ class ArticleViewModel(
                         }
 
                     true ->
-                        Either.catching(
+                        Either.catching<TSSError, List<AnnotatedString>>(
                             onCatch = {
                                 when (it) {
                                     is FileNotFoundException -> TTSFileNotFound
@@ -643,6 +644,7 @@ class ArticleViewModel(
         val content = viewState.value.articleContent
         return TranslatableTextExtractor.extract(content.elements)
     }
+
 
     private suspend fun loadArticleContent(): String {
         val viewState = viewState.value

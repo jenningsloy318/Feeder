@@ -162,6 +162,8 @@ fun SettingsScreen(
             feedItemStyleValue = viewState.feedItemStyle,
             onFeedItemStyleChange = settingsViewModel::setFeedItemStyle,
             blockListValue = ImmutableHolder(viewState.blockList.sorted()),
+            applyBlocklistToSummaries = viewState.applyBlocklistToSummaries,
+            onApplyBlocklistToSummariesChange = settingsViewModel::setApplyBlocklistToSummaries,
             swipeAsReadValue = viewState.swipeAsRead,
             onSwipeAsReadOptionChange = settingsViewModel::setSwipeAsRead,
             syncOnStartupValue = viewState.syncOnResume,
@@ -219,6 +221,10 @@ fun SettingsScreen(
             onOpenDrawerOnFab = settingsViewModel::setOpenDrawerOnFab,
             onTextSettings = onNavigateToTextSettingsScreen,
             currentFontSelection = viewState.font,
+            isPagingMode = viewState.isPagingMode,
+            onIsPagingModeChange = settingsViewModel::setIsPagingMode,
+            isAnimatedPaging = viewState.isAnimatedPaging,
+            onIsAnimatedPagingChange = settingsViewModel::setIsAnimatedPaging,
             onSendFeedback = {
                 activityLauncher.startActivity(
                     openAdjacentIfSuitable = true,
@@ -247,6 +253,8 @@ private fun SettingsScreenPreview() {
             feedItemStyleValue = FeedItemStyle.CARD,
             onFeedItemStyleChange = {},
             blockListValue = ImmutableHolder(emptyList()),
+            applyBlocklistToSummaries = false,
+            onApplyBlocklistToSummariesChange = {},
             swipeAsReadValue = SwipeAsRead.ONLY_FROM_END,
             onSwipeAsReadOptionChange = {},
             syncOnStartupValue = true,
@@ -299,6 +307,10 @@ private fun SettingsScreenPreview() {
             onOpenDrawerOnFab = {},
             onTextSettings = {},
             currentFontSelection = FontSelection.SystemDefault,
+            isPagingMode = false,
+            onIsPagingModeChange = {},
+            isAnimatedPaging = false,
+            onIsAnimatedPagingChange = {},
             onSendFeedback = {},
             modifier = Modifier,
         )
@@ -318,6 +330,8 @@ fun SettingsList(
     feedItemStyleValue: FeedItemStyle,
     onFeedItemStyleChange: (FeedItemStyle) -> Unit,
     blockListValue: ImmutableHolder<List<String>>,
+    applyBlocklistToSummaries: Boolean,
+    onApplyBlocklistToSummariesChange: (Boolean) -> Unit,
     swipeAsReadValue: SwipeAsRead,
     onSwipeAsReadOptionChange: (SwipeAsRead) -> Unit,
     syncOnStartupValue: Boolean,
@@ -372,6 +386,10 @@ fun SettingsList(
     isOpenDrawerOnFab: Boolean,
     onOpenDrawerOnFab: (Boolean) -> Unit,
     currentFontSelection: FontSelection,
+    isPagingMode: Boolean,
+    onIsPagingModeChange: (Boolean) -> Unit,
+    isAnimatedPaging: Boolean,
+    onIsAnimatedPagingChange: (Boolean) -> Unit,
     onTextSettings: () -> Unit,
     onSendFeedback: () -> Unit,
     modifier: Modifier = Modifier,
@@ -462,8 +480,12 @@ fun SettingsList(
                 }
             },
             currentValue = blockListValue,
+            showToggle = true,
+            toggleValue = applyBlocklistToSummaries,
+            toggleLabel = stringResource(id = R.string.apply_blocklist_to_summaries),
             onAddItem = onBlockListAdd,
             onRemoveItem = onBlockListRemove,
+            onToggleChange = onApplyBlocklistToSummariesChange,
         )
 
         NotificationsSetting(
@@ -718,6 +740,22 @@ fun SettingsList(
                     title = stringResource(id = R.string.open_browser_in_split_screen),
                     checked = isOpenAdjacent,
                     onCheckedChange = onOpenAdjacent,
+                )
+            }
+
+            SwitchSetting(
+                title = stringResource(id = R.string.pref_paging_mode_title),
+                checked = isPagingMode,
+                onCheckedChange = onIsPagingModeChange,
+                description = stringResource(id = R.string.pref_paging_mode_description),
+            )
+
+            if (isPagingMode) {
+                SwitchSetting(
+                    title = stringResource(id = R.string.pref_animated_paging_title),
+                    checked = isAnimatedPaging,
+                    onCheckedChange = onIsAnimatedPagingChange,
+                    description = stringResource(id = R.string.pref_animated_paging_description),
                 )
             }
         }
@@ -1035,7 +1073,11 @@ fun ListDialogSetting(
     onAddItem: (String) -> Unit,
     onRemoveItem: (String) -> Unit,
     modifier: Modifier = Modifier,
+    showToggle: Boolean = false,
+    toggleValue: Boolean = false,
+    toggleLabel: String = "",
     icon: @Composable () -> Unit = {},
+    onToggleChange: (Boolean) -> Unit = {},
 ) {
     var expanded by rememberSaveable { mutableStateOf(false) }
     val dimens = LocalDimens.current
@@ -1075,11 +1117,15 @@ fun ListDialogSetting(
             EditableListDialog(
                 title = dialogTitle,
                 items = currentValue,
+                showToggle = showToggle,
+                toggleValue = toggleValue,
+                toggleLabel = toggleLabel,
                 onDismiss = {
                     expanded = false
                 },
-                onAddItem = onAddItem,
                 onRemoveItem = onRemoveItem,
+                onAddItem = onAddItem,
+                onToggleChange = onToggleChange,
             )
         }
     }

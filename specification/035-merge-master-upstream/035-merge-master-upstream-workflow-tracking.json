@@ -1,0 +1,16 @@
+{
+  "featureName": "Merge master upstream changes into ai-features",
+  "specDirectory": "specification/035-merge-master-upstream",
+  "worktreePath": ".worktree/035-merge-master-upstream",
+  "startedAt": "2026-03-19T00:00:00Z",
+  "phases": [
+    { "id": 0, "name": "Apply Dev Rules", "status": "complete", "startedAt": "2026-03-19T00:00:00Z", "completedAt": "2026-03-19T00:01:00Z" },
+    { "id": 1, "name": "Specification Setup", "status": "in_progress", "startedAt": "2026-03-19T00:01:00Z" }
+  ],
+  "tasks": [
+    { "id": "T1.1", "phase": 1, "description": "Specification Setup", "status": "in_progress", "files": [], "updatedAt": "2026-03-19T00:01:00Z" }
+  ],
+  "iteration": { "loops": 0, "lastReviewVerdict": null },
+  "team": { "name": "super-dev-035-merge-master-upstream", "teammates": [], "messages": [] },
+  "status": { "allPhasesComplete": false, "allTasksComplete": false, "workflowDone": false }
+}

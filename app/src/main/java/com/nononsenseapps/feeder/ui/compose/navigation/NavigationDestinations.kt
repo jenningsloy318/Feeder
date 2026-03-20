@@ -22,6 +22,7 @@ import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
 import com.nononsenseapps.feeder.base.diAwareViewModel
 import com.nononsenseapps.feeder.db.room.ID_UNSET
+import com.nononsenseapps.feeder.ui.MainActivityViewModel
 import com.nononsenseapps.feeder.ui.NavigationDeepLinkViewModel
 import com.nononsenseapps.feeder.ui.compose.editfeed.CreateFeedScreen
 import com.nononsenseapps.feeder.ui.compose.editfeed.CreateFeedScreenViewModel
@@ -101,6 +102,7 @@ sealed class NavigationDestination(
         navGraphBuilder: NavGraphBuilder,
         navController: NavController,
         navDrawerListState: LazyListState,
+        mainActivityViewModel: MainActivityViewModel,
     ) {
         navGraphBuilder.composable(
             route = route,
@@ -115,6 +117,7 @@ sealed class NavigationDestination(
                 navController = navController,
                 backStackEntry = backStackEntry,
                 navDrawerListState = navDrawerListState,
+                mainActivityViewModel = mainActivityViewModel,
             )
         }
     }
@@ -124,6 +127,7 @@ sealed class NavigationDestination(
         navController: NavController,
         backStackEntry: NavBackStackEntry,
         navDrawerListState: LazyListState,
+        mainActivityViewModel: MainActivityViewModel,
     )
 }
 
@@ -175,6 +179,7 @@ data object SearchFeedDestination : NavigationDestination(
         navController: NavController,
         backStackEntry: NavBackStackEntry,
         navDrawerListState: LazyListState,
+        mainActivityViewModel: MainActivityViewModel,
     ) {
         SearchFeedScreen(
             onNavigateUp = {
@@ -210,6 +215,7 @@ data object TextSettingsDestination : NavigationDestination(
         navController: NavController,
         backStackEntry: NavBackStackEntry,
         navDrawerListState: LazyListState,
+        mainActivityViewModel: MainActivityViewModel,
     ) {
         val textSettingsViewModel: TextSettingsViewModel = backStackEntry.diAwareViewModel()
 
@@ -262,6 +268,7 @@ data object AddFeedDestination : NavigationDestination(
         navController: NavController,
         backStackEntry: NavBackStackEntry,
         navDrawerListState: LazyListState,
+        mainActivityViewModel: MainActivityViewModel,
     ) {
         val createFeedScreenViewModel: CreateFeedScreenViewModel = backStackEntry.diAwareViewModel()
 
@@ -300,6 +307,7 @@ data object EditFeedDestination : NavigationDestination(
         navController: NavController,
         backStackEntry: NavBackStackEntry,
         navDrawerListState: LazyListState,
+        mainActivityViewModel: MainActivityViewModel,
     ) {
         val editFeedScreenViewModel: EditFeedScreenViewModel = backStackEntry.diAwareViewModel()
         EditFeedScreen(
@@ -329,6 +337,7 @@ data object SettingsDestination : NavigationDestination(
         navController: NavController,
         backStackEntry: NavBackStackEntry,
         navDrawerListState: LazyListState,
+        mainActivityViewModel: MainActivityViewModel,
     ) {
         SettingsScreen(
             onNavigateUp = {
@@ -382,6 +391,7 @@ data object ProviderListDestination : NavigationDestination(
         navController: NavController,
         backStackEntry: NavBackStackEntry,
         navDrawerListState: LazyListState,
+        mainActivityViewModel: MainActivityViewModel,
     ) {
         val providerListViewModel = backStackEntry.diAwareViewModel<ProviderListViewModel>()
 
@@ -443,6 +453,7 @@ data object ProviderEditDestination : NavigationDestination(
         navController: NavController,
         backStackEntry: NavBackStackEntry,
         navDrawerListState: LazyListState,
+        mainActivityViewModel: MainActivityViewModel,
     ) {
         val viewModel: ProviderEditViewModel = backStackEntry.diAwareViewModel()
 
@@ -478,6 +489,7 @@ data object SummarySettingsDestination : NavigationDestination(
         navController: NavController,
         backStackEntry: NavBackStackEntry,
         navDrawerListState: LazyListState,
+        mainActivityViewModel: MainActivityViewModel,
     ) {
         val viewModel: SummarySettingsViewModel = backStackEntry.diAwareViewModel()
 
@@ -511,6 +523,7 @@ data object TranslationSettingsDestination : NavigationDestination(
         navController: NavController,
         backStackEntry: NavBackStackEntry,
         navDrawerListState: LazyListState,
+        mainActivityViewModel: MainActivityViewModel,
     ) {
         val viewModel: TranslationSettingsViewModel = backStackEntry.diAwareViewModel()
 
@@ -544,6 +557,7 @@ data object SelectionMenuSettingsDestination : NavigationDestination(
         navController: NavController,
         backStackEntry: NavBackStackEntry,
         navDrawerListState: LazyListState,
+        mainActivityViewModel: MainActivityViewModel,
     ) {
         val viewModel: SelectionMenuSettingsViewModel = backStackEntry.diAwareViewModel()
 
@@ -611,6 +625,7 @@ data object FeedDestination : NavigationDestination(
         navController: NavController,
         backStackEntry: NavBackStackEntry,
         navDrawerListState: LazyListState,
+        mainActivityViewModel: MainActivityViewModel,
     ) {
         val feedId =
             remember {
@@ -669,6 +684,7 @@ data object ArticleDestination : NavigationDestination(
         navController: NavController,
         backStackEntry: NavBackStackEntry,
         navDrawerListState: LazyListState,
+        mainActivityViewModel: MainActivityViewModel,
     ) {
         val itemId =
             remember {
@@ -693,6 +709,7 @@ data object ArticleDestination : NavigationDestination(
                 FeedDestination.navigate(navController, feedId = feedId)
             },
             viewModel = backStackEntry.diAwareViewModel(),
+            mainActivityViewModel = mainActivityViewModel,
         )
     }
 }
@@ -742,6 +759,7 @@ data object SyncScreenDestination : NavigationDestination(
         navController: NavController,
         backStackEntry: NavBackStackEntry,
         navDrawerListState: LazyListState,
+        mainActivityViewModel: MainActivityViewModel,
     ) {
         val syncRemoteViewModel = backStackEntry.diAwareViewModel<SyncScreenViewModel>()
 

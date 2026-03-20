@@ -28,6 +28,77 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed TranslationChunker chunk index calculation bug that caused incorrect text slicing
 - Added safety check to prevent division by zero in TranslationProgress.getProgressPercentage()
 
+## [2.18.0] - 2026-03-07
+
+### 🚀 Features
+- When YouTube feed is added, suggest additional channel specific feeds (#1036) by @xn-7492 in [#1036](https://github.com/spacecowboy/feeder/pull/1036)
+- Added 'Apply to summaries' toggle to blocklist feature (#1003) by @linuxhd0 in [#1003](https://github.com/spacecowboy/feeder/pull/1003)
+- Added widget (#1018) by @MatthewTighe in [#1018](https://github.com/spacecowboy/feeder/pull/1018)
+- Add markdown parsing for ai summaries (#569, #786) (#1002) by @myaple in [#1002](https://github.com/spacecowboy/feeder/pull/1002)
+
+### 🐛 Bug Fixes & Minor Changes
+- Added 'open in'-options to context menu (#1037) by @xn-7492 in [#1037](https://github.com/spacecowboy/feeder/pull/1037)
+- Fixed crash when selected text scrolls offscreen (#1045) by @spacecowboy in [#1045](https://github.com/spacecowboy/feeder/pull/1045)
+- Fixed currently open article could be deleted by sync job (#1047) by @spacecowboy in [#1047](https://github.com/spacecowboy/feeder/pull/1047)
+- Fixed odd scrolling bug with compact layouts (#1048) by @spacecowboy in [#1048](https://github.com/spacecowboy/feeder/pull/1048)
+
+### 🌐 Translations
+- Updated German translation using Weblate in [commit](https://github.com/spacecowboy/feeder/commit/4524af3b6cd33836643148563968ec123add5ca8)
+- Updated Chinese (Simplified Han script) translation using Weblate in [commit](https://github.com/spacecowboy/feeder/commit/6ebd99f7f2813912c3c26d355a66e50df3fb71c6)
+- Updated Swedish translation using Weblate by @bittin in [commit](https://github.com/spacecowboy/feeder/commit/52a8e652209e97573f61e8c19a7640c15a658b56)
+- Updated Dutch translation using Weblate by @thomasboom in [commit](https://github.com/spacecowboy/feeder/commit/db3c397ed0eea1de081ce17697ea5b32ce7fe2d6)
+- Updated Serbian translation using Weblate by @eevan78 in [commit](https://github.com/spacecowboy/feeder/commit/a393d44e90f25f898df98e32c4316a8ab98b83c7)
+- Updated Polish translation using Weblate by @Aga-C in [commit](https://github.com/spacecowboy/feeder/commit/4aec72481376011eee33fcfbd03efc72bfd3677e)
+- Updated Spanish translation using Weblate by @jesusFx in [commit](https://github.com/spacecowboy/feeder/commit/a01144fe3e66fecf36fab828d96124952f778c7a)
+- Updated Danish translation using Weblate in [commit](https://github.com/spacecowboy/feeder/commit/938ab3b222ef8fcf65048c297b886b2a3f602092)
+- Updated Czech translation using Weblate in [commit](https://github.com/spacecowboy/feeder/commit/0b4ca34289889a12bd79aef3267029cf9aeabfbf)
+- Updated Estonian translation using Weblate in [commit](https://github.com/spacecowboy/feeder/commit/6d2ca0f479d52458f2e46149dd7927a3aa0e952e)
+- Updated French translation using Weblate in [commit](https://github.com/spacecowboy/feeder/commit/c3a66f1d239f3e6de7e8779873d27bbc87fcbe67)
+- Updated Hungarian translation using Weblate by @summoner001 in [commit](https://github.com/spacecowboy/feeder/commit/47776bcf1ed67fa2debc5710d661e5e134f601f6)
+- Updated Bulgarian translation using Weblate in [commit](https://github.com/spacecowboy/feeder/commit/c151df04ec2f96c22ec44997a08a391d4e217b08)
+- Updated Norwegian Bokmål translation using Weblate by @bbacow2 in [commit](https://github.com/spacecowboy/feeder/commit/a348513899f57fa7bedea1abadb0a722f74a1e6b)
+- Updated Italian translation using Weblate by @Wiccio in [#1030](https://github.com/spacecowboy/feeder/pull/1030)
+
+### ❤️  New Contributors
+* @thomasboom made their first contribution
+* @myaple made their first contribution in [#1002](https://github.com/spacecowboy/feeder/pull/1002)
+* @MatthewTighe made their first contribution in [#1018](https://github.com/spacecowboy/feeder/pull/1018)
+* @linuxhd0 made their first contribution in [#1003](https://github.com/spacecowboy/feeder/pull/1003)
+* @xn-7492 made their first contribution in [#1037](https://github.com/spacecowboy/feeder/pull/1037)
+
+## [2.17.0] - 2026-02-07
+
+### 🚀 Features
+- Change opacity of read items (#996) by @Jiogo18 in [#996](https://github.com/spacecowboy/feeder/pull/996)
+
+### 🐛 Bug Fixes & Minor Changes
+- Invisible SearchBar (#1009) by @luk-dushaj in [#1009](https://github.com/spacecowboy/feeder/pull/1009)
+- Fixed favicon lookup for feeds linking to their own RSS URL (#1006) by @CryYxx in [#1006](https://github.com/spacecowboy/feeder/pull/1006)
+- Add back contentprovider to Manifeset (#1027) by @spacecowboy in [#1027](https://github.com/spacecowboy/feeder/pull/1027)
+- Fixed crash when network changed during sync (#1028) by @spacecowboy in [#1028](https://github.com/spacecowboy/feeder/pull/1028)
+
+### 🌐 Translations
+- Updated Polish translation using Weblate by @e-michalak in [commit](https://github.com/spacecowboy/feeder/commit/1d99ec93fd3b443990e76b909a5f710a3d9adf05)
+- Added Estonian translation using Weblate by @spacecowboy in [commit](https://github.com/spacecowboy/feeder/commit/bd98548f7a900b92c2fab9e7d5046827e12e2dbf)
+- Updated Estonian translation using Weblate in [commit](https://github.com/spacecowboy/feeder/commit/74f176fcb3bfddcca0741845c39a7eedaec2b8d9)
+- Updated Swedish translation using Weblate in [commit](https://github.com/spacecowboy/feeder/commit/fdd0573d2b17d91b4cd28dde0cda45aff082d61f)
+- Updated Tamil translation using Weblate in [commit](https://github.com/spacecowboy/feeder/commit/52e62b0893c161dadea08700331f4bea28321e1c)
+- Updated Turkish translation using Weblate by @Ruzgarland in [commit](https://github.com/spacecowboy/feeder/commit/9c69a1f11c5d901e64a159e2fba3d0311e8fedf6)
+- Updated Esperanto translation using Weblate by @Wiccio in [commit](https://github.com/spacecowboy/feeder/commit/2e3f24e2377af1bbebe84682d203c3df6a03ebb7)
+- Updated Albanian translation using Weblate in [commit](https://github.com/spacecowboy/feeder/commit/d3d1262deb0f1068bdd744436810a0220e90154f)
+- Updated Hungarian translation using Weblate by @summoner001 in [commit](https://github.com/spacecowboy/feeder/commit/6f2e26a14f3bc70dc812d32cdfbfc3ce6d3fa4c4)
+- Updated French translation using Weblate by @Matth7878 in [commit](https://github.com/spacecowboy/feeder/commit/fc5b07dc368f15b4f4834fcd119100f4f16015a7)
+- Updated German translation using Weblate by @VfBFan in [commit](https://github.com/spacecowboy/feeder/commit/87f148d32e413e6c2bd982a5faa62e6a6779b356)
+- Updated Ukrainian translation using Weblate in [commit](https://github.com/spacecowboy/feeder/commit/55525424a2366e5699a18864dee71b886c91a9e2)
+- Updated Portuguese (Brazil) translation using Weblate by @diogoan in [commit](https://github.com/spacecowboy/feeder/commit/bdd869359c3a3fe090ed2dfe16e4dc02bc860d41)
+- Updated Thai translation using Weblate by @bowornsin in [#991](https://github.com/spacecowboy/feeder/pull/991)
+
+### ❤️  New Contributors
+* @Jiogo18 made their first contribution in [#996](https://github.com/spacecowboy/feeder/pull/996)
+* @diogoan made their first contribution
+* @CryYxx made their first contribution in [#1006](https://github.com/spacecowboy/feeder/pull/1006)
+* @luk-dushaj made their first contribution in [#1009](https://github.com/spacecowboy/feeder/pull/1009)
+
 ## [2.16.1] - 2025-11-23
 
 ### 🐛 Bug Fixes & Minor Changes
@@ -153,7 +224,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 🌐 Translations
 - Updated Latvian translation using Weblate by @Coool in [commit](https://github.com/spacecowboy/feeder/commit/4281a146e2cc3228b188a9339144e4cb87c284f1)
-- Updated Hungarian translation using Weblate in [#811](https://github.com/spacecowboy/feeder/pull/811) 
+- Updated Hungarian translation using Weblate by @ghostofsparta222 in [#811](https://github.com/spacecowboy/feeder/pull/811) 
 - Updated Thai translation using Weblate by @bowornsin in [commit](https://github.com/spacecowboy/feeder/commit/5f4cb2734917c860c817436cc42a36970aa200f8)
 - Updated Bulgarian translation using Weblate by @trunars in [commit](https://github.com/spacecowboy/feeder/commit/b4c0d966abb9b05bd7f372312fe42bbab7ffff82)
 - Updated Tamil translation using Weblate in [#825](https://github.com/spacecowboy/feeder/pull/825) 
@@ -164,6 +235,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### ❤️  New Contributors
 * @martinco78 made their first contribution in [#850](https://github.com/spacecowboy/feeder/pull/850)
+* @ghostofsparta222 made their first contribution
 
 ## [2.12.1] - 2025-06-14
 
@@ -292,7 +364,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.10.1] - 2025-03-16
 
 ### 🐛 Bug Fixes & Minor Changes
-- Made feed ordering case insensitive (#656) by @Friendly-Banana in [#656](https://github.com/spacecowboy/feeder/pull/656) 
+- Made feed ordering case insensitive (#656) by @gkuznik in [#656](https://github.com/spacecowboy/feeder/pull/656) 
 - Removed unsupported default link from the intent filter by @spacecowboy in [#669](https://github.com/spacecowboy/feeder/pull/669) 
 
 ### 🌐 Translations
@@ -307,7 +379,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.10.0] - 2025-03-08
 
 ### 🚀 Features
-- Added a search function (#647) by @Friendly-Banana in [#647](https://github.com/spacecowboy/feeder/pull/647) 
+- Added a search function (#647) by @gkuznik in [#647](https://github.com/spacecowboy/feeder/pull/647) 
 
 ### 🌐 Translations
 - Updated Greek translation using Weblate by @trlef19 in [#649](https://github.com/spacecowboy/feeder/pull/649) 
@@ -322,7 +394,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated Thai translation using Weblate by @bowornsin in [#652](https://github.com/spacecowboy/feeder/pull/652) 
 
 ### ❤️  New Contributors
-* @Friendly-Banana made their first contribution in [#647](https://github.com/spacecowboy/feeder/pull/647)
+* @gkuznik made their first contribution in [#647](https://github.com/spacecowboy/feeder/pull/647)
 
 ## [2.9.2] - 2025-02-28
 
@@ -4703,6 +4775,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### ❤️  New Contributors
 * @spacecowboy made their first contribution
 
+[2.18.0]: https://github.com/spacecowboy/feeder/compare/2.17.0..2.18.0
+[2.17.0]: https://github.com/spacecowboy/feeder/compare/2.16.1..2.17.0
 [2.16.1]: https://github.com/spacecowboy/feeder/compare/2.16.0..2.16.1
 [2.16.0]: https://github.com/spacecowboy/feeder/compare/2.15.1..2.16.0
 [2.15.1]: https://github.com/spacecowboy/feeder/compare/2.15.0..2.15.1

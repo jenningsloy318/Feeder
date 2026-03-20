@@ -5,7 +5,10 @@ import com.nononsenseapps.feeder.ai.SummaryResponseParser
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusGroup
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,6 +16,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
@@ -20,9 +24,7 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.lazy.LazyListScope
-import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Article
@@ -67,9 +69,11 @@ import com.nononsenseapps.feeder.R
 import com.nononsenseapps.feeder.archmodel.TextToDisplay
 import com.nononsenseapps.feeder.db.room.ID_UNSET
 import com.nononsenseapps.feeder.model.LocaleOverride
+import com.nononsenseapps.feeder.ui.MainActivityViewModel
+import com.nononsenseapps.feeder.ui.ScrollDirection
 import com.nononsenseapps.feeder.ui.compose.components.safeSemantics
 import com.nononsenseapps.feeder.ui.compose.feed.PlainTooltipBox
-import com.nononsenseapps.feeder.ui.compose.html.linearArticleContent
+import com.nononsenseapps.feeder.ui.compose.html.ColumnArticleContent
 import com.nononsenseapps.feeder.ui.compose.icons.CustomFilled
 import com.nononsenseapps.feeder.ui.compose.icons.TextToSpeech
 import com.nononsenseapps.feeder.ui.compose.readaloud.HideableTTSPlayer
@@ -91,13 +95,45 @@ fun ArticleScreen(
     onNavigateUp: () -> Unit,
     onNavigateToFeed: (Long) -> Unit,
     viewModel: ArticleViewModel,
+    mainActivityViewModel: MainActivityViewModel,
+    modifier: Modifier = Modifier,
 ) {
     BackHandler(onBack = onNavigateUp)
-    val activityLauncher: ActivityLauncher by LocalDI.current.instance()
+    val di = LocalDI.current
+    val activityLauncher: ActivityLauncher by di.instance()
 
+    val mavm = remember { mainActivityViewModel }
     val viewState by viewModel.viewState.collectAsStateWithLifecycle()
+    val isPagingMode by mavm.isPagingMode.collectAsStateWithLifecycle()
+    val isAnimatedPaging by mavm.isAnimatedPaging.collectAsStateWithLifecycle()
 
-    val articleListState = rememberLazyListState()
+    val articleScrollState = rememberScrollState()
+    val coroutineScope = rememberCoroutineScope()
+
+    LaunchedEffect(Unit) {
+        mavm.scrollCommand.collect { direction ->
+            val scrollAmount = (articleScrollState.viewportSize * 0.9f).toInt()
+            when (direction) {
+                ScrollDirection.UP -> {
+                    val target = (articleScrollState.value - scrollAmount).coerceAtLeast(0)
+                    if (isAnimatedPaging) {
+                        articleScrollState.animateScrollTo(target)
+                    } else {
+                        articleScrollState.scrollTo(target)
+                    }
+                }
+
+                ScrollDirection.DOWN -> {
+                    val target = (articleScrollState.value + scrollAmount).coerceAtMost(articleScrollState.maxValue)
+                    if (isAnimatedPaging) {
+                        articleScrollState.animateScrollTo(target)
+                    } else {
+                        articleScrollState.scrollTo(target)
+                    }
+                }
+            }
+        }
+    }
 
     val toolbarColor = MaterialTheme.colorScheme.surface.toArgb()
 
@@ -141,7 +177,7 @@ fun ArticleScreen(
         onToggleBookmark = {
             viewModel.setBookmarked(!viewState.isBookmarked)
         },
-        articleListState = articleListState,
+        articleScrollState = articleScrollState,
         onNavigateUp = onNavigateUp,
         onSummarize = {
             viewModel.summarize()
@@ -155,6 +191,9 @@ fun ArticleScreen(
         onCancelTranslation = {
             viewModel.cancelTranslation()
         },
+        modifier = modifier,
+        isPagingMode = isPagingMode,
+        isAnimatedPaging = isAnimatedPaging,
     )
 }
 
@@ -176,13 +215,15 @@ fun ArticleScreen(
     ttsOnSkipNext: () -> Unit,
     ttsOnSelectLanguage: (LocaleOverride) -> Unit,
     onToggleBookmark: () -> Unit,
-    articleListState: LazyListState,
+    articleScrollState: ScrollState,
     onNavigateUp: () -> Unit,
     onSummarize: () -> Unit,
     onTranslate: () -> Unit,
     onCancelSummarize: () -> Unit,
     onCancelTranslation: () -> Unit,
     modifier: Modifier = Modifier,
+    isPagingMode: Boolean = false,
+    isAnimatedPaging: Boolean = false,
 ) {
     // Wrap with custom text toolbar to enable selection menu
     com.nononsenseapps.feeder.ui.compose.utils.WithFeederTextToolbar(
@@ -203,13 +244,15 @@ fun ArticleScreen(
             ttsOnSkipNext = ttsOnSkipNext,
             ttsOnSelectLanguage = ttsOnSelectLanguage,
             onToggleBookmark = onToggleBookmark,
-            articleListState = articleListState,
+            articleScrollState = articleScrollState,
             onNavigateUp = onNavigateUp,
             onSummarize = onSummarize,
             onTranslate = onTranslate,
             onCancelSummarize = onCancelSummarize,
             onCancelTranslation = onCancelTranslation,
             modifier = modifier,
+            isPagingMode = isPagingMode,
+            isAnimatedPaging = isAnimatedPaging,
         )
     }
 }
@@ -232,13 +275,15 @@ private fun ArticleScreenInternal(
     ttsOnSkipNext: () -> Unit,
     ttsOnSelectLanguage: (LocaleOverride) -> Unit,
     onToggleBookmark: () -> Unit,
-    articleListState: LazyListState,
+    articleScrollState: ScrollState,
     onNavigateUp: () -> Unit,
     onSummarize: () -> Unit,
     onTranslate: () -> Unit,
     onCancelSummarize: () -> Unit,
     onCancelTranslation: () -> Unit,
     modifier: Modifier = Modifier,
+    isPagingMode: Boolean = false,
+    isAnimatedPaging: Boolean = false,
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
@@ -506,10 +551,11 @@ private fun ArticleScreenInternal(
                 onTranslate = { onTranslate() },
             )
 
+            val coroutineScope = rememberCoroutineScope()
             ArticleContent(
                 viewState = viewState,
                 screenType = ScreenType.SINGLE,
-                articleListState = articleListState,
+                articleScrollState = articleScrollState,
                 onFeedTitleClick = onFeedTitleClick,
                 modifier =
                     Modifier
@@ -519,6 +565,52 @@ private fun ArticleScreenInternal(
                             up = focusTopBar
                         },
             )
+
+            if (isPagingMode) {
+                Row(modifier = Modifier.matchParentSize()) {
+                    Box(
+                        modifier =
+                            Modifier
+                                .fillMaxHeight()
+                                .weight(0.2f)
+                                .clickable(
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    indication = null,
+                                ) {
+                                    val scrollAmount = (articleScrollState.viewportSize * 0.9f).toInt()
+                                    val target = (articleScrollState.value - scrollAmount).coerceAtLeast(0)
+                                    coroutineScope.launch {
+                                        if (isAnimatedPaging) {
+                                            articleScrollState.animateScrollTo(target)
+                                        } else {
+                                            articleScrollState.scrollTo(target)
+                                        }
+                                    }
+                                },
+                    )
+                    Spacer(modifier = Modifier.weight(0.6f))
+                    Box(
+                        modifier =
+                            Modifier
+                                .fillMaxHeight()
+                                .weight(0.2f)
+                                .clickable(
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    indication = null,
+                                ) {
+                                    val scrollAmount = (articleScrollState.viewportSize * 0.9f).toInt()
+                                    val target = (articleScrollState.value + scrollAmount).coerceAtMost(articleScrollState.maxValue)
+                                    coroutineScope.launch {
+                                        if (isAnimatedPaging) {
+                                            articleScrollState.animateScrollTo(target)
+                                        } else {
+                                            articleScrollState.scrollTo(target)
+                                        }
+                                    }
+                                },
+                    )
+                }
+            }
         }
     }
 }
@@ -528,7 +620,7 @@ fun ArticleContent(
     viewState: ArticleScreenViewState,
     screenType: ScreenType,
     onFeedTitleClick: () -> Unit,
-    articleListState: LazyListState,
+    articleScrollState: ScrollState,
     modifier: Modifier = Modifier,
 ) {
     val toolbarColor = MaterialTheme.colorScheme.surface.toArgb()
@@ -536,6 +628,9 @@ fun ArticleContent(
     val context = LocalContext.current
     val activityLauncher: ActivityLauncher by LocalDI.current.instance()
     val coroutineScope = rememberCoroutineScope()
+
+    // Track Y positions of article elements by index for anchor link scrolling
+    val elementPositions = remember { mutableMapOf<Int, Float>() }
 
     ReaderView(
         screenType = screenType,
@@ -554,7 +649,9 @@ fun ArticleContent(
                 viewState.author == null && viewState.pubDate != null ->
                     stringResource(
                         R.string.on_date,
-                        (viewState.pubDate?.withZoneSameInstant(ZoneId.systemDefault()) ?: ZonedDateTime.now()).format(dateTimeFormat),
+                        (viewState.pubDate?.withZoneSameInstant(ZoneId.systemDefault()) ?: ZonedDateTime.now()).format(
+                            dateTimeFormat,
+                        ),
                     )
 
                 viewState.author != null && viewState.pubDate != null ->
@@ -563,7 +660,9 @@ fun ArticleContent(
                         // Must wrap author in unicode marks to ensure it formats
                         // correctly in RTL
                         context.unicodeWrap(viewState.author ?: ""),
-                        (viewState.pubDate?.withZoneSameInstant(ZoneId.systemDefault()) ?: ZonedDateTime.now()).format(dateTimeFormat),
+                        (viewState.pubDate?.withZoneSameInstant(ZoneId.systemDefault()) ?: ZonedDateTime.now()).format(
+                            dateTimeFormat,
+                        ),
                     )
 
                 else -> null
@@ -571,23 +670,19 @@ fun ArticleContent(
         image = viewState.image,
         isFeedText = viewState.textToDisplay == TextToDisplay.CONTENT,
         modifier = modifier,
-        articleListState = articleListState,
+        articleScrollState = articleScrollState,
     ) { indexOffset ->
         var offsetCounter = indexOffset
 
         if (viewState.aiSummary is AISummaryState.Result) {
             offsetCounter++
-            item {
-                SummarySection(viewState.aiSummary)
-            }
+            SummarySection(viewState.aiSummary)
         }
 
         // Translation status section (loading or error)
         if (viewState.translation is TranslationState.Translated || viewState.translation is TranslationState.Error) {
             offsetCounter++
-            item {
-                TranslationStatusSection(viewState.translation)
-            }
+            TranslationStatusSection(viewState.translation)
         }
 
         // Can take a composition or two before viewstate is set to its actual values
@@ -606,50 +701,50 @@ fun ArticleContent(
                             else -> null
                         }
 
-                    linearArticleContent(
+                    ColumnArticleContent(
                         articleContent = viewState.articleContent,
                         translatedParagraphs = translatedParagraphs,
                         onLinkClick = { link, index ->
-                            if (index != null) {
-                                coroutineScope.launch {
-                                    articleListState.animateScrollToItem(offsetCounter + index)
+                            if (index != null && elementPositions.containsKey(index)) {
+                                // Anchor link - scroll to the element position
+                                val yPosition = elementPositions[index]
+                                if (yPosition != null) {
+                                    coroutineScope.launch {
+                                        articleScrollState.animateScrollTo(yPosition.toInt())
+                                    }
                                 }
                             } else {
+                                // External link - open in browser/custom tab
                                 activityLauncher.openLink(
                                     link = link,
                                     toolbarColor = toolbarColor,
                                 )
                             }
                         },
+                        onElementPosition = { index, yPosition ->
+                            elementPositions[offsetCounter + index] = yPosition
+                        },
                     )
                 }
 
                 TextToDisplay.LOADING_FULLTEXT -> {
-                    LoadingItem()
+                    Text(text = stringResource(id = R.string.fetching_full_article))
                 }
 
                 TextToDisplay.FAILED_TO_LOAD_FULLTEXT -> {
-                    item {
-                        Text(text = stringResource(id = R.string.failed_to_fetch_full_article))
-                    }
+                    Text(text = stringResource(id = R.string.failed_to_fetch_full_article))
                 }
 
                 TextToDisplay.FAILED_MISSING_BODY -> {
-                    item {
-                        Text(text = stringResource(id = R.string.failed_to_fetch_full_article_missing_body))
-                    }
+                    Text(text = stringResource(id = R.string.failed_to_fetch_full_article_missing_body))
                 }
 
                 TextToDisplay.FAILED_MISSING_LINK -> {
-                    item {
-                        Text(text = stringResource(id = R.string.failed_to_fetch_full_article_missing_link))
-                    }
+                    Text(text = stringResource(id = R.string.failed_to_fetch_full_article_missing_link))
                 }
 
                 TextToDisplay.FAILED_NOT_HTML -> {
-                    item {
-                        Text(text = stringResource(id = R.string.failed_to_fetch_full_article_not_html))
-                    }
+                    Text(text = stringResource(id = R.string.failed_to_fetch_full_article_not_html))
                 }
             }
         }
@@ -782,12 +877,3 @@ private fun TranslationErrorSection(errorMessage: String) {
         }
     }
 }
-
-@Suppress("FunctionName")
-private fun LazyListScope.LoadingItem() {
-    item {
-        Text(text = stringResource(id = R.string.fetching_full_article))
-    }
-}
-
-private const val LOG_TAG = "FEEDER_ARTICLESCREEN"

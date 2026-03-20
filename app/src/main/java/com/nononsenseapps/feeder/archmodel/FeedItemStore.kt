@@ -43,12 +43,13 @@ class FeedItemStore(
     private val dao: FeedItemDao by instance()
     private val blocklistDao: BlocklistDao by instance()
     private val appDatabase: AppDatabase by instance()
+    private val settingsStore: SettingsStore by instance()
 
     suspend fun setBlockStatusForNewInFeed(
         feedId: Long,
         blockTime: Instant,
     ) {
-        blocklistDao.setItemBlockStatusForNewInFeed(feedId, blockTime)
+        blocklistDao.setItemBlockStatusForNewInFeed(feedId, blockTime, settingsStore.applyBlocklistToSummaries.value)
     }
 
     fun getFeedItemCountRaw(
@@ -71,6 +72,17 @@ class FeedItemStore(
 
         return dao.getPreviewsCount(SimpleSQLiteQuery(queryString.toString(), args.toTypedArray()))
     }
+
+    fun getWidgetFeedListItems(
+        feedId: Long,
+        tag: String,
+    ): Flow<List<FeedListItem>> =
+        when {
+            feedId == ID_SAVED_ARTICLES -> dao.widgetPreviewsSaved()
+            feedId > ID_UNSET -> dao.widgetPreviewsByFeed(feedId)
+            tag.isNotEmpty() -> dao.widgetPreviewsByTag(tag)
+            else -> dao.widgetPreviewsAllFeeds()
+        }.map { list -> list.map { it.toFeedListItem() } }
 
     fun getPagedFeedItemsRaw(
         feedId: Long,

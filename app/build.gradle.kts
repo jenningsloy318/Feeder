@@ -2,7 +2,6 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose.compiler)
     alias(libs.plugins.kotlin.ksp)
     alias(libs.plugins.kotlin.parcelize)
@@ -41,8 +40,8 @@ android {
         // The version fields are set with actual values to support F-Droid
         // In Play variant, they are overridden and taken from git to support alpha/beta testing.
         // For actual releases they match.
-        versionCode = 3858
-        versionName = "2.16.1"
+        versionCode = 3922
+        versionName = "2.18.0"
         // TLS1.3 is enabled in Android 10 (29) and above
         minSdk = 29
         targetSdk =
@@ -72,7 +71,7 @@ android {
     sourceSets {
         // To test Room we need to include the schema dir in resources
         named("androidTest") {
-            assets.srcDir("$projectDir/schemas")
+            assets.directories.add("$projectDir/schemas")
         }
     }
 
@@ -136,7 +135,7 @@ android {
             }
             create("play") {
                 dimension = "store"
-                versionName = "2.16.1"
+                versionName = "2.18.0"
                 versionCode = commitCount
                 applicationIdSuffix = ".play"
             }
@@ -171,7 +170,6 @@ android {
         compose = true
         buildConfig = true
         aidl = false
-        renderScript = false
         resValues = false
         shaders = false
     }
@@ -267,18 +265,21 @@ dependencies {
     implementation(libs.anthropic.java)
     implementation(libs.anthropic.java.okhttp)
 
+    // Glance widget
+    implementation(libs.glance.appwidget)
+    implementation(libs.glance.material3)
+    implementation(libs.glance.preview)
+    implementation(libs.glance.appwidget.preview)
+
     // Markdown - Using Mikepenz library for improved rendering
     implementation(libs.mikepenz.markdown)
     implementation(libs.mikepenz.markdown.m3)
     implementation(libs.mikepenz.markdown.coil3)
-    // TODO: Remove jetbrains-markdown after migration complete (Task 5.1)
     implementation(libs.jetbrains.markdown)
 
     // Drag and drop for reorderable lists
     implementation("sh.calvin.reorderable:reorderable:2.4.0")
 
-    // Only for debug
-    debugImplementation("com.squareup.leakcanary:leakcanary-android:3.0-alpha-8")
 
     // Tests
     testImplementation(libs.bundles.kotlin)

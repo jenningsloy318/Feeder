@@ -49,6 +49,12 @@ import java.net.URL
 import java.time.Instant
 
 sealed interface FeedItemEvent {
+    data object OpenInReader : FeedItemEvent
+
+    data object OpenInCustomTab : FeedItemEvent
+
+    data object OpenInBrowser : FeedItemEvent
+
     data object MarkAboveAsRead : FeedItemEvent
 
     data object MarkBelowAsRead : FeedItemEvent
@@ -87,6 +93,7 @@ fun FeedItemCompactCard(
             modifier =
                 Modifier
                     .requiredHeightIn(min = minimumTouchSize)
+                    .alpha(if (!state.item.unread) 0.75f else 1.0f)
                     .fillMaxWidth(),
         ) {
             if (state.showThumbnail) {
@@ -168,12 +175,14 @@ private fun FeedItemTitle(
         val textColor =
             when {
                 !state.showThumbnail -> LocalContentColor.current
-                state.item.unread -> Color.White
-                else -> Color.White.copy(alpha = 0.74f)
+                else -> Color.White
             }
         CompositionLocalProvider(LocalContentColor provides textColor) {
             FeedItemText(
                 item = state.item,
+                onOpenFeedItemInReader = { onEvent(FeedItemEvent.OpenInReader) },
+                onOpenFeedItemInCustomTab = { onEvent(FeedItemEvent.OpenInCustomTab) },
+                onOpenFeedItemInBrowser = { onEvent(FeedItemEvent.OpenInBrowser) },
                 onMarkAboveAsRead = { onEvent(FeedItemEvent.MarkAboveAsRead) },
                 onMarkBelowAsRead = { onEvent(FeedItemEvent.MarkBelowAsRead) },
                 onShareItem = { onEvent(FeedItemEvent.ShareItem) },

@@ -8,6 +8,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.nononsenseapps.feeder.db.room.ID_UNSET
@@ -21,6 +22,9 @@ import java.time.Instant
 @Composable
 fun FeedItemSuperCompact(
     item: FeedListItem,
+    onOpenFeedItemInReader: () -> Unit,
+    onOpenFeedItemInCustomTab: () -> Unit,
+    onOpenFeedItemInBrowser: () -> Unit,
     onMarkAboveAsRead: () -> Unit,
     onMarkBelowAsRead: () -> Unit,
     onShareItem: () -> Unit,
@@ -33,7 +37,12 @@ fun FeedItemSuperCompact(
     showReadingTime: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    Surface(modifier = modifier.requiredHeightIn(min = minimumTouchSize)) {
+    Surface(
+        modifier =
+            modifier
+                .requiredHeightIn(min = minimumTouchSize)
+                .alpha(if (!item.unread) 0.75f else 1.0f),
+    ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -47,6 +56,9 @@ fun FeedItemSuperCompact(
             )
             FeedItemText(
                 item = item,
+                onOpenFeedItemInReader = onOpenFeedItemInReader,
+                onOpenFeedItemInCustomTab = onOpenFeedItemInCustomTab,
+                onOpenFeedItemInBrowser = onOpenFeedItemInBrowser,
                 onMarkAboveAsRead = onMarkAboveAsRead,
                 onMarkBelowAsRead = onMarkBelowAsRead,
                 onShareItem = onShareItem,
@@ -83,6 +95,9 @@ private fun PreviewRead() {
                     rawPubDate = null,
                     wordCount = 900,
                 ),
+            onOpenFeedItemInReader = {},
+            onOpenFeedItemInCustomTab = {},
+            onOpenFeedItemInBrowser = {},
             onMarkAboveAsRead = {},
             onMarkBelowAsRead = {},
             onShareItem = {},
@@ -119,6 +134,9 @@ private fun PreviewUnread() {
                     rawPubDate = null,
                     wordCount = 900,
                 ),
+            onOpenFeedItemInReader = {},
+            onOpenFeedItemInCustomTab = {},
+            onOpenFeedItemInBrowser = {},
             onMarkAboveAsRead = {},
             onMarkBelowAsRead = {},
             onShareItem = {},
@@ -155,6 +173,9 @@ private fun PreviewWithImage() {
                     rawPubDate = null,
                     wordCount = 900,
                 ),
+            onOpenFeedItemInReader = {},
+            onOpenFeedItemInCustomTab = {},
+            onOpenFeedItemInBrowser = {},
             onMarkAboveAsRead = {},
             onMarkBelowAsRead = {},
             onShareItem = {},

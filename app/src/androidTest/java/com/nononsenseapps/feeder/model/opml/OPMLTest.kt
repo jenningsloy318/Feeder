@@ -138,7 +138,11 @@ class OPMLTest : DIAware {
             val actual = settingsStore.getAllSettings()
 
             ALL_SETTINGS_WITH_VALUES.toList().forEachIndexed { index, (key, expected) ->
-                assertEquals("$index: Setting $key, expected $expected but was ${actual[key]}", expected, actual[key].toString())
+                assertEquals(
+                    "$index: Setting $key, expected $expected but was ${actual[key]}",
+                    expected,
+                    actual[key].toString(),
+                )
             }
 
             val actualBlocked = settingsStore.blockListPreference.first()
@@ -619,8 +623,8 @@ class OPMLTest : DIAware {
             feedStore
                 .saveFeed(
                     Feed(
-                        title = "Ampersands are & the worst",
-                        url = URL("https://example.com/ampersands"),
+                        title = "ExportThenImport",
+                        url = URL("https://example.com/exportthenimport"),
                     ),
                 ).also { feedIds.add(it) }
             feedStore
@@ -768,6 +772,8 @@ class OPMLTest : DIAware {
                         UserSettings.SETTING_FONT -> "bundled/roboto_flex"
                         UserSettings.SETTING_LIST_SHOW_READING_TIME -> "false"
                         UserSettings.SETTING_OPEN_DRAWER_ON_FAB -> "true"
+                        UserSettings.SETTING_PAGING_MODE -> "true"
+                        UserSettings.SETTING_ANIMATED_PAGING -> "true"
                         UserSettings.SETTING_SHOW_TITLE_UNREAD_COUNT -> "true"
                         UserSettings.SETTING_MAX_ITEM_COUNT_PER_FEED -> "200"
                         UserSettings.SETTING_OPENAI_KEY -> "test-api-key"
@@ -832,6 +838,8 @@ private val sampleFile: List<String> =
           <feeder:setting key="pref_default_open_item_with" value="3"/>
           <feeder:setting key="pref_open_links_with" value="3"/>
           <feeder:setting key="pref_open_adjacent" value="true"/>
+          <feeder:setting key="pref_paging_mode" value="true"/>
+          <feeder:setting key="pref_animated_paging" value="true"/>
           <feeder:setting key="pref_body_text_scale" value="1.6"/>
           <feeder:setting key="pref_is_mark_as_read_on_scroll" value="true"/>
           <feeder:setting key="pref_readaloud_detect_lang" value="true"/>

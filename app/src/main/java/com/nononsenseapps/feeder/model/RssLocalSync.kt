@@ -325,7 +325,14 @@ class RssLocalSync(
                                     ) ?: FeedItem(firstSyncedTime = downloadTime)
 
                                 // If new item, see if duplicates exist
-                                if (feedItemSql.id != ID_UNSET || !feedSql.skipDuplicates || !repository.duplicateStoryExists(id = feedItemSql.id, title = item.title ?: "", link = item.url)) {
+                                if (feedItemSql.id != ID_UNSET ||
+                                    !feedSql.skipDuplicates ||
+                                    !repository.duplicateStoryExists(
+                                        id = feedItemSql.id,
+                                        title = item.title ?: "",
+                                        link = item.url,
+                                    )
+                                ) {
                                     feedItemSql.updateFromParsedEntry(item, guid, feed)
                                     feedItemSql.feedId = feedSql.id
 
@@ -354,7 +361,8 @@ class RssLocalSync(
                     if (feedSql.imageUrl == null && feedSql.siteFetched == Instant.EPOCH) {
                         val siteUrl =
                             try {
-                                URL(feed.home_page_url)
+                                val url = URL(feed.home_page_url)
+                                URL(url.protocol, url.host, url.port, "")
                             } catch (e: Throwable) {
                                 logDebug(LOG_TAG, "Bad site url: ${feed.home_page_url}", e)
                                 null
@@ -401,7 +409,10 @@ class RssLocalSync(
                             .getItemsToBeCleanedFromFeed(
                                 feedId = feedSql.id,
                                 keepCount = max(maxFeedItemCount, items?.size ?: 0),
-                            ).filterNot { it in presentIds }
+                            ).filterNot { id ->
+                                // Don't delete articles that are present in feed or currently selected
+                                id in presentIds || id == repository.currentArticleId.value
+                            }
 
                     for (id in articlesToDelete) {
                         blobFile(itemId = id, filesDir = filePathProvider.articleDir).let { file ->
@@ -473,7 +484,15 @@ class RssLocalSync(
                     repository.syncLoadFeeds(tag, retryAfter = Instant.now())
                 }
 
-            else -> if (staleTime > 0) repository.syncLoadFeedsIfStale(staleTime, retryAfter = Instant.now()) else repository.syncLoadFeeds(retryAfter = Instant.now())
+            else ->
+                if (staleTime > 0) {
+                    repository.syncLoadFeedsIfStale(
+                        staleTime,
+                        retryAfter = Instant.now(),
+                    )
+                } else {
+                    repository.syncLoadFeeds(retryAfter = Instant.now())
+                }
         }
 
     companion object {

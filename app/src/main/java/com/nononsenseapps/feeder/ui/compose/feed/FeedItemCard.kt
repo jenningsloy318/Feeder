@@ -72,6 +72,9 @@ import java.time.Instant
 fun FeedItemCard(
     item: FeedListItem,
     showThumbnail: Boolean,
+    onOpenFeedItemInReader: () -> Unit,
+    onOpenFeedItemInCustomTab: () -> Unit,
+    onOpenFeedItemInBrowser: () -> Unit,
     onMarkAboveAsRead: () -> Unit,
     onMarkBelowAsRead: () -> Unit,
     onShareItem: () -> Unit,
@@ -91,7 +94,8 @@ fun FeedItemCard(
             verticalArrangement = Arrangement.spacedBy(4.dp),
             modifier =
                 Modifier
-                    .requiredHeightIn(min = minimumTouchSize),
+                    .requiredHeightIn(min = minimumTouchSize)
+                    .alpha(if (!item.unread) 0.75f else 1.0f),
         ) {
             if (showThumbnail) {
                 item.image?.let { image ->
@@ -107,12 +111,6 @@ fun FeedItemCard(
                                 with(LocalDensity.current) {
                                     val pxWidth = maxWidth.roundToPx()
                                     Size(pxWidth, (pxWidth * 9) / 16)
-                                }
-                            val alpha =
-                                if (item.unread) {
-                                    1f
-                                } else {
-                                    0.74f
                                 }
                             AsyncImage(
                                 model =
@@ -138,7 +136,6 @@ fun FeedItemCard(
                                         .fillMaxWidth()
                                         .aspectRatio(16.0f / 9.0f)
                                         .background(MaterialTheme.colorScheme.surfaceVariant)
-                                        .alpha(alpha)
                                         .safeSemantics {
                                             testTag = "card_image"
                                         },
@@ -162,6 +159,9 @@ fun FeedItemCard(
                 )
                 FeedItemText(
                     item = item,
+                    onOpenFeedItemInReader = onOpenFeedItemInReader,
+                    onOpenFeedItemInCustomTab = onOpenFeedItemInCustomTab,
+                    onOpenFeedItemInBrowser = onOpenFeedItemInBrowser,
                     onMarkAboveAsRead = onMarkAboveAsRead,
                     onMarkBelowAsRead = onMarkBelowAsRead,
                     onShareItem = onShareItem,
@@ -180,6 +180,9 @@ fun FeedItemCard(
 @Composable
 fun RowScope.FeedItemText(
     item: FeedListItem,
+    onOpenFeedItemInReader: () -> Unit,
+    onOpenFeedItemInCustomTab: () -> Unit,
+    onOpenFeedItemInBrowser: () -> Unit,
     onMarkAboveAsRead: () -> Unit,
     onMarkBelowAsRead: () -> Unit,
     onShareItem: () -> Unit,
@@ -264,6 +267,39 @@ fun RowScope.FeedItemText(
                 onDismissRequest = onDismissDropdown,
                 modifier = Modifier.onKeyEventLikeEscape(onDismissDropdown),
             ) {
+                DropdownMenuItem(
+                    onClick = {
+                        onDismissDropdown()
+                        onOpenFeedItemInReader()
+                    },
+                    text = {
+                        Text(
+                            text = stringResource(id = R.string.open_article_in_reader),
+                        )
+                    },
+                )
+                DropdownMenuItem(
+                    onClick = {
+                        onDismissDropdown()
+                        onOpenFeedItemInCustomTab()
+                    },
+                    text = {
+                        Text(
+                            text = stringResource(id = R.string.open_article_in_custom_tab),
+                        )
+                    },
+                )
+                DropdownMenuItem(
+                    onClick = {
+                        onDismissDropdown()
+                        onOpenFeedItemInBrowser()
+                    },
+                    text = {
+                        Text(
+                            text = stringResource(id = R.string.open_article_in_default_browser),
+                        )
+                    },
+                )
                 DropdownMenuItem(
                     onClick = {
                         onDismissDropdown()
@@ -398,6 +434,9 @@ private fun Preview() {
                     wordCount = 588,
                 ),
             showThumbnail = true,
+            onOpenFeedItemInReader = {},
+            onOpenFeedItemInCustomTab = {},
+            onOpenFeedItemInBrowser = {},
             onMarkAboveAsRead = {},
             onMarkBelowAsRead = {},
             onShareItem = {},
@@ -438,6 +477,9 @@ private fun PreviewWithImageUnread() {
                         wordCount = 939,
                     ),
                 showThumbnail = true,
+                onOpenFeedItemInReader = {},
+                onOpenFeedItemInCustomTab = {},
+                onOpenFeedItemInBrowser = {},
                 onMarkAboveAsRead = {},
                 onMarkBelowAsRead = {},
                 onShareItem = {},
@@ -479,6 +521,9 @@ private fun PreviewWithImageRead() {
                         wordCount = 910,
                     ),
                 showThumbnail = true,
+                onOpenFeedItemInReader = {},
+                onOpenFeedItemInCustomTab = {},
+                onOpenFeedItemInBrowser = {},
                 onMarkAboveAsRead = {},
                 onMarkBelowAsRead = {},
                 onShareItem = {},

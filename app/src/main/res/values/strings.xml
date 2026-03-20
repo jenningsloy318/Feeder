@@ -82,6 +82,7 @@
   <string name="on_startup">Upon app start</string>
   <string name="block_list">Block list</string>
   <string name="block_list_description">Hides articles with titles containing any of these filters. Example filters:</string>
+  <string name="apply_blocklist_to_summaries">Apply to summaries</string>
   <string name="add_item">Add item</string>
   <string name="show_fab">Show floating action button</string>
   <string name="include_mobile_hotspots">Include mobile hotspots</string>
@@ -93,6 +94,11 @@
   <string name="open_in_webview">Web view</string>
   <string name="open_in_default_browser">Default browser</string>
   <string name="open_in_custom_tab">Custom tab</string>
+  <string name="open_article_in_reader">Open in reader</string>
+  <string name="open_article_in_default_browser">Open in default browser</string>
+  <string name="open_article_in_custom_tab">Open in custom tab</string>
+  <string name="no_article_link_browser">Unable to open article in browser</string>
+  <string name="no_article_link_custom_tab">Unable to open article in custom tab</string>
   <string name="use_app_default">Use app default</string>
   <string name="open_item_by_default_with">Open items by default with</string>
   <string name="open_links_with">Open links with</string>
@@ -255,6 +261,10 @@
   <string name="no_url">No URL</string>
   <string name="add_anyway">Add anyway</string>
   <string name="open_browser_in_split_screen">Open browser in split screen</string>
+  <string name="pref_paging_mode_title">Paging Mode</string>
+  <string name="pref_paging_mode_description">Navigate articles by \"turning pages\" instead of continuous scrolling. Optimized for e-ink devices.</string>
+  <string name="pref_animated_paging_title">Animated Paging</string>
+  <string name="pref_animated_paging_description">Briefly animate page turns. May cause ghosting on some e-ink devices.</string>
   <string name="show_reading_time">Show estimated reading time</string>
   <string name="zero_words">%1$s words</string>
   <string name="one_word">%1$s word</string>
@@ -418,4 +428,7 @@
   <string name="setting_auto_fetch_full_article">Auto Fetch Full Article</string>
   <string name="setting_auto_fetch_full_article_description">Automatically fetch full article text when opening articles</string>
   <string name="unable_to_open_app">Unable to open %s</string>
+
+  <string name="widget_title">Feeder</string>
+  <string name="widget_refreshing">Refreshing</string>
 </resources>

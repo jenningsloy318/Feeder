@@ -183,7 +183,8 @@ fun ArticleScreen(
             viewModel.summarize()
         },
         onTranslate = {
-            viewModel.translate()
+            val isAlreadyTranslated = viewState.translation is TranslationState.Translated
+            viewModel.translate(forceRefresh = isAlreadyTranslated)
         },
         onCancelSummarize = {
             viewModel.cancelSummarize()

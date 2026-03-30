@@ -1,0 +1,16 @@
+{
+  "featureName": "Persist Translation Cache",
+  "specDirectory": "specification/036-persist-translation-cache",
+  "worktreePath": ".worktree/036-persist-translation-cache",
+  "startedAt": "2026-03-30T13:56:21+08:00",
+  "phases": [
+    { "id": 0, "name": "Apply Dev Rules", "status": "complete", "startedAt": "2026-03-30T13:56:21+08:00", "completedAt": "2026-03-30T13:56:21+08:00" },
+    { "id": 1, "name": "Specification Setup", "status": "complete", "startedAt": "2026-03-30T13:56:21+08:00", "completedAt": "2026-03-30T13:56:21+08:00" }
+  ],
+  "tasks": [
+    { "id": "T1.1", "phase": 1, "description": "Specification Setup", "status": "complete", "files": ["specification/036-persist-translation-cache/"], "updatedAt": "2026-03-30T13:56:21+08:00" }
+  ],
+  "iteration": { "loops": 0, "lastReviewVerdict": null },
+  "team": { "name": "super-dev-036-persist-translation-cache", "teammates": [], "messages": [] },
+  "status": { "allPhasesComplete": false, "allTasksComplete": false, "workflowDone": false }
+}

@@ -38,6 +38,11 @@ interface FilePathProvider {
      * Where images should be cached to for okhttp
      */
     val httpImageCacheDir: File
+
+    /**
+     * Where translation cache files should be placed (backup-eligible)
+     */
+    val translationsDir: File
 }
 
 private class FilePathProviderImpl(
@@ -50,6 +55,7 @@ private class FilePathProviderImpl(
     override val imageCacheDir: File = cacheDir.resolve("image_cache")
     override val httpImageCacheDir: File = cacheDir.resolve("http_image_cache")
     override val fontsDir: File = filesDir.resolve("fonts")
+    override val translationsDir: File = filesDir.resolve("translations")
 }
 
 fun filePathProvider(

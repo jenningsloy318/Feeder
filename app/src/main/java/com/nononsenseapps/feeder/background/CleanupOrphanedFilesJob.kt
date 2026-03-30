@@ -50,6 +50,9 @@ class CleanupOrphanedFilesJob(
             // Clean up full article files in fullArticleDir
             cleanupDirectory(filePathProvider.fullArticleDir, validFeedItemIds, ::blobFullFile)
 
+            // Clean up translation cache files
+            cleanupTranslationsDirectory(filePathProvider.translationsDir, validFeedItemIds.toSet())
+
             Log.i(LOG_TAG, "Completed cleanup of orphaned article files")
         } catch (e: Exception) {
             Log.e(LOG_TAG, "Error during cleanup of orphaned files", e)
@@ -92,6 +95,28 @@ class CleanupOrphanedFilesJob(
         }
 
         Log.i(LOG_TAG, "Deleted $deletedCount orphaned files from ${directory.canonicalPath}")
+    }
+
+    private suspend fun cleanupTranslationsDirectory(
+        directory: File,
+        validIds: Set<Long>,
+    ) {
+        if (!directory.isDirectory) return
+
+        withContext(Dispatchers.IO) {
+            directory.listFiles()?.forEach { file ->
+                try {
+                    val itemId = file.name.substringBefore("_").toLongOrNull()
+                    if (itemId == null || itemId !in validIds) {
+                        if (file.delete()) {
+                            logDebug(LOG_TAG, "Deleted orphaned translation file: ${file.name}")
+                        }
+                    }
+                } catch (e: Exception) {
+                    Log.e(LOG_TAG, "Error processing translation file ${file.name}", e)
+                }
+            }
+        }
     }
 
     companion object {

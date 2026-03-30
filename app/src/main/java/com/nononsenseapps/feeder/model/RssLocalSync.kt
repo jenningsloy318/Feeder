@@ -7,6 +7,7 @@ import com.nononsenseapps.feeder.background.runOnceFullTextSync
 import com.nononsenseapps.feeder.blob.blobFile
 import com.nononsenseapps.feeder.blob.blobFullFile
 import com.nononsenseapps.feeder.blob.blobOutputStream
+import com.nononsenseapps.feeder.blob.deleteTranslationCache
 import com.nononsenseapps.feeder.db.room.Feed
 import com.nononsenseapps.feeder.db.room.FeedItem
 import com.nononsenseapps.feeder.db.room.ID_UNSET
@@ -438,6 +439,10 @@ class RssLocalSync(
                             }
                             Unit
                         }
+                        deleteTranslationCache(
+                            itemId = id,
+                            translationsDir = filePathProvider.translationsDir,
+                        )
                     }
 
                     repository.deleteFeedItems(articlesToDelete)

@@ -16,6 +16,7 @@ import com.nononsenseapps.feeder.ai.ParagraphTranslationProgress
 import com.nononsenseapps.feeder.ai.TranslatableText
 import com.nononsenseapps.feeder.ai.TranslatableTextExtractor
 import com.nononsenseapps.feeder.ai.model.AISettings
+import com.nononsenseapps.feeder.ai.model.TranslationLanguage
 import com.nononsenseapps.feeder.archmodel.Article
 import com.nononsenseapps.feeder.archmodel.Enclosure
 import com.nononsenseapps.feeder.archmodel.LinkOpener
@@ -27,6 +28,8 @@ import com.nononsenseapps.feeder.blob.blobFile
 import com.nononsenseapps.feeder.blob.blobFullFile
 import com.nononsenseapps.feeder.blob.blobFullInputStream
 import com.nononsenseapps.feeder.blob.blobInputStream
+import com.nononsenseapps.feeder.blob.loadTranslation
+import com.nononsenseapps.feeder.blob.saveTranslation
 import com.nononsenseapps.feeder.db.room.FeedItemForFetching
 import com.nononsenseapps.feeder.db.room.ID_UNSET
 import com.nononsenseapps.feeder.model.FeedParserError
@@ -129,6 +132,7 @@ class ArticleViewModel(
 
     private val translationState: MutableStateFlow<TranslationState> = MutableStateFlow(TranslationState.Empty)
     private var translateJob: Job? = null
+    private var cacheSkipOnNextTranslate = false
 
     val viewState: StateFlow<ArticleScreenViewState> =
         combine(
@@ -511,10 +515,30 @@ class ArticleViewModel(
      * Results are displayed paragraph-by-paragraph below the original text.
      * Users can tap the translate button again to retry if translation fails.
      */
-    fun translate() {
+    fun translate(forceRefresh: Boolean = false) {
+        val skipCache = forceRefresh || cacheSkipOnNextTranslate
+        cacheSkipOnNextTranslate = false
+
         translateJob?.cancel()
         translateJob = viewModelScope.launch(Dispatchers.IO) {
             try {
+                // Step 0: Get target language and resolve code
+                val targetLanguage = repository.translationLanguage.first()
+                val languageCode = resolveLanguageCode(targetLanguage)
+
+                // Step 0.5: Cache check (skip if re-translating)
+                if (!skipCache) {
+                    val cached = loadTranslation(
+                        itemId = itemId,
+                        languageCode = languageCode,
+                        translationsDir = filePathProvider.translationsDir,
+                    )
+                    if (cached != null) {
+                        translationState.value = TranslationState.Translated(cached)
+                        return@launch
+                    }
+                }
+
                 // Step 1: Extract paragraphs
                 val translatableTexts = extractTranslatableParagraphs()
                 if (translatableTexts.isEmpty()) {
@@ -542,8 +566,7 @@ class ArticleViewModel(
                     articleTranslation = initialArticleTranslation,
                 )
 
-                // Step 4: Get target language and create coordinator
-                val targetLanguage = repository.translationLanguage.first()
+                // Step 4: Create coordinator with settings
                 val translationTimeout = repository.translationTimeout.first()
                 val settingsWithTimeout = createSettingsWithTimeout(translationTimeout)
                 val paragraphCoordinator = ParagraphTranslationCoordinator(
@@ -582,6 +605,17 @@ class ArticleViewModel(
 
                             // Step 6: Transition to Translated when all resolved
                             if (updatedArticleTranslation.status == "translated") {
+                                // Save to cache (already on Dispatchers.IO)
+                                try {
+                                    saveTranslation(
+                                        itemId = itemId,
+                                        languageCode = languageCode,
+                                        translationsDir = filePathProvider.translationsDir,
+                                        translation = updatedArticleTranslation,
+                                    )
+                                } catch (e: Exception) {
+                                    Log.w(LOG_TAG, "Failed to save translation cache", e)
+                                }
                                 TranslationState.Translated(articleTranslation = updatedArticleTranslation)
                             } else {
                                 TranslationState.Translating(articleTranslation = updatedArticleTranslation)
@@ -602,6 +636,7 @@ class ArticleViewModel(
         translateJob?.cancel()
         translateJob = null
         translationState.value = TranslationState.Empty
+        cacheSkipOnNextTranslate = true
     }
 
     private fun createSettingsWithTimeout(translationTimeoutSeconds: Int): AISettings {
@@ -620,6 +655,9 @@ class ArticleViewModel(
             }
         }
     }
+
+    private fun resolveLanguageCode(language: TranslationLanguage): String =
+        if (language.code.isEmpty()) Locale.getDefault().language else language.code
 
     /**
      * Extracts translatable text paragraphs with structure context from the article content.

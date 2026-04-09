@@ -156,6 +156,7 @@ class OpmlWriterKtTest {
               <feeder:setting key="pref_anthropic_request_timeout_seconds" value="60"/>
               <feeder:setting key="pref_ai_provider_type" value="openai"/>
               <feeder:setting key="pref_summary_enabled" value="true"/>
+              <feeder:setting key="pref_blocklist_apply_to_summaries" value="true"/>
               <feeder:blocked pattern="foo"/>
               <feeder:blocked pattern="break &quot;xml id &apos;9&apos; &gt; 0 &amp; &lt; 10"/>
             </feeder:settings>
@@ -212,6 +213,7 @@ class OpmlWriterKtTest {
                         UserSettings.SETTING_ANTHROPIC_REQUEST_TIMEOUT_SECONDS -> "60"
                         UserSettings.SETTING_AI_PROVIDER_TYPE -> "openai"
                         UserSettings.SETTING_SUMMARY_ENABLED -> "true"
+                        UserSettings.SETTING_BLOCKLIST_APPLY_TO_SUMMARIES -> "true"
                     }
             }
     }

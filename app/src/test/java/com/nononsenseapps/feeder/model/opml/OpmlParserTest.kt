@@ -105,6 +105,7 @@ class OpmlParserTest : DIAware {
                         UserSettings.SETTING_ANTHROPIC_REQUEST_TIMEOUT_SECONDS -> "60"
                         UserSettings.SETTING_AI_PROVIDER_TYPE -> "openai"
                         UserSettings.SETTING_SUMMARY_ENABLED -> "true"
+                        UserSettings.SETTING_BLOCKLIST_APPLY_TO_SUMMARIES -> "true"
                     },
             )
         }
@@ -153,6 +154,7 @@ class OpmlParserTest : DIAware {
                 settingsStore.setAnthropicSettings(any())
                 settingsStore.setAIProviderType(any())
                 settingsStore.setSummaryEnabled(true)
+                settingsStore.setApplyBlocklistToSummaries(true)
             }
 
             confirmVerified(settingsStore)

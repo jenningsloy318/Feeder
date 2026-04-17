@@ -284,4 +284,6 @@
     <string name="summarize_on_open">Samenvatting</string>
     <string name="feed_search_suggestions_header">Suggesties</string>
     <string name="openai_settings_info">Compatibel met veel AI-providers, maar niet met alle</string>
+    <string name="enable_summary_title">Samenvatting inschakelen</string>
+    <string name="enable_summary_description">AI-samenvattingsfunctie inschakelen</string>
 </resources>

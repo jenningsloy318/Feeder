@@ -285,4 +285,6 @@
     <string name="summarize_on_open">Açıldığında özetle</string>
     <string name="feed_search_suggestions_header">Öneriler</string>
     <string name="openai_settings_info">Bir çok YZ sağlayıcısı ile uyumlu, fakat hepsi ile değil</string>
+    <string name="enable_summary_title">Özeti etkinleştir</string>
+    <string name="enable_summary_description">AI özet işlevini etkinleştir</string>
 </resources>

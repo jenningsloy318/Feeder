@@ -78,12 +78,6 @@ class AIApi(
      */
     suspend fun summarize(content: String): AIClient.SummaryResult {
         return try {
-            // Check if summaries are enabled
-            val enabled = repository.summaryEnabled.first()
-            if (!enabled) {
-                return AIClient.SummaryResult.Error(content = "")
-            }
-
             // Get summary-specific timeout
             val summaryTimeout = repository.summaryTimeout.first()
 

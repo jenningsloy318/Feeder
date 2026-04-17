@@ -292,4 +292,6 @@
     <string name="openai_settings_info">Kompatibel med mange AI-udbydere, men ikke alle</string>
     <string name="widget_title">Feeder</string>
     <string name="widget_refreshing">Opfrisker</string>
+    <string name="enable_summary_title">Aktiver sammendrag</string>
+    <string name="enable_summary_description">Aktiver AI-sammendragsfunktion</string>
 </resources>

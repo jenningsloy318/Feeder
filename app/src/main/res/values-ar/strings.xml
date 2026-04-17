@@ -231,4 +231,6 @@
     <string name="one_word">كلمة واحدة</string>
     <string name="export_saved_articles">صدّر المقالات المحفوظة</string>
     <string name="nostr_feed_description">Nostr ا‏ةطساوب تالقم %1$s</string>
+    <string name="enable_summary_title">تفعيل الملخص</string>
+    <string name="enable_summary_description">تفعيل وظيفة الملخص بالذكاء الاصطناعي</string>
 </resources>

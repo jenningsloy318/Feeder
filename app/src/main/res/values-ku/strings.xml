@@ -242,4 +242,6 @@
     <string name="two_tags">%1$s etîketan</string>
     <string name="content_is_not_html">Naverok ne HTML e</string>
     <string name="other_tags">%1$s etîketan</string>
+    <string name="enable_summary_title">Kurtekirinê çalak bike</string>
+    <string name="enable_summary_description">Fonksiyona kurtekirina AI-ê çalak bike</string>
 </resources>

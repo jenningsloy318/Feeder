@@ -130,4 +130,6 @@
     <string name="navigation_drawer_close">بستن کشوی ناوبری</string>
     <string name="navigation_drawer_open">باز کردن کشوی ناوبری</string>
     <string name="theme_e_ink">کاغذ الکترونیک</string>
+    <string name="enable_summary_title">فعال‌سازی خلاصه</string>
+    <string name="enable_summary_description">فعال‌سازی قابلیت خلاصه هوش مصنوعی</string>
 </resources>

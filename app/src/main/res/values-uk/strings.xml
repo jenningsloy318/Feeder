@@ -292,4 +292,6 @@
     <string name="widget_title">Feeder</string>
     <string name="widget_refreshing">Оновлення</string>
     <string name="apply_blocklist_to_summaries">Застосувати до підсумків</string>
+    <string name="enable_summary_title">Увімкнути підсумок</string>
+    <string name="enable_summary_description">Увімкнути функцію підсумку ШІ</string>
 </resources>

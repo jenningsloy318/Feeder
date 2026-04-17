@@ -280,4 +280,6 @@
     <string name="time_out">Tempo limite (segundos)</string>
     <string name="time_out_placeholder">Tempo limite para requerimentos do OpenAI</string>
     <string name="azure_deployment_id">Id de implantação do Azure</string>
+    <string name="enable_summary_title">Ativar resumo</string>
+    <string name="enable_summary_description">Ativar funcionalidade de resumo com IA</string>
 </resources>

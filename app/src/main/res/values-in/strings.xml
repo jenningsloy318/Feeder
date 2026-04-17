@@ -281,4 +281,6 @@
     <string name="could_not_remove_font">Tidak bisa menghapus fonta</string>
     <string name="something_went_wrong">Telah terjadi kesalahan</string>
     <string name="time_out_placeholder">Waktu habis untuk permintaan OpenAI</string>
+    <string name="enable_summary_title">Aktifkan ringkasan</string>
+    <string name="enable_summary_description">Aktifkan fungsi ringkasan AI</string>
 </resources>

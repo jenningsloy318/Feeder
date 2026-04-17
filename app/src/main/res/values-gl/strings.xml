@@ -250,4 +250,6 @@
     <string name="feed_item_style_compact_card">Tarxeta compacta</string>
     <string name="touch_to_play_audio">Toca para reproducir o audio</string>
     <string name="show_title_unread_count">Mostrar número de artigos non lidos no título</string>
+    <string name="enable_summary_title">Activar resumo</string>
+    <string name="enable_summary_description">Activar a funcionalidade de resumo con IA</string>
 </resources>

@@ -287,4 +287,6 @@
     <string name="open_article_in_reader">Deschideți in cititor</string>
     <string name="widget_title">Feeder</string>
     <string name="openai_settings_info">Compatibil cu mulți furnizori IA, dar nu toți</string>
+    <string name="enable_summary_title">Activare rezumat</string>
+    <string name="enable_summary_description">Activare funcționalitate rezumat AI</string>
 </resources>

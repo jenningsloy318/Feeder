@@ -1,2 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>    <string name="enable_summary_title">Enable Summary</string>
+    <string name="enable_summary_description">Enable AI summary functionality</string>
+</resources>

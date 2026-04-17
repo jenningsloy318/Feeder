@@ -164,4 +164,6 @@
     <string name="failed_to_import_OPML">Malsukcesis importi OPML</string>
     <string name="nostr_feed_description">Nostr artikoloj de %1$s</string>
     <string name="feed_search_suggestions_header">Sugestoj</string>
+    <string name="enable_summary_title">Ebligi resumon</string>
+    <string name="enable_summary_description">Ebligi AI-resuman funkcion</string>
 </resources>

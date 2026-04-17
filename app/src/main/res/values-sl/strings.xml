@@ -284,4 +284,6 @@
     <string name="summarize_on_open">Povzemi ob odprtju</string>
     <string name="feed_search_suggestions_header">Predlogi</string>
     <string name="openai_settings_info">Podpira mnogo AI ponudnikov, a ne vseh</string>
+    <string name="enable_summary_title">Omogoči povzetek</string>
+    <string name="enable_summary_description">Omogoči funkcijo povzetka z UI</string>
 </resources>

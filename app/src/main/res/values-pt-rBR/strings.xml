@@ -284,4 +284,6 @@
     <string name="something_went_wrong">Algo deu errado</string>
     <string name="feed_search_suggestions_header">Sugestões</string>
     <string name="openai_settings_info">Compatível com muitos provedores de IA, mas não todos</string>
+    <string name="enable_summary_title">Ativar resumo</string>
+    <string name="enable_summary_description">Ativar funcionalidade de resumo com IA</string>
 </resources>

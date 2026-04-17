@@ -239,4 +239,6 @@
     <string name="font">Font</string>
     <string name="text_preview">Vista prèvia</string>
     <string name="italic">Itàlica</string>
+    <string name="enable_summary_title">Activa el resum</string>
+    <string name="enable_summary_description">Activa la funcionalitat de resum amb IA</string>
 </resources>

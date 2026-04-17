@@ -204,4 +204,6 @@
     <string name="few_feeds">Prurjet %1$s</string>
     <string name="many_feeds">Prurjet %1$s</string>
     <string name="other_feeds">Prurjet %1$s</string>
+    <string name="enable_summary_title">Aktivizo përmbledhjen</string>
+    <string name="enable_summary_description">Aktivizo funksionalitetin e përmbledhjes me IA</string>
 </resources>

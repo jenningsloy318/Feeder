@@ -2,4 +2,6 @@
 <resources>
 
     <string name="by_author_on_date">by %1$s, %2$s</string>
+    <string name="enable_summary_title">Enable Summary</string>
+    <string name="enable_summary_description">Enable AI summary functionality</string>
 </resources>

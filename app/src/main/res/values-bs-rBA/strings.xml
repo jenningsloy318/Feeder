@@ -264,4 +264,6 @@
     <string name="model_id">ID modela</string>
     <string name="azure_api_version">Verzija Azure API-ja</string>
     <string name="nostr_feed_description">Nostraj članke od %1$s</string>
+    <string name="enable_summary_title">Omogući sažetak</string>
+    <string name="enable_summary_description">Omogući funkciju AI sažetka</string>
 </resources>

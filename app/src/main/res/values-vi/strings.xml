@@ -249,4 +249,6 @@
     <string name="export_saved_articles">Xuất các bài viết đã lưu</string>
     <string name="skip_duplicate_articles">Bỏ qua bài viết trùng lặp</string>
     <string name="touch_to_play_audio">Chạm để phát âm thanh</string>
+    <string name="enable_summary_title">Bật tóm tắt</string>
+    <string name="enable_summary_description">Bật chức năng tóm tắt AI</string>
 </resources>

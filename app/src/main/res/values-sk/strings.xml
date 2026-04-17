@@ -282,4 +282,6 @@
     <string name="could_not_add_font">Nepodarilo sa pridať font</string>
     <string name="could_not_remove_font">Nepodarilo sa zmazať font</string>
     <string name="something_went_wrong">Niečo sa pokazilo</string>
+    <string name="enable_summary_title">Povoliť zhrnutie</string>
+    <string name="enable_summary_description">Povoliť funkciu AI zhrnutia</string>
 </resources>

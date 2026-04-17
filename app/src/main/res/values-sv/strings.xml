@@ -292,4 +292,6 @@
     <string name="no_article_link_custom_tab">Kan inte öppna artiklen med custom tab</string>
     <string name="widget_title">Feeder</string>
     <string name="widget_refreshing">Uppdaterar</string>
+    <string name="enable_summary_title">Aktivera sammanfattning</string>
+    <string name="enable_summary_description">Aktivera AI-sammanfattningsfunktion</string>
 </resources>

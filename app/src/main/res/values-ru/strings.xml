@@ -250,4 +250,6 @@
     <string name="feed_item_style_compact_card">Компактный карточный</string>
     <string name="touch_to_play_audio">Коснитесь для воспроизведения аудио</string>
     <string name="show_title_unread_count">Показывать число непрочитанных статей в заголовке</string>
+    <string name="enable_summary_title">Включить обобщение</string>
+    <string name="enable_summary_description">Включить функцию обобщения ИИ</string>
 </resources>

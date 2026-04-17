@@ -252,4 +252,6 @@
     <string name="azure_api_version">Azure API-versjon</string>
     <string name="touch_to_play_audio">Trykk for å spille av lyd</string>
     <string name="show_title_unread_count">Vis antall uleste artikler i tittelen</string>
+    <string name="enable_summary_title">Aktiver oppsummering</string>
+    <string name="enable_summary_description">Aktiver AI-oppsummeringsfunksjon</string>
 </resources>

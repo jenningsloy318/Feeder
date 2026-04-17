@@ -296,4 +296,6 @@
     <string name="pref_paging_mode_description">A cikkek böngészése „oldalanként” a folyamatos görgetés helyett. E-ink eszközökhöz optimalizálva.</string>
     <string name="pref_animated_paging_title">Animált lapozás</string>
     <string name="pref_animated_paging_description">Rövid animáció a lapozásnál. Néhány e-ink eszközön előfordulhat szellemkép.</string>
+    <string name="enable_summary_title">Összegzés engedélyezése</string>
+    <string name="enable_summary_description">AI összegzési funkció engedélyezése</string>
 </resources>

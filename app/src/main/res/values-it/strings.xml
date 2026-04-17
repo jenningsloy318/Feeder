@@ -296,4 +296,6 @@
     <string name="pref_paging_mode_description">Naviga gli articoli \"voltando pagina\" invece dello scorrimento continuo. Ottimizzata per dispositivi e-ink.</string>
     <string name="pref_animated_paging_title">Cambio pagina animato</string>
     <string name="pref_animated_paging_description">Anima brevemente il passaggio tra le pagine. Potrebbe causare effetto ghosting su alcuni dispositivi e-ink.</string>
+    <string name="enable_summary_title">Attiva riepilogo</string>
+    <string name="enable_summary_description">Attiva la funzionalità di riepilogo con IA</string>
 </resources>

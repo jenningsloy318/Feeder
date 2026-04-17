@@ -63,4 +63,6 @@
     <string name="mark_as_unread">చదవనట్టు గుర్తుపెట్టు</string>
     <string name="add_feed_search_hint">ఫీడ్ యూఆర్ఎల్</string>
     <string name="add_feed">ఫీడ్ జోడించండి</string>
+    <string name="enable_summary_title">సారాంశం ప్రారంభించు</string>
+    <string name="enable_summary_description">AI సారాంశ కార్యాచరణను ప్రారంభించు</string>
 </resources>

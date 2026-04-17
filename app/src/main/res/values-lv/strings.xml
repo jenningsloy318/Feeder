@@ -270,4 +270,6 @@
     <string name="go_to_feed">Doties uz %1$s</string>
     <string name="explanation_permission_notifications">Pirms paziņojumu iespējošanas ir jāpiešķir atļauja.</string>
     <string name="summarize_on_open">Apkopot, kad atver</string>
+    <string name="enable_summary_title">Iespējot apkopojumu</string>
+    <string name="enable_summary_description">Iespējot AI apkopojuma funkciju</string>
 </resources>

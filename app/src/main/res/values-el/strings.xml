@@ -281,4 +281,6 @@
     <string name="time_out">Χρονικό όριο (δευτερόλεπτα)</string>
     <string name="time_out_validation_error">Το χρονικό όριο πρέπει να είναι μεταξύ 30 και 600 δευτερολέπτων</string>
     <string name="time_out_placeholder">Χρονικό όριο για αιτήσεις OpenAI</string>
+    <string name="enable_summary_title">Ενεργοποίηση σύνοψης</string>
+    <string name="enable_summary_description">Ενεργοποίηση λειτουργίας σύνοψης AI</string>
 </resources>

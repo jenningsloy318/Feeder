@@ -284,4 +284,6 @@
     <string name="could_not_add_font">எழுத்துருவை சேர்க்க முடியவில்லை</string>
     <string name="could_not_remove_font">எழுத்துருவை அகற்ற முடியவில்லை</string>
     <string name="something_went_wrong">ஏதோ தவறாகிவிட்டது</string>
+    <string name="enable_summary_title">சுருக்கத்தை இயக்கு</string>
+    <string name="enable_summary_description">AI சுருக்க செயல்பாட்டை இயக்கு</string>
 </resources>

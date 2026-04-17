@@ -250,4 +250,6 @@
     <string name="feed_item_style_compact_card">कॉम्पैक्ट कार्ड</string>
     <string name="touch_to_play_audio">ऑडियो चलाने के लिए छुएं</string>
     <string name="show_title_unread_count">शीर्षक में अपठित आलेखों की संख्या दिखाएं</string>
+    <string name="enable_summary_title">सारांश सक्षम करें</string>
+    <string name="enable_summary_description">AI सारांश कार्यक्षमता सक्षम करें</string>
 </resources>

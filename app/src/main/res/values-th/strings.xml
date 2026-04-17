@@ -278,4 +278,6 @@
     <string name="feed_search_suggestions_header">คำแนะนำ</string>
     <string name="summarize_on_open">สรุปความเมื่อเปิด</string>
     <string name="openai_settings_info">รองรับกับผู้ให้บริการ AI หลากหลาย, แต่ไม่ใช่ทั้งหมด</string>
+    <string name="enable_summary_title">เปิดใช้สรุป</string>
+    <string name="enable_summary_description">เปิดใช้ฟังก์ชันสรุปด้วย AI</string>
 </resources>

@@ -37,26 +37,36 @@ Feeder currently supports the following AI providers:
 
 1. In **AI Integration** settings
 2. Tap **Summary**
-3. Toggle **Enable summaries** on or off
-4. Select your preferred **Summary Language**
+3. Toggle **Enable Summary** on or off (master toggle -- controls whether the summary feature is available)
+4. Toggle **Auto Summary** on or off (only available when Enable Summary is on -- controls automatic summarization)
+5. Select your preferred **Summary Language**
 
 ### Step 3: Use AI Summaries
 
 Once configured:
-- Open any article in Feeder
-- The AI will automatically generate a summary
-- Summaries appear in the article view
+- If **Enable Summary** is ON, the summarize button appears in the article toolbar
+- If **Auto Summary** is also ON, articles are automatically summarized when opened
+- The translate button is always available when an AI provider is configured (independent of summary settings)
 
 ---
 
 ## Settings Explained
 
-### Enable Summaries
+### Enable Summary (Master Toggle)
 
-- **On**: Automatically summarize articles when opened
-- **Off**: Disable automatic summarization (manual summaries still available if implemented)
+- **On**: The summary feature is available -- the summarize button appears in the article toolbar and auto-summary can run
+- **Off**: The summary feature is hidden entirely -- no summarize button in the toolbar and no auto-summaries
 
 **Default**: On
+
+### Auto Summary
+
+- **On**: Automatically summarize articles when opened (only effective when Enable Summary is ON)
+- **Off**: Manual summaries only -- use the summarize button in the article toolbar
+
+**Default**: On
+
+**Note**: When Enable Summary is OFF, the Auto Summary toggle appears visually disabled and cannot be changed.
 
 ### Summary Language
 
@@ -79,7 +89,8 @@ Choose the language in which summaries should be generated. Available languages 
 Your AI summary settings are included when you export your feeds via OPML:
 
 **Exported Settings**:
-- AI summary enabled state
+- Enable Summary master toggle state
+- Auto Summary toggle state
 - Summary language preference
 
 To restore:
@@ -93,10 +104,17 @@ To restore:
 ### Summaries Not Appearing
 
 **Possible Causes**:
-1. **Summaries Disabled**: Check Settings > AI Integration > Summary > Enable summaries
-2. **No API Key**: Ensure you've configured your AI provider and API key
-3. **API Error**: Verify your API key is valid and has sufficient credits
-4. **Network Issue**: Check your internet connection
+1. **Summary Feature Disabled**: Check Settings > AI Integration > Summary > Enable Summary is ON
+2. **Auto Summary Disabled**: If you want automatic summaries, ensure Auto Summary is also ON
+3. **No API Key**: Ensure you've configured your AI provider and API key
+4. **API Error**: Verify your API key is valid and has sufficient credits
+5. **Network Issue**: Check your internet connection
+
+### Summarize Button Not Visible
+
+**Possible Causes**:
+1. **Enable Summary is OFF**: The master toggle must be ON for the summarize button to appear
+2. **No AI Provider Configured**: A valid AI provider must be set up
 
 ### Summary Language Not Working
 
@@ -168,7 +186,15 @@ When summaries are enabled, Feeder sends the following to your configured AI pro
 
 ### Q: Can I configure different settings for different feeds?
 
-**A**: Currently, summary settings apply globally to all feeds. Per-feed configuration is not supported.
+**A**: Per-feed auto-summary settings are supported. The global Enable Summary master toggle and Auto Summary toggle apply by default, but individual feeds can have their own auto-summary override.
+
+### Q: What is the difference between "Enable Summary" and "Auto Summary"?
+
+**A**: "Enable Summary" is the master toggle that controls whether the summary feature is available at all. When OFF, the summarize button is hidden and no summaries are generated. "Auto Summary" controls whether summaries are generated automatically when you open an article -- it only takes effect when Enable Summary is ON.
+
+### Q: Can I still translate articles if I disable summaries?
+
+**A**: Yes. The translate feature is independent of the summary toggles. As long as you have a valid AI provider configured, the translate button will appear in the article toolbar regardless of the Enable Summary setting.
 
 ---
 
@@ -181,7 +207,9 @@ When summaries are enabled, Feeder sends the following to your configured AI pro
 
 ### Summary Generation
 
-- Triggered automatically when article is opened (if enabled)
+- The summarize button in the article toolbar is only visible when Enable Summary is ON and an AI provider is configured
+- When Auto Summary is ON, summarization is triggered automatically when an article is opened
+- When Auto Summary is OFF, you can still manually trigger summarization using the toolbar button
 - Uses the configured language parameter
 - Returns concise summary of article content
 - Displays in article view
@@ -223,8 +251,11 @@ For feature requests:
 ### Version 2.17.0 (Unreleased)
 
 **New Features**:
+- Master "Enable Summary" toggle to control whether the summary feature is available
+- "Auto Summary" toggle (formerly "Enable summaries") now depends on the master toggle
+- Auto Summary toggle appears visually disabled when master toggle is OFF
+- Translate button is independent of summary settings
 - Dedicated Summary settings screen
-- Enable/disable toggle for AI summaries
 - Improved UX for summary language selection
 - OPML import/export support for summary settings
 

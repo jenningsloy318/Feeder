@@ -44,6 +44,7 @@ class OpmlParserTest : DIAware {
             every { setAnthropicSettings(any()) } just Runs
             every { setAIProviderType(any()) } just Runs
             every { setSummaryEnabled(any()) } just Runs
+            every { setEnableSummary(any()) } just Runs
         }
     private val filePathProvider: FilePathProvider = mockk(relaxUnitFun = true)
     override val di =
@@ -105,6 +106,7 @@ class OpmlParserTest : DIAware {
                         UserSettings.SETTING_ANTHROPIC_REQUEST_TIMEOUT_SECONDS -> "60"
                         UserSettings.SETTING_AI_PROVIDER_TYPE -> "openai"
                         UserSettings.SETTING_SUMMARY_ENABLED -> "true"
+                        UserSettings.SETTING_ENABLE_SUMMARY -> "true"
                         UserSettings.SETTING_BLOCKLIST_APPLY_TO_SUMMARIES -> "true"
                     },
             )
@@ -154,6 +156,7 @@ class OpmlParserTest : DIAware {
                 settingsStore.setAnthropicSettings(any())
                 settingsStore.setAIProviderType(any())
                 settingsStore.setSummaryEnabled(true)
+                settingsStore.setEnableSummary(true)
                 settingsStore.setApplyBlocklistToSummaries(true)
             }
 

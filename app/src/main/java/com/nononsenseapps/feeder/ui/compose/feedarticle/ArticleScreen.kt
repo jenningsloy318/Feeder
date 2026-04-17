@@ -362,7 +362,7 @@ private fun ArticleScreenInternal(
                     }
 
                     // Translate button (conditional)
-                    if (viewState.showSummarize) {
+                    if (viewState.showTranslate) {
                         val isTranslating = viewState.translation is TranslationState.Translating
                         val translationProgressFraction: (() -> Float)? = if (isTranslating) {
                             val articleTranslation = (viewState.translation as TranslationState.Translating).articleTranslation

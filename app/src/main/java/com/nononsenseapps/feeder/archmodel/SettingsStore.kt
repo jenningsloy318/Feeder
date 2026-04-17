@@ -823,6 +823,14 @@ class SettingsStore(
         sp.edit().putBoolean(PREF_SUMMARY_ENABLED, value).apply()
     }
 
+    private val _enableSummary = MutableStateFlow(sp.getBoolean(PREF_ENABLE_SUMMARY, true))
+    val enableSummary = _enableSummary.asStateFlow()
+
+    fun setEnableSummary(value: Boolean) {
+        _enableSummary.value = value
+        sp.edit().putBoolean(PREF_ENABLE_SUMMARY, value).apply()
+    }
+
     // Summary timeout setting
     private val _summaryTimeout = MutableStateFlow(sp.getInt(PREF_SUMMARY_TIMEOUT_SECONDS, 90))
     val summaryTimeout = _summaryTimeout.asStateFlow()
@@ -1027,6 +1035,7 @@ const val PREF_SUMMARY_LANGUAGE = "pref_summary_language"
  * AI summary enabled setting
  */
 const val PREF_SUMMARY_ENABLED = "pref_summary_enabled"
+const val PREF_ENABLE_SUMMARY = "pref_enable_summary"
 const val PREF_SUMMARY_TIMEOUT_SECONDS = "pref_summary_timeout_seconds"
 
 /**
@@ -1110,6 +1119,7 @@ enum class UserSettings(
 
     // Summary settings
     SETTING_SUMMARY_ENABLED(key = PREF_SUMMARY_ENABLED),
+    SETTING_ENABLE_SUMMARY(key = PREF_ENABLE_SUMMARY),
     SETTING_BLOCKLIST_APPLY_TO_SUMMARIES(key = PREF_BLOCKLIST_APPLY_TO_SUMMARIES),
     ;
 

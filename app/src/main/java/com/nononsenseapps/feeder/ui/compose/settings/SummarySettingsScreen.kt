@@ -52,6 +52,7 @@ fun SummarySettingsScreen(
     modifier: Modifier = Modifier,
 ) {
     val summaryEnabled by viewModel.summaryEnabled.collectAsStateWithLifecycle()
+    val enableSummary by viewModel.enableSummary.collectAsStateWithLifecycle()
     val summaryLanguage by viewModel.summaryLanguage.collectAsStateWithLifecycle()
     val summaryTimeout by viewModel.summaryTimeout.collectAsStateWithLifecycle()
 
@@ -88,12 +89,23 @@ fun SummarySettingsScreen(
                         vertical = 8.dp,
                     ),
         ) {
-            // Enable/Disable Switch
+            // Master toggle: Enable Summary
+            SwitchSetting(
+                title = stringResource(R.string.enable_summary_title),
+                checked = enableSummary,
+                onCheckedChange = { viewModel.setEnableSummary(it) },
+                description = stringResource(R.string.enable_summary_description),
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Sub-toggle: Auto Summary (dependent on master)
             SwitchSetting(
                 title = stringResource(R.string.summary_enabled_title),
                 checked = summaryEnabled,
                 onCheckedChange = { viewModel.setSummaryEnabled(it) },
                 description = stringResource(R.string.summary_enabled_description),
+                enabled = enableSummary,
             )
 
             Spacer(modifier = Modifier.height(8.dp))

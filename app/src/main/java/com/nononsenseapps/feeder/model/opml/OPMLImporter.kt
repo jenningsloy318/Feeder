@@ -161,6 +161,7 @@ open class OPMLImporter(
 
             // Summary settings
             UserSettings.SETTING_SUMMARY_ENABLED -> settingsStore.setSummaryEnabled(value.toBoolean())
+            UserSettings.SETTING_ENABLE_SUMMARY -> settingsStore.setEnableSummary(value.toBoolean())
             UserSettings.SETTING_BLOCKLIST_APPLY_TO_SUMMARIES -> settingsStore.setApplyBlocklistToSummaries(value.toBoolean())
         }
     }

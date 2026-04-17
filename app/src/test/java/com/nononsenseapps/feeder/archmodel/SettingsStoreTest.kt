@@ -424,4 +424,42 @@ class SettingsStoreTest : DIAware {
 
         assertEquals(false, store.applyBlocklistToSummaries.value)
     }
+
+    @Test
+    fun enableSummaryDefaultsToTrue() {
+        every { sp.getBoolean(PREF_ENABLE_SUMMARY, true) } returns true
+
+        assertEquals(true, store.enableSummary.value)
+    }
+
+    @Test
+    fun enableSummarySetToFalse() {
+        store.setEnableSummary(false)
+
+        verify {
+            sp.edit().putBoolean(PREF_ENABLE_SUMMARY, false).apply()
+        }
+
+        assertEquals(false, store.enableSummary.value)
+    }
+
+    @Test
+    fun enableSummarySetToTrue() {
+        store.setEnableSummary(true)
+
+        verify {
+            sp.edit().putBoolean(PREF_ENABLE_SUMMARY, true).apply()
+        }
+
+        assertEquals(true, store.enableSummary.value)
+    }
+
+    @Test
+    fun enableSummaryIndependentOfSummaryEnabled() {
+        store.setEnableSummary(false)
+        store.setSummaryEnabled(true)
+
+        assertEquals(false, store.enableSummary.value)
+        assertEquals(true, store.summaryEnabled.value)
+    }
 }

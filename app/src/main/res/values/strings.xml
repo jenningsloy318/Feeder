@@ -320,8 +320,10 @@
   <string name="summary_title">Summary</string>
   <string name="summary_subtitle">Configure AI-generated summaries</string>
   <string name="summary_settings_title">Summary Settings</string>
-  <string name="summary_enabled_title">Enable Auto Summary</string>
-  <string name="summary_enabled_description">Automatically generate AI summaries for articles</string>
+  <string name="enable_summary_title">Enable Summary</string>
+  <string name="enable_summary_description">Enable AI summary functionality</string>
+  <string name="summary_enabled_title">Auto Summary</string>
+  <string name="summary_enabled_description">Automatically summarize articles when opened</string>
   <string name="summary_timeout_title">Summary Timeout</string>
   <string name="summary_timeout_description">Maximum time to wait for AI to generate a summary</string>
   <string name="translation_title">Translation</string>

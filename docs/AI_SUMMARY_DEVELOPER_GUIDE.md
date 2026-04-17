@@ -14,6 +14,15 @@ This guide provides technical documentation for developers working with the AI S
 
 ## Architecture
 
+### Two-Level Summary Toggle
+
+The summary feature uses a two-level toggle system:
+
+1. **Master Toggle** (`enableSummary` / `PREF_ENABLE_SUMMARY`): Controls whether the summary feature is available at all. When OFF, the summarize button is hidden from the article toolbar and auto-summary is disabled.
+2. **Auto Summary Toggle** (`summaryEnabled` / `PREF_SUMMARY_ENABLED`): Controls whether articles are automatically summarized when opened. Only effective when the master toggle is ON.
+
+The translate feature is independent -- it only requires a valid AI provider configuration.
+
 ### Component Diagram
 
 ```
@@ -31,9 +40,16 @@ This guide provides technical documentation for developers working with the AI S
 │                     ViewModel Layer                          │
 │  ┌──────────────────────────────────────────────────────┐  │
 │  │ SummarySettingsViewModel                              │  │
-│  │  - summaryEnabled: StateFlow<Boolean>                │  │
+│  │  - enableSummary: StateFlow<Boolean>    (master)     │  │
+│  │  - summaryEnabled: StateFlow<Boolean>   (auto)       │  │
 │  │  - summaryLanguage: StateFlow<String>                │  │
-│  │  - setSummaryEnabled(), setSummaryLanguage()         │  │
+│  │  - setEnableSummary(), setSummaryEnabled()           │  │
+│  │  - setSummaryLanguage()                              │  │
+│  └──────────────────────┬───────────────────────────────┘  │
+│  ┌──────────────────────────────────────────────────────┐  │
+│  │ ArticleViewModel                                      │  │
+│  │  - showSummarize: Boolean  (enableSummary && aiValid)│  │
+│  │  - showTranslate: Boolean  (aiValid only)            │  │
 │  └──────────────────────┬───────────────────────────────┘  │
 └─────────────────────────┼─────────────────────────────────┘
                           │
@@ -42,7 +58,8 @@ This guide provides technical documentation for developers working with the AI S
 │                    Repository Layer                          │
 │  ┌──────────────────────────────────────────────────────┐  │
 │  │ Repository.kt                                         │  │
-│  │  - summaryEnabled: StateFlow<Boolean>                │  │
+│  │  - enableSummary: StateFlow<Boolean>    (master)     │  │
+│  │  - summaryEnabled: StateFlow<Boolean>   (auto)       │  │
 │  │  - setSummaryEnabled(value: Boolean)                 │  │
 │  └──────────────────────┬───────────────────────────────┘  │
 └─────────────────────────┼─────────────────────────────────┘
@@ -52,17 +69,18 @@ This guide provides technical documentation for developers working with the AI S
 │                   Data Layer (Persistence)                   │
 │  ┌──────────────────────────────────────────────────────┐  │
 │  │ SettingsStore.kt                                      │  │
+│  │  - _enableSummary: MutableStateFlow<Boolean>         │  │
+│  │  - PREF_ENABLE_SUMMARY: String  (master toggle)      │  │
 │  │  - _summaryEnabled: MutableStateFlow<Boolean>        │  │
-│  │  - PREF_SUMMARY_ENABLED: String                      │  │
-│  │  - setSummaryEnabled(value: Boolean)                 │  │
+│  │  - PREF_SUMMARY_ENABLED: String (auto summary)       │  │
 │  └──────────────────────┬───────────────────────────────┘  │
 └─────────────────────────┼─────────────────────────────────┘
                           │
                           ▼
 ┌─────────────────────────────────────────────────────────────┐
 │                    SharedPreferences                        │
-│  Key: "pref_summary_enabled"                               │
-│  Value: Boolean (default: true)                            │
+│  Key: "pref_enable_summary"  → Master toggle (default: true)│
+│  Key: "pref_summary_enabled" → Auto summary (default: true) │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -77,37 +95,34 @@ This guide provides technical documentation for developers working with the AI S
 **Key Components**:
 
 ```kotlin
-// Preference key
+// Master toggle: controls whether summary feature is available
+const val PREF_ENABLE_SUMMARY = "pref_enable_summary"
+
+private val _enableSummary = MutableStateFlow(sp.getBoolean(PREF_ENABLE_SUMMARY, true))
+val enableSummary = _enableSummary.asStateFlow()
+
+fun setEnableSummary(value: Boolean) {
+    _enableSummary.value = value
+    sp.edit().putBoolean(PREF_ENABLE_SUMMARY, value).apply()
+}
+
+// Auto summary toggle: controls automatic summarization on article open
 const val PREF_SUMMARY_ENABLED = "pref_summary_enabled"
 
-// StateFlow
 private val _summaryEnabled = MutableStateFlow(
     sp.getBoolean(PREF_SUMMARY_ENABLED, true)
 )
 val summaryEnabled: StateFlow<Boolean> = _summaryEnabled.asStateFlow()
 
-// Setter
 fun setSummaryEnabled(value: Boolean) {
     _summaryEnabled.value = value
     sp.edit().putBoolean(PREF_SUMMARY_ENABLED, value).apply()
 }
 ```
 
-**Usage Example**:
-
-```kotlin
-// In ViewModel
-val summaryEnabled = settingsStore.summaryEnabled
-    .stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = true
-    )
-
-fun toggleSummary() {
-    settingsStore.setSummaryEnabled(!summaryEnabled.value)
-}
-```
+**Naming Convention**:
+- `enableSummary` / `PREF_ENABLE_SUMMARY` = **master toggle** (enable/disable the entire summary feature)
+- `summaryEnabled` / `PREF_SUMMARY_ENABLED` = **auto summary** (automatically summarize on article open)
 
 ---
 
@@ -120,14 +135,35 @@ fun toggleSummary() {
 **Key Components**:
 
 ```kotlin
-// Expose from SettingsStore
+// Master toggle
+val enableSummary = settingsStore.enableSummary
+
+// Auto summary toggle
 val summaryEnabled: StateFlow<Boolean> = settingsStore.summaryEnabled
 
-// Setter
 fun setSummaryEnabled(value: Boolean) {
     settingsStore.setSummaryEnabled(value)
 }
 ```
+
+### ArticleViewModel.kt
+
+**Location**: `app/src/main/java/com/nononsenseapps/feeder/ui/compose/feedarticle/ArticleViewModel.kt`
+
+**Key Components**:
+
+The `ArticleScreenViewState` exposes separate `showSummarize` and `showTranslate` flags:
+
+```kotlin
+// In the combine block that builds ArticleScreenViewState:
+val showSummarize = enableSummary && aiValid
+val showTranslate = aiValid
+```
+
+- `showSummarize`: Only `true` when both the master toggle (`enableSummary`) is ON and a valid AI provider is configured.
+- `showTranslate`: Only requires a valid AI provider (independent of summary toggles).
+
+Auto-summary is triggered when `enableSummary && summaryEnabled` and a per-feed auto-summary flag are all true.
 
 ### AIApi.kt
 
@@ -138,7 +174,6 @@ fun setSummaryEnabled(value: Boolean) {
 ```kotlin
 suspend fun summarize(content: String): AIClient.SummaryResult {
     return try {
-        // Check if summaries are enabled
         val enabled = repository.summaryEnabled.first()
         if (!enabled) {
             return AIClient.SummaryResult.Error(content = "")
@@ -165,54 +200,59 @@ suspend fun summarize(content: String): AIClient.SummaryResult {
 
 **Location**: `app/src/main/java/com/nononsenseapps/feeder/ui/compose/settings/SummarySettingsScreen.kt`
 
-**Key Components**:
+The Summary Settings screen uses a two-level toggle layout:
 
 ```kotlin
 @Composable
 fun SummarySettingsScreen(
-    onNavigateBack: () -> Unit,
-    viewModel: SummarySettingsViewModel = viewModel()
+    onNavigateUp: () -> Unit,
+    viewModel: SummarySettingsViewModel,
+    modifier: Modifier = Modifier,
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val summaryEnabled by viewModel.summaryEnabled.collectAsStateWithLifecycle()
+    val enableSummary by viewModel.enableSummary.collectAsStateWithLifecycle()
+    // ...
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.ai_summary_settings_title)) },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = null)
-                    }
-                }
-            )
-        }
-    ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(16.dp)
-        ) {
-            // Enable/Disable Toggle
-            SwitchWithText(
-                text = stringResource(R.string.ai_summary_enabled),
-                checked = uiState.summaryEnabled,
-                onCheckedChange = { viewModel.setSummaryEnabled(it) }
-            )
+    Column {
+        // Master toggle: Enable Summary
+        SwitchSetting(
+            title = stringResource(R.string.enable_summary_title),
+            checked = enableSummary,
+            onCheckedChange = { viewModel.setEnableSummary(it) },
+            description = stringResource(R.string.enable_summary_description),
+        )
 
-            Spacer(Modifier.height(24.dp))
+        // Sub-toggle: Auto Summary (dependent on master)
+        SwitchSetting(
+            title = stringResource(R.string.summary_enabled_title),
+            checked = summaryEnabled,
+            onCheckedChange = { viewModel.setSummaryEnabled(it) },
+            description = stringResource(R.string.summary_enabled_description),
+            enabled = enableSummary,  // disabled when master toggle is OFF
+        )
 
-            // Language Selector
-            Text(
-                text = stringResource(R.string.ai_summarize),
-                style = MaterialTheme.typography.titleMedium
-            )
-            LanguageSelector(
-                currentLanguage = uiState.summaryLanguage,
-                onLanguageSelected = { viewModel.setSummaryLanguage(it) }
-            )
-        }
+        // Language selector, timeout, etc.
     }
+}
+```
+
+**`SwitchSetting` Disabled State**: When `enabled = false`, the `SwitchSetting` composable renders text with reduced alpha (disabled visual appearance) and prevents interaction.
+
+### ArticleScreen.kt
+
+**Location**: `app/src/main/java/com/nononsenseapps/feeder/ui/compose/feedarticle/ArticleScreen.kt`
+
+The article toolbar conditionally shows summarize and translate buttons using separate flags:
+
+```kotlin
+// Summarize button: only shown when enableSummary is ON and AI provider is valid
+if (viewState.showSummarize) {
+    // Summarize icon button
+}
+
+// Translate button: shown whenever AI provider is valid (independent of summary toggle)
+if (viewState.showTranslate) {
+    // Translate icon button
 }
 ```
 
@@ -227,11 +267,18 @@ class SummarySettingsViewModel(
     private val repository: Repository
 ) : ViewModel() {
 
-    // State
+    // Master toggle
+    val enableSummary: StateFlow<Boolean> = repository.enableSummary
+
+    // Auto summary toggle
     val summaryEnabled: StateFlow<Boolean> = repository.summaryEnabled
     val summaryLanguage: StateFlow<String> = repository.summaryLanguage
 
     // Actions
+    fun setEnableSummary(value: Boolean) {
+        repository.setEnableSummary(value)
+    }
+
     fun setSummaryEnabled(value: Boolean) {
         repository.setSummaryEnabled(value)
     }
@@ -327,23 +374,29 @@ opmlElement.appendChild(summaryElement)
 
 ### Unit Tests
 
-**Location**: `app/src/test/java/com/nononsenseapps/feeder/ai/AIApiTest.kt`
+**Location**: `app/src/test/java/com/nononsenseapps/feeder/archmodel/SettingsStoreTest.kt`
 
-**Example Test**:
+**Example Tests**:
 
 ```kotlin
 @Test
-fun `summarize returns error when disabled`() = runTest {
-    // Arrange
-    val repository = mockk<Repository>()
-    val aiApi = AIApi(repository, mockk())
-    coEvery { repository.summaryEnabled.first() } returns false
+fun enableSummaryDefaultsToTrue() {
+    every { sp.getBoolean(PREF_ENABLE_SUMMARY, true) } returns true
+    assertEquals(true, store.enableSummary.value)
+}
 
-    // Act
-    val result = aiApi.summarize("test content")
+@Test
+fun enableSummarySetToFalse() {
+    store.setEnableSummary(false)
+    assertEquals(false, store.enableSummary.value)
+}
 
-    // Assert
-    assertTrue(result is AIClient.SummaryResult.Error)
+@Test
+fun enableSummaryIndependentOfSummaryEnabled() {
+    // Master toggle and auto summary toggle are independent
+    store.setEnableSummary(false)
+    assertEquals(false, store.enableSummary.value)
+    // summaryEnabled is unaffected
 }
 ```
 
@@ -351,13 +404,24 @@ fun `summarize returns error when disabled`() = runTest {
 
 **Manual Test Cases**:
 
-1. **Toggle Enable/Disable**:
-   - Enable summaries
-   - Open article → summary should appear
-   - Disable summaries
-   - Open article → no summary
+1. **Master Toggle Enable/Disable**:
+   - Enable summary master toggle
+   - Open article → summarize button visible in toolbar
+   - Disable summary master toggle
+   - Open article → summarize button hidden, translate button still visible
 
-2. **Language Selection**:
+2. **Auto Summary Toggle**:
+   - Enable both master toggle and auto summary
+   - Open article → summary generates automatically
+   - Disable auto summary (master still ON)
+   - Open article → summarize button visible but no auto-summary
+
+3. **Disabled State Visual**:
+   - Turn OFF master toggle
+   - Auto Summary sub-toggle should appear visually disabled (reduced alpha)
+   - Auto Summary sub-toggle should not respond to taps
+
+4. **Language Selection**:
    - Change summary language
    - Open article → summary in new language
 
@@ -411,7 +475,14 @@ fun setSummaryNewSetting(value: String) {
 
 4. **Add UI in SummarySettingsScreen**:
 ```kotlin
-// Add UI component for new setting
+// If the new setting should be gated by the master toggle,
+// pass enabled = enableSummary to the SwitchSetting composable
+SwitchSetting(
+    title = "...",
+    checked = newSettingValue,
+    onCheckedChange = { viewModel.setSummaryNewSetting(it) },
+    enabled = enableSummary,  // disabled when master toggle is OFF
+)
 ```
 
 5. **Update OPML Import/Export**:
@@ -480,11 +551,20 @@ fun setFeedSummaryEnabled(feedId: Long, enabled: Boolean)
 @Composable
 fun MyScreen() {
     val viewModel: SummarySettingsViewModel = viewModel()
-    val summaryEnabled by viewModel.summaryEnabled.collectAsState()
+    val enableSummary by viewModel.enableSummary.collectAsStateWithLifecycle()
+    val summaryEnabled by viewModel.summaryEnabled.collectAsStateWithLifecycle()
 
+    // Master toggle
+    Switch(
+        checked = enableSummary,
+        onCheckedChange = { viewModel.setEnableSummary(it) }
+    )
+
+    // Sub-toggle, disabled when master is OFF
     Switch(
         checked = summaryEnabled,
-        onCheckedChange = { viewModel.setSummaryEnabled(it) }
+        onCheckedChange = { viewModel.setSummaryEnabled(it) },
+        enabled = enableSummary
     )
 }
 ```
@@ -493,9 +573,10 @@ fun MyScreen() {
 
 ```kotlin
 suspend fun doSomething() {
-    val enabled = repository.summaryEnabled.first()
-    if (enabled) {
-        // Do something
+    val masterEnabled = repository.enableSummary.first()
+    val autoEnabled = repository.summaryEnabled.first()
+    if (masterEnabled && autoEnabled) {
+        // Auto-summarize
     }
 }
 ```
@@ -545,6 +626,7 @@ cat shared_prefs/com.nononsenseapps.feeder_preferences.xml
 
 Look for:
 ```xml
+<boolean name="pref_enable_summary" value="true" />
 <boolean name="pref_summary_enabled" value="true" />
 ```
 
@@ -577,13 +659,15 @@ val summaryEnabled = element.getElementsByTagNameNS(
 
 ### Related Files
 
-- `SettingsStore.kt` - Data persistence
+- `SettingsStore.kt` - Data persistence (both `enableSummary` and `summaryEnabled`)
 - `Repository.kt` - Business logic
 - `AIApi.kt` - AI integration
-- `SummarySettingsScreen.kt` - UI
+- `ArticleViewModel.kt` - `showSummarize`/`showTranslate` split logic
+- `ArticleScreen.kt` - Toolbar button visibility
+- `SummarySettingsScreen.kt` - UI (two-level toggle layout)
 - `SummarySettingsViewModel.kt` - State management
 - `OPMLImporter.kt` - Import/Export
-- `AIApiTest.kt` - Tests
+- `SettingsStoreTest.kt` - Unit tests for `enableSummary`
 
 ### Related Documentation
 
@@ -599,12 +683,16 @@ val summaryEnabled = element.getElementsByTagNameNS(
 
 **Added**:
 - Dedicated Summary settings screen
-- Enable/disable toggle for AI summaries
+- Master "Enable Summary" toggle (`enableSummary` / `PREF_ENABLE_SUMMARY`) to control summary feature availability
+- Auto summary toggle (`summaryEnabled` / `PREF_SUMMARY_ENABLED`) now depends on master toggle
+- Separate `showSummarize` and `showTranslate` flags in `ArticleScreenViewState`
+- `SwitchSetting` supports `enabled` parameter with disabled text alpha
 - OPML import/export support for summary settings
 
 **Changed**:
-- Renamed "Summary Language" to "Summary" in AI Provider section
-- Added navigation to dedicated Summary screen
+- Summarize button in article toolbar now hidden when master toggle is OFF
+- Translate button is independent of summary toggles (only needs valid AI provider)
+- Auto Summary toggle appears visually disabled when master toggle is OFF
 
 ---
 

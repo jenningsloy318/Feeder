@@ -154,6 +154,7 @@ class ArticleViewModel(
             repository.aiSettingsFlow,
             aiSummary,
             translationState,
+            repository.enableSummary,
         ) { params ->
             val article = params[0] as Article?
             val textToDisplay = params[1] as TextToDisplay
@@ -166,7 +167,10 @@ class ArticleViewModel(
             @Suppress("UNCHECKED_CAST")
             val ttsLanguages = params[7] as List<Locale>
 
-            val showSummarize = (params[8] as AISettings).isValid && !article?.link.isNullOrEmpty()
+            val enableSummary = params[11] as Boolean
+            val aiValid = (params[8] as AISettings).isValid && !article?.link.isNullOrEmpty()
+            val showSummarize = enableSummary && aiValid
+            val showTranslate = aiValid
             val aiSummary = (params[9] as AISummaryState)
             val translation = (params[10] as TranslationState)
 
@@ -196,6 +200,7 @@ class ArticleViewModel(
                     },
                 image = article?.image,
                 showSummarize = showSummarize,
+                showTranslate = showTranslate,
                 aiSummary = aiSummary,
                 translation = translation,
                 articleContent = articleContent,
@@ -232,20 +237,21 @@ class ArticleViewModel(
             combine(
                 articleFlow,
                 repository.summaryEnabled,
-            ) { article, summaryEnabled ->
-                article to summaryEnabled
+                repository.enableSummary,
+            ) { article, summaryEnabled, enableSummary ->
+                Triple(article, summaryEnabled, enableSummary)
             }.filterNotNull()
-                .collect { (article, summaryEnabled) ->
+                .collect { (article, summaryEnabled, enableSummary) ->
                     val feedId = article?.item?.feedId
                     if (feedId != null) {
                         val feed = repository.getFeed(feedId)
-                        // Check both user setting and feed setting
-                        if ((summaryEnabled || feed?.summarizeOnOpen == true) &&
+                        if (enableSummary &&
+                            (summaryEnabled || feed?.summarizeOnOpen == true) &&
                             aiSummary.value is AISummaryState.Empty &&
                             article?.link != null
                         ) {
                             summarize()
-                            return@collect // Only summarize on first load
+                            return@collect
                         }
                     }
                 }
@@ -747,6 +753,7 @@ private data class ArticleState(
     override val wordCount: Int = 0,
     override val image: ThumbnailImage? = null,
     override val showSummarize: Boolean = false,
+    override val showTranslate: Boolean = false,
     override val aiSummary: AISummaryState = AISummaryState.Empty,
     override val translation: TranslationState = TranslationState.Empty,
     override val articleContent: LinearArticle = LinearArticle(emptyList()),
@@ -775,6 +782,7 @@ interface ArticleScreenViewState {
     val wordCount: Int
     val image: ThumbnailImage?
     val showSummarize: Boolean
+    val showTranslate: Boolean
     val aiSummary: AISummaryState
     val translation: TranslationState
     val articleContent: LinearArticle

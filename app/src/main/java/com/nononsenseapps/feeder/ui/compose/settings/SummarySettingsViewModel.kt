@@ -22,12 +22,19 @@ class SummarySettingsViewModel(
 ) : DIAwareViewModel(di) {
     private val repository: Repository by instance()
     val summaryEnabled: StateFlow<Boolean> = repository.summaryEnabled
+    val enableSummary: StateFlow<Boolean> = repository.enableSummary
     val summaryLanguage: StateFlow<SummaryLanguage> = repository.summaryLanguage
     val summaryTimeout: StateFlow<Int> = repository.summaryTimeout
 
     fun setSummaryEnabled(enabled: Boolean) {
         viewModelScope.launch {
             repository.setSummaryEnabled(enabled)
+        }
+    }
+
+    fun setEnableSummary(enabled: Boolean) {
+        viewModelScope.launch {
+            repository.setEnableSummary(enabled)
         }
     }
 

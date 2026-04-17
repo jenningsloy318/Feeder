@@ -5,6 +5,7 @@ import android.os.Build
 import android.provider.Settings
 import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
+import androidx.compose.ui.draw.alpha
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -1319,6 +1320,7 @@ fun SwitchSetting(
             modifier
                 .width(dimens.maxContentWidth)
                 .heightIn(min = 64.dp)
+                .alpha(if (enabled) 1f else 0.38f)
                 .clickable(
                     enabled = enabled,
                     onClick = { onCheckedChange(!checked) },

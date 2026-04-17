@@ -385,6 +385,11 @@ class Repository(
 
     fun setSummaryEnabled(value: Boolean) = settingsStore.setSummaryEnabled(value)
 
+    // Enable Summary Setting (master toggle)
+    val enableSummary = settingsStore.enableSummary
+
+    fun setEnableSummary(value: Boolean) = settingsStore.setEnableSummary(value)
+
     // Summary Timeout Setting
     val summaryTimeout = settingsStore.summaryTimeout
 

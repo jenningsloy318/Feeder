@@ -298,4 +298,8 @@
     <string name="pref_animated_paging_description">Краткотрайно анимиране на прелистването на страниците. Може да доведе до появата на „дублирани образи“ на някои устройства с E-ink дисплей.</string>
     <string name="enable_summary_title">Активиране на обобщение</string>
     <string name="enable_summary_description">Активиране на AI обобщение</string>
+    <string name="enable_translation_title">Активиране на превод</string>
+    <string name="enable_translation_description">Активиране на AI превод</string>
+    <string name="translation_enabled_title">Автоматичен превод</string>
+    <string name="translation_enabled_description">Автоматично превеждане на статиите при отваряне</string>
 </resources>

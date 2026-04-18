@@ -286,4 +286,8 @@
     <string name="something_went_wrong">ஏதோ தவறாகிவிட்டது</string>
     <string name="enable_summary_title">சுருக்கத்தை இயக்கு</string>
     <string name="enable_summary_description">AI சுருக்க செயல்பாட்டை இயக்கு</string>
+    <string name="enable_translation_title">மொழிபெயர்ப்பை இயக்கு</string>
+    <string name="enable_translation_description">AI மொழிபெயர்ப்பு செயல்பாட்டை இயக்கு</string>
+    <string name="translation_enabled_title">தானியங்கி மொழிபெயர்ப்பு</string>
+    <string name="translation_enabled_description">திறக்கும்போது கட்டுரைகளை தானாக மொழிபெயர்க்கவும்</string>
 </resources>

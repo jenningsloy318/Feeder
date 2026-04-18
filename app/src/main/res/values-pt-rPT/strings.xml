@@ -282,4 +282,8 @@
     <string name="azure_deployment_id">Id de implantação do Azure</string>
     <string name="enable_summary_title">Ativar resumo</string>
     <string name="enable_summary_description">Ativar funcionalidade de resumo com IA</string>
+    <string name="enable_translation_title">Ativar tradução</string>
+    <string name="enable_translation_description">Ativar funcionalidade de tradução com IA</string>
+    <string name="translation_enabled_title">Tradução automática</string>
+    <string name="translation_enabled_description">Traduzir automaticamente artigos ao abrir</string>
 </resources>

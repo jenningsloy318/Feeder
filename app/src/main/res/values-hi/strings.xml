@@ -252,4 +252,8 @@
     <string name="show_title_unread_count">शीर्षक में अपठित आलेखों की संख्या दिखाएं</string>
     <string name="enable_summary_title">सारांश सक्षम करें</string>
     <string name="enable_summary_description">AI सारांश कार्यक्षमता सक्षम करें</string>
+    <string name="enable_translation_title">अनुवाद सक्षम करें</string>
+    <string name="enable_translation_description">AI अनुवाद कार्यक्षमता सक्षम करें</string>
+    <string name="translation_enabled_title">स्वचालित अनुवाद</string>
+    <string name="translation_enabled_description">खोलने पर लेखों का स्वचालित अनुवाद करें</string>
 </resources>

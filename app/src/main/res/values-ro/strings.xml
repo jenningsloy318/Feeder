@@ -289,4 +289,8 @@
     <string name="openai_settings_info">Compatibil cu mulți furnizori IA, dar nu toți</string>
     <string name="enable_summary_title">Activare rezumat</string>
     <string name="enable_summary_description">Activare funcționalitate rezumat AI</string>
+    <string name="enable_translation_title">Activare traducere</string>
+    <string name="enable_translation_description">Activare funcționalitate traducere AI</string>
+    <string name="translation_enabled_title">Traducere automată</string>
+    <string name="translation_enabled_description">Traducerea automată a articolelor la deschidere</string>
 </resources>

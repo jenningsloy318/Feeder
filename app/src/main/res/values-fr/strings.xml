@@ -298,4 +298,8 @@
     <string name="pref_animated_paging_description">Animer brièvement le changement de page. Peut créer un effet de ghosting sur certains appareils e-ink.</string>
     <string name="enable_summary_title">Activer le résumé</string>
     <string name="enable_summary_description">Activer la fonctionnalité de résumé par IA</string>
+    <string name="enable_translation_title">Activer la traduction</string>
+    <string name="enable_translation_description">Activer la fonctionnalité de traduction par IA</string>
+    <string name="translation_enabled_title">Traduction automatique</string>
+    <string name="translation_enabled_description">Traduire automatiquement les articles à l\'ouverture</string>
 </resources>

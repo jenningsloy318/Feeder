@@ -286,4 +286,8 @@
     <string name="openai_settings_info">Compatibel met veel AI-providers, maar niet met alle</string>
     <string name="enable_summary_title">Samenvatting inschakelen</string>
     <string name="enable_summary_description">AI-samenvattingsfunctie inschakelen</string>
+    <string name="enable_translation_title">Vertaling inschakelen</string>
+    <string name="enable_translation_description">AI-vertaalfunctie inschakelen</string>
+    <string name="translation_enabled_title">Automatische vertaling</string>
+    <string name="translation_enabled_description">Artikelen automatisch vertalen bij openen</string>
 </resources>

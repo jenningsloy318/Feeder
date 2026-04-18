@@ -4,4 +4,8 @@
     <string name="by_author_on_date">by %1$s, %2$s</string>
     <string name="enable_summary_title">Enable Summary</string>
     <string name="enable_summary_description">Enable AI summary functionality</string>
+    <string name="enable_translation_title">Enable Translation</string>
+    <string name="enable_translation_description">Enable AI translation functionality</string>
+    <string name="translation_enabled_title">Auto Translation</string>
+    <string name="translation_enabled_description">Automatically translate articles when opened</string>
 </resources>

@@ -266,4 +266,8 @@
     <string name="nostr_feed_description">Nostraj članke od %1$s</string>
     <string name="enable_summary_title">Omogući sažetak</string>
     <string name="enable_summary_description">Omogući funkciju AI sažetka</string>
+    <string name="enable_translation_title">Omogući prevod</string>
+    <string name="enable_translation_description">Omogući funkciju AI prevoda</string>
+    <string name="translation_enabled_title">Automatski prevod</string>
+    <string name="translation_enabled_description">Automatski prevedi članke pri otvaranju</string>
 </resources>

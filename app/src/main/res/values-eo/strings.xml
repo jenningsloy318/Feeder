@@ -166,4 +166,8 @@
     <string name="feed_search_suggestions_header">Sugestoj</string>
     <string name="enable_summary_title">Ebligi resumon</string>
     <string name="enable_summary_description">Ebligi AI-resuman funkcion</string>
+    <string name="enable_translation_title">Ebligi tradukon</string>
+    <string name="enable_translation_description">Ebligi AI-tradukan funkcion</string>
+    <string name="translation_enabled_title">Aŭtomata traduko</string>
+    <string name="translation_enabled_description">Aŭtomate traduki artikolojn kiam malfermitaj</string>
 </resources>

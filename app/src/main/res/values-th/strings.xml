@@ -280,4 +280,8 @@
     <string name="openai_settings_info">รองรับกับผู้ให้บริการ AI หลากหลาย, แต่ไม่ใช่ทั้งหมด</string>
     <string name="enable_summary_title">เปิดใช้สรุป</string>
     <string name="enable_summary_description">เปิดใช้ฟังก์ชันสรุปด้วย AI</string>
+    <string name="enable_translation_title">เปิดใช้การแปล</string>
+    <string name="enable_translation_description">เปิดใช้ฟังก์ชันการแปลด้วย AI</string>
+    <string name="translation_enabled_title">แปลอัตโนมัติ</string>
+    <string name="translation_enabled_description">แปลบทความโดยอัตโนมัติเมื่อเปิด</string>
 </resources>

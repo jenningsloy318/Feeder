@@ -252,4 +252,8 @@
     <string name="show_title_unread_count">Mostrar número de artigos non lidos no título</string>
     <string name="enable_summary_title">Activar resumo</string>
     <string name="enable_summary_description">Activar a funcionalidade de resumo con IA</string>
+    <string name="enable_translation_title">Activar tradución</string>
+    <string name="enable_translation_description">Activar a funcionalidade de tradución con IA</string>
+    <string name="translation_enabled_title">Tradución automática</string>
+    <string name="translation_enabled_description">Traducir automaticamente os artigos ao abrilos</string>
 </resources>

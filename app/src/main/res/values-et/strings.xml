@@ -298,4 +298,8 @@
     <string name="pref_animated_paging_description">Korraks animeeri lehe pööramisi. Võib mõnedes e-tindi seadmetes tekitada varjutamise efekti.</string>
     <string name="enable_summary_title">Luba kokkuvõte</string>
     <string name="enable_summary_description">Luba AI kokkuvõtte funktsioon</string>
+    <string name="enable_translation_title">Luba tõlge</string>
+    <string name="enable_translation_description">Luba AI tõlke funktsioon</string>
+    <string name="translation_enabled_title">Automaatne tõlge</string>
+    <string name="translation_enabled_description">Tõlgi artiklid automaatselt avamisel</string>
 </resources>

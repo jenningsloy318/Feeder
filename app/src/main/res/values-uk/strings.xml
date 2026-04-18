@@ -294,4 +294,8 @@
     <string name="apply_blocklist_to_summaries">Застосувати до підсумків</string>
     <string name="enable_summary_title">Увімкнути підсумок</string>
     <string name="enable_summary_description">Увімкнути функцію підсумку ШІ</string>
+    <string name="enable_translation_title">Увімкнути переклад</string>
+    <string name="enable_translation_description">Увімкнути функцію перекладу ШІ</string>
+    <string name="translation_enabled_title">Автоматичний переклад</string>
+    <string name="translation_enabled_description">Автоматично перекладати статті при відкритті</string>
 </resources>

@@ -294,4 +294,8 @@
     <string name="widget_refreshing">Uppdaterar</string>
     <string name="enable_summary_title">Aktivera sammanfattning</string>
     <string name="enable_summary_description">Aktivera AI-sammanfattningsfunktion</string>
+    <string name="enable_translation_title">Aktivera översättning</string>
+    <string name="enable_translation_description">Aktivera AI-översättningsfunktion</string>
+    <string name="translation_enabled_title">Automatisk översättning</string>
+    <string name="translation_enabled_description">Översätt artiklar automatiskt vid öppning</string>
 </resources>

@@ -32,4 +32,8 @@
     <string name="device_sync">ଡିଵାଇସ୍ ସୀଙ୍କ୍</string>
     <string name="enable_summary_title">ସାରାଂଶ ସକ୍ଷମ କରନ୍ତୁ</string>
     <string name="enable_summary_description">AI ସାରାଂଶ କାର୍ଯ୍ୟକ୍ଷମତା ସକ୍ଷମ କରନ୍ତୁ</string>
+    <string name="enable_translation_title">ଅନୁବାଦ ସକ୍ଷମ କରନ୍ତୁ</string>
+    <string name="enable_translation_description">AI ଅନୁବାଦ କାର୍ଯ୍ୟକ୍ଷମତା ସକ୍ଷମ କରନ୍ତୁ</string>
+    <string name="translation_enabled_title">ସ୍ୱୟଂଚାଳିତ ଅନୁବାଦ</string>
+    <string name="translation_enabled_description">ଖୋଲିବାବେଳେ ଲେଖାଗୁଡ଼ିକୁ ସ୍ୱୟଂଚାଳିତ ଭାବେ ଅନୁବାଦ କରନ୍ତୁ</string>
 </resources>

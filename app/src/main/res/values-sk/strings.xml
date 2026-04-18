@@ -284,4 +284,8 @@
     <string name="something_went_wrong">Niečo sa pokazilo</string>
     <string name="enable_summary_title">Povoliť zhrnutie</string>
     <string name="enable_summary_description">Povoliť funkciu AI zhrnutia</string>
+    <string name="enable_translation_title">Povoliť preklad</string>
+    <string name="enable_translation_description">Povoliť funkciu AI prekladu</string>
+    <string name="translation_enabled_title">Automatický preklad</string>
+    <string name="translation_enabled_description">Automaticky prekladať články pri otvorení</string>
 </resources>

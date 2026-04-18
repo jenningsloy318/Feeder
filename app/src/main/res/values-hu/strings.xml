@@ -298,4 +298,8 @@
     <string name="pref_animated_paging_description">Rövid animáció a lapozásnál. Néhány e-ink eszközön előfordulhat szellemkép.</string>
     <string name="enable_summary_title">Összegzés engedélyezése</string>
     <string name="enable_summary_description">AI összegzési funkció engedélyezése</string>
+    <string name="enable_translation_title">Fordítás engedélyezése</string>
+    <string name="enable_translation_description">AI fordítási funkció engedélyezése</string>
+    <string name="translation_enabled_title">Automatikus fordítás</string>
+    <string name="translation_enabled_description">Cikkek automatikus fordítása megnyitáskor</string>
 </resources>

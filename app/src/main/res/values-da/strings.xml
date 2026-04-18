@@ -294,4 +294,8 @@
     <string name="widget_refreshing">Opfrisker</string>
     <string name="enable_summary_title">Aktiver sammendrag</string>
     <string name="enable_summary_description">Aktiver AI-sammendragsfunktion</string>
+    <string name="enable_translation_title">Aktiver oversættelse</string>
+    <string name="enable_translation_description">Aktiver AI-oversættelsesfunktion</string>
+    <string name="translation_enabled_title">Automatisk oversættelse</string>
+    <string name="translation_enabled_description">Oversæt automatisk artikler ved åbning</string>
 </resources>

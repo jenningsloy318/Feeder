@@ -300,6 +300,10 @@
     <string name="summary_settings_title">摘要設定</string>
     <string name="enable_summary_title">啟用摘要</string>
     <string name="enable_summary_description">啟用 AI 摘要功能</string>
+    <string name="enable_translation_title">啟用翻譯</string>
+    <string name="enable_translation_description">啟用 AI 翻譯功能</string>
+    <string name="translation_enabled_title">自動翻譯</string>
+    <string name="translation_enabled_description">開啟時自動翻譯文章</string>
     <string name="summary_enabled_title">啟用自動摘要</string>
     <string name="summary_enabled_description">為文章自動生成 AI 摘要</string>
 

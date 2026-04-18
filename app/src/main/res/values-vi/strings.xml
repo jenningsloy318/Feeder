@@ -251,4 +251,8 @@
     <string name="touch_to_play_audio">Chạm để phát âm thanh</string>
     <string name="enable_summary_title">Bật tóm tắt</string>
     <string name="enable_summary_description">Bật chức năng tóm tắt AI</string>
+    <string name="enable_translation_title">Bật dịch thuật</string>
+    <string name="enable_translation_description">Bật chức năng dịch thuật AI</string>
+    <string name="translation_enabled_title">Dịch tự động</string>
+    <string name="translation_enabled_description">Tự động dịch bài viết khi mở</string>
 </resources>

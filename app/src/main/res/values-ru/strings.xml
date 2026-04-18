@@ -252,4 +252,8 @@
     <string name="show_title_unread_count">Показывать число непрочитанных статей в заголовке</string>
     <string name="enable_summary_title">Включить обобщение</string>
     <string name="enable_summary_description">Включить функцию обобщения ИИ</string>
+    <string name="enable_translation_title">Включить перевод</string>
+    <string name="enable_translation_description">Включить функцию перевода ИИ</string>
+    <string name="translation_enabled_title">Автоматический перевод</string>
+    <string name="translation_enabled_description">Автоматически переводить статьи при открытии</string>
 </resources>

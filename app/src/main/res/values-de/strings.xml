@@ -298,4 +298,8 @@
     <string name="pref_animated_paging_description">Seitenwechsel kurz animieren. Kann auf einigen E-Papier-Geräte zu Geisterbildern führen.</string>
     <string name="enable_summary_title">Zusammenfassung aktivieren</string>
     <string name="enable_summary_description">KI-Zusammenfassungsfunktion aktivieren</string>
+    <string name="enable_translation_title">Übersetzung aktivieren</string>
+    <string name="enable_translation_description">KI-Übersetzungsfunktion aktivieren</string>
+    <string name="translation_enabled_title">Automatische Übersetzung</string>
+    <string name="translation_enabled_description">Artikel beim Öffnen automatisch übersetzen</string>
 </resources>

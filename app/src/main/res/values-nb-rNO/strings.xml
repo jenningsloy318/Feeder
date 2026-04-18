@@ -254,4 +254,8 @@
     <string name="show_title_unread_count">Vis antall uleste artikler i tittelen</string>
     <string name="enable_summary_title">Aktiver oppsummering</string>
     <string name="enable_summary_description">Aktiver AI-oppsummeringsfunksjon</string>
+    <string name="enable_translation_title">Aktiver oversettelse</string>
+    <string name="enable_translation_description">Aktiver AI-oversettelsesfunksjon</string>
+    <string name="translation_enabled_title">Automatisk oversettelse</string>
+    <string name="translation_enabled_description">Oversett artikler automatisk når de åpnes</string>
 </resources>

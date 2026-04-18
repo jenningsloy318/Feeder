@@ -298,4 +298,8 @@
     <string name="pref_animated_paging_description">Krótko animuj przewracanie stron. Może powodować efekt ghostingu na niektórych urządzeniach z e-papierem</string>
     <string name="enable_summary_title">Włącz podsumowanie</string>
     <string name="enable_summary_description">Włącz funkcję podsumowania AI</string>
+    <string name="enable_translation_title">Włącz tłumaczenie</string>
+    <string name="enable_translation_description">Włącz funkcję tłumaczenia AI</string>
+    <string name="translation_enabled_title">Automatyczne tłumaczenie</string>
+    <string name="translation_enabled_description">Automatycznie tłumacz artykuły po otwarciu</string>
 </resources>

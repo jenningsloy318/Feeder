@@ -244,4 +244,8 @@
     <string name="other_tags">%1$s etîketan</string>
     <string name="enable_summary_title">Kurtekirinê çalak bike</string>
     <string name="enable_summary_description">Fonksiyona kurtekirina AI-ê çalak bike</string>
+    <string name="enable_translation_title">Wergerandinê çalak bike</string>
+    <string name="enable_translation_description">Fonksiyona wergerandina AI-ê çalak bike</string>
+    <string name="translation_enabled_title">Wergerandina otomatîk</string>
+    <string name="translation_enabled_description">Dema vekirinê gotaran bi otomatîk wergerîne</string>
 </resources>

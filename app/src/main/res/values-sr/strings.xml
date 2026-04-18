@@ -298,4 +298,8 @@
     <string name="pref_animated_paging_description">Накратко се анимирају окретања страница. На неким e-ink уређајима може да изазове духове.</string>
     <string name="enable_summary_title">Омогући резиме</string>
     <string name="enable_summary_description">Омогући функцију AI резимирања</string>
+    <string name="enable_translation_title">Омогући превод</string>
+    <string name="enable_translation_description">Омогући функцију AI превођења</string>
+    <string name="translation_enabled_title">Аутоматски превод</string>
+    <string name="translation_enabled_description">Аутоматски преведи чланке при отварању</string>
 </resources>

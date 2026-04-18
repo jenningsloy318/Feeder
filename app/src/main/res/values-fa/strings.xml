@@ -132,4 +132,8 @@
     <string name="theme_e_ink">کاغذ الکترونیک</string>
     <string name="enable_summary_title">فعال‌سازی خلاصه</string>
     <string name="enable_summary_description">فعال‌سازی قابلیت خلاصه هوش مصنوعی</string>
+    <string name="enable_translation_title">فعال‌سازی ترجمه</string>
+    <string name="enable_translation_description">فعال‌سازی قابلیت ترجمه هوش مصنوعی</string>
+    <string name="translation_enabled_title">ترجمه خودکار</string>
+    <string name="translation_enabled_description">ترجمه خودکار مقالات هنگام باز کردن</string>
 </resources>

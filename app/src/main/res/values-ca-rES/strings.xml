@@ -241,4 +241,8 @@
     <string name="italic">Itàlica</string>
     <string name="enable_summary_title">Activa el resum</string>
     <string name="enable_summary_description">Activa la funcionalitat de resum amb IA</string>
+    <string name="enable_translation_title">Activa la traducció</string>
+    <string name="enable_translation_description">Activa la funcionalitat de traducció amb IA</string>
+    <string name="translation_enabled_title">Traducció automàtica</string>
+    <string name="translation_enabled_description">Tradueix automàticament els articles en obrir-los</string>
 </resources>

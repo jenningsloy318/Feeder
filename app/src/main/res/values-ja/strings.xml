@@ -256,4 +256,8 @@
     <string name="api_key">API キー</string>
     <string name="enable_summary_title">要約を有効にする</string>
     <string name="enable_summary_description">AI要約機能を有効にする</string>
+    <string name="enable_translation_title">翻訳を有効にする</string>
+    <string name="enable_translation_description">AI翻訳機能を有効にする</string>
+    <string name="translation_enabled_title">自動翻訳</string>
+    <string name="translation_enabled_description">記事を開いたときに自動的に翻訳する</string>
 </resources>

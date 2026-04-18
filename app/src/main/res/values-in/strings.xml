@@ -283,4 +283,8 @@
     <string name="time_out_placeholder">Waktu habis untuk permintaan OpenAI</string>
     <string name="enable_summary_title">Aktifkan ringkasan</string>
     <string name="enable_summary_description">Aktifkan fungsi ringkasan AI</string>
+    <string name="enable_translation_title">Aktifkan terjemahan</string>
+    <string name="enable_translation_description">Aktifkan fungsi terjemahan AI</string>
+    <string name="translation_enabled_title">Terjemahan otomatis</string>
+    <string name="translation_enabled_description">Terjemahkan artikel secara otomatis saat dibuka</string>
 </resources>

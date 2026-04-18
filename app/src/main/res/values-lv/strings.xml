@@ -272,4 +272,8 @@
     <string name="summarize_on_open">Apkopot, kad atver</string>
     <string name="enable_summary_title">Iespējot apkopojumu</string>
     <string name="enable_summary_description">Iespējot AI apkopojuma funkciju</string>
+    <string name="enable_translation_title">Iespējot tulkojumu</string>
+    <string name="enable_translation_description">Iespējot AI tulkojuma funkciju</string>
+    <string name="translation_enabled_title">Automātiskais tulkojums</string>
+    <string name="translation_enabled_description">Automātiski tulkot rakstus atverot</string>
 </resources>

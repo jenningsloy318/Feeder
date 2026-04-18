@@ -286,4 +286,8 @@
     <string name="openai_settings_info">Podpira mnogo AI ponudnikov, a ne vseh</string>
     <string name="enable_summary_title">Omogoči povzetek</string>
     <string name="enable_summary_description">Omogoči funkcijo povzetka z UI</string>
+    <string name="enable_translation_title">Omogoči prevod</string>
+    <string name="enable_translation_description">Omogoči funkcijo prevoda z UI</string>
+    <string name="translation_enabled_title">Samodejni prevod</string>
+    <string name="translation_enabled_description">Samodejno prevedi članke ob odprtju</string>
 </resources>

@@ -250,4 +250,8 @@
     <string name="show_reading_time">Rodyti likusį skaitymo laiką</string>
     <string name="enable_summary_title">Įjungti santrauką</string>
     <string name="enable_summary_description">Įjungti AI santraukos funkciją</string>
+    <string name="enable_translation_title">Įjungti vertimą</string>
+    <string name="enable_translation_description">Įjungti AI vertimo funkciją</string>
+    <string name="translation_enabled_title">Automatinis vertimas</string>
+    <string name="translation_enabled_description">Automatiškai versti straipsnius atidarius</string>
 </resources>

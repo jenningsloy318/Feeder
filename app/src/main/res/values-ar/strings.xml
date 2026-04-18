@@ -233,4 +233,8 @@
     <string name="nostr_feed_description">Nostr ا‏ةطساوب تالقم %1$s</string>
     <string name="enable_summary_title">تفعيل الملخص</string>
     <string name="enable_summary_description">تفعيل وظيفة الملخص بالذكاء الاصطناعي</string>
+    <string name="enable_translation_title">تفعيل الترجمة</string>
+    <string name="enable_translation_description">تفعيل وظيفة الترجمة بالذكاء الاصطناعي</string>
+    <string name="translation_enabled_title">الترجمة التلقائية</string>
+    <string name="translation_enabled_description">ترجمة المقالات تلقائيًا عند فتحها</string>
 </resources>

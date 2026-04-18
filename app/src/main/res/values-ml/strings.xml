@@ -157,4 +157,8 @@
     <string name="theme_e_ink">ഇലക്ട്രോണിക് പേപ്പർ</string>
     <string name="enable_summary_title">സംഗ്രഹം പ്രവർത്തനക്ഷമമാക്കുക</string>
     <string name="enable_summary_description">AI സംഗ്രഹ പ്രവർത്തനക്ഷമത ഓണാക്കുക</string>
+    <string name="enable_translation_title">വിവർത്തനം പ്രവർത്തനക്ഷമമാക്കുക</string>
+    <string name="enable_translation_description">AI വിവർത്തന പ്രവർത്തനക്ഷമത ഓണാക്കുക</string>
+    <string name="translation_enabled_title">യാന്ത്രിക വിവർത്തനം</string>
+    <string name="translation_enabled_description">തുറക്കുമ്പോൾ ലേഖനങ്ങൾ യാന്ത്രികമായി വിവർത്തനം ചെയ്യുക</string>
 </resources>

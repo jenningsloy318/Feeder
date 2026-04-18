@@ -65,4 +65,8 @@
     <string name="add_feed">ఫీడ్ జోడించండి</string>
     <string name="enable_summary_title">సారాంశం ప్రారంభించు</string>
     <string name="enable_summary_description">AI సారాంశ కార్యాచరణను ప్రారంభించు</string>
+    <string name="enable_translation_title">అనువాదం ప్రారంభించు</string>
+    <string name="enable_translation_description">AI అనువాద కార్యాచరణను ప్రారంభించు</string>
+    <string name="translation_enabled_title">స్వయంచాలక అనువాదం</string>
+    <string name="translation_enabled_description">తెరిచినప్పుడు వ్యాసాలను స్వయంచాలకంగా అనువదించు</string>
 </resources>

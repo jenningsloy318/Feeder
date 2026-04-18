@@ -298,4 +298,8 @@
     <string name="pref_animated_paging_description">Animovat otáčení stránek. Na některých e-ink zařízeních může způsobit ghosting.</string>
     <string name="enable_summary_title">Povolit shrnutí</string>
     <string name="enable_summary_description">Povolit funkci shrnutí pomocí AI</string>
+    <string name="enable_translation_title">Povolit překlad</string>
+    <string name="enable_translation_description">Povolit funkci překladu pomocí AI</string>
+    <string name="translation_enabled_title">Automatický překlad</string>
+    <string name="translation_enabled_description">Automaticky překládat články při otevření</string>
 </resources>

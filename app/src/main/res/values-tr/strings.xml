@@ -287,4 +287,8 @@
     <string name="openai_settings_info">Bir çok YZ sağlayıcısı ile uyumlu, fakat hepsi ile değil</string>
     <string name="enable_summary_title">Özeti etkinleştir</string>
     <string name="enable_summary_description">AI özet işlevini etkinleştir</string>
+    <string name="enable_translation_title">Çeviriyi etkinleştir</string>
+    <string name="enable_translation_description">AI çeviri işlevini etkinleştir</string>
+    <string name="translation_enabled_title">Otomatik çeviri</string>
+    <string name="translation_enabled_description">Açıldığında makaleleri otomatik çevir</string>
 </resources>

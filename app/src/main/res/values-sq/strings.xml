@@ -206,4 +206,8 @@
     <string name="other_feeds">Prurjet %1$s</string>
     <string name="enable_summary_title">Aktivizo përmbledhjen</string>
     <string name="enable_summary_description">Aktivizo funksionalitetin e përmbledhjes me IA</string>
+    <string name="enable_translation_title">Aktivizo përkthimin</string>
+    <string name="enable_translation_description">Aktivizo funksionalitetin e përkthimit me IA</string>
+    <string name="translation_enabled_title">Përkthim automatik</string>
+    <string name="translation_enabled_description">Përkthe automatikisht artikujt kur hapen</string>
 </resources>

@@ -262,4 +262,8 @@
     <string name="list_of_available_models">Luettelo saatavilla olevista malleista</string>
     <string name="enable_summary_title">Ota yhteenveto käyttöön</string>
     <string name="enable_summary_description">Ota AI-yhteenvetotoiminto käyttöön</string>
+    <string name="enable_translation_title">Ota käännös käyttöön</string>
+    <string name="enable_translation_description">Ota AI-käännöstoiminto käyttöön</string>
+    <string name="translation_enabled_title">Automaattinen käännös</string>
+    <string name="translation_enabled_description">Käännä artikkelit automaattisesti avattaessa</string>
 </resources>

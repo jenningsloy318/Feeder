@@ -21,7 +21,10 @@ The summary feature uses a two-level toggle system:
 1. **Master Toggle** (`enableSummary` / `PREF_ENABLE_SUMMARY`): Controls whether the summary feature is available at all. When OFF, the summarize button is hidden from the article toolbar and auto-summary is disabled.
 2. **Auto Summary Toggle** (`summaryEnabled` / `PREF_SUMMARY_ENABLED`): Controls whether articles are automatically summarized when opened. Only effective when the master toggle is ON.
 
-The translate feature is independent -- it only requires a valid AI provider configuration.
+The translate feature uses a similar two-level toggle system:
+
+1. **Master Toggle** (`enableTranslation` / `PREF_ENABLE_TRANSLATION`): Controls whether the translation feature is available at all. When OFF, the translate button is hidden from the article toolbar and auto-translation is disabled.
+2. **Auto Translation Toggle** (`translationEnabled` / `PREF_TRANSLATION_ENABLED`): Controls whether articles are automatically translated when opened. Only effective when the master toggle is ON.
 
 ### Component Diagram
 
@@ -49,7 +52,7 @@ The translate feature is independent -- it only requires a valid AI provider con
 │  ┌──────────────────────────────────────────────────────┐  │
 │  │ ArticleViewModel                                      │  │
 │  │  - showSummarize: Boolean  (enableSummary && aiValid)│  │
-│  │  - showTranslate: Boolean  (aiValid only)            │  │
+│  │  - showTranslate: Boolean  (enableTranslation && aiValid) │  │
 │  └──────────────────────┬───────────────────────────────┘  │
 └─────────────────────────┼─────────────────────────────────┘
                           │
@@ -157,13 +160,13 @@ The `ArticleScreenViewState` exposes separate `showSummarize` and `showTranslate
 ```kotlin
 // In the combine block that builds ArticleScreenViewState:
 val showSummarize = enableSummary && aiValid
-val showTranslate = aiValid
+val showTranslate = enableTranslation && aiValid
 ```
 
 - `showSummarize`: Only `true` when both the master toggle (`enableSummary`) is ON and a valid AI provider is configured.
-- `showTranslate`: Only requires a valid AI provider (independent of summary toggles).
+- `showTranslate`: Only `true` when both the master toggle (`enableTranslation`) is ON and a valid AI provider is configured.
 
-Auto-summary is triggered when `enableSummary && summaryEnabled` and a per-feed auto-summary flag are all true.
+Auto-summary is triggered when `enableSummary && summaryEnabled` and a per-feed auto-summary flag are all true. Similarly, auto-translation is triggered when `enableTranslation && translationEnabled` and a per-feed auto-translate flag are all true.
 
 ### AIApi.kt
 
@@ -250,7 +253,7 @@ if (viewState.showSummarize) {
     // Summarize icon button
 }
 
-// Translate button: shown whenever AI provider is valid (independent of summary toggle)
+// Translate button: only shown when enableTranslation is ON and AI provider is valid
 if (viewState.showTranslate) {
     // Translate icon button
 }
@@ -691,7 +694,7 @@ val summaryEnabled = element.getElementsByTagNameNS(
 
 **Changed**:
 - Summarize button in article toolbar now hidden when master toggle is OFF
-- Translate button is independent of summary toggles (only needs valid AI provider)
+- Translate button is gated by `enableTranslation` master toggle (only needs valid AI provider + translation enabled)
 - Auto Summary toggle appears visually disabled when master toggle is OFF
 
 ---

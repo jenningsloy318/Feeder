@@ -462,4 +462,42 @@ class SettingsStoreTest : DIAware {
         assertEquals(false, store.enableSummary.value)
         assertEquals(true, store.summaryEnabled.value)
     }
+
+    @Test
+    fun enableTranslationDefaultsToTrue() {
+        every { sp.getBoolean(PREF_ENABLE_TRANSLATION, true) } returns true
+
+        assertEquals(true, store.enableTranslation.value)
+    }
+
+    @Test
+    fun enableTranslationSetToFalse() {
+        store.setEnableTranslation(false)
+
+        verify {
+            sp.edit().putBoolean(PREF_ENABLE_TRANSLATION, false).apply()
+        }
+
+        assertEquals(false, store.enableTranslation.value)
+    }
+
+    @Test
+    fun enableTranslationSetToTrue() {
+        store.setEnableTranslation(true)
+
+        verify {
+            sp.edit().putBoolean(PREF_ENABLE_TRANSLATION, true).apply()
+        }
+
+        assertEquals(true, store.enableTranslation.value)
+    }
+
+    @Test
+    fun enableTranslationIndependentOfTranslationEnabled() {
+        store.setEnableTranslation(false)
+        store.setTranslationEnabled(true)
+
+        assertEquals(false, store.enableTranslation.value)
+        assertEquals(true, store.translationEnabled.value)
+    }
 }

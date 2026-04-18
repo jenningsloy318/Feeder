@@ -22,12 +22,19 @@ class TranslationSettingsViewModel(
 ) : DIAwareViewModel(di) {
     private val repository: Repository by instance()
     val translationEnabled: StateFlow<Boolean> = repository.translationEnabled
+    val enableTranslation: StateFlow<Boolean> = repository.enableTranslation
     val translationLanguage: StateFlow<TranslationLanguage> = repository.translationLanguage
     val translationTimeout: StateFlow<Int> = repository.translationTimeout
 
     fun setTranslationEnabled(enabled: Boolean) {
         viewModelScope.launch {
             repository.setTranslationEnabled(enabled)
+        }
+    }
+
+    fun setEnableTranslation(enabled: Boolean) {
+        viewModelScope.launch {
+            repository.setEnableTranslation(enabled)
         }
     }
 

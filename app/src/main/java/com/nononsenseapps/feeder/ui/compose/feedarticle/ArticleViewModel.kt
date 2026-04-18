@@ -155,6 +155,7 @@ class ArticleViewModel(
             aiSummary,
             translationState,
             repository.enableSummary,
+            repository.enableTranslation,
         ) { params ->
             val article = params[0] as Article?
             val textToDisplay = params[1] as TextToDisplay
@@ -168,9 +169,10 @@ class ArticleViewModel(
             val ttsLanguages = params[7] as List<Locale>
 
             val enableSummary = params[11] as Boolean
+            val enableTranslation = params[12] as Boolean
             val aiValid = (params[8] as AISettings).isValid && !article?.link.isNullOrEmpty()
             val showSummarize = enableSummary && aiValid
-            val showTranslate = aiValid
+            val showTranslate = enableTranslation && aiValid
             val aiSummary = (params[9] as AISummaryState)
             val translation = (params[10] as TranslationState)
 
@@ -264,15 +266,18 @@ class ArticleViewModel(
                 articleFlow,
                 articleContentFlow,
                 repository.translationEnabled,
-            ) { article, articleContent, translationEnabled ->
-                Triple(article, articleContent, translationEnabled)
+                repository.enableTranslation,
+            ) { article, articleContent, translationEnabled, enableTranslation ->
+                data class AutoTranslateData(
+                    val article: Article?,
+                    val articleContent: LinearArticle,
+                    val translationEnabled: Boolean,
+                    val enableTranslation: Boolean,
+                )
+                AutoTranslateData(article, articleContent, translationEnabled, enableTranslation)
             }.filterNotNull()
-                .collect { (article, articleContent, translationEnabled) ->
-                    // Only auto-translate once when:
-                    // 1. Setting is enabled
-                    // 2. Translation state is empty (not already loading/done)
-                    // 3. Article has content (not empty elements list)
-                    if (translationEnabled &&
+                .collect { (article, articleContent, translationEnabled, enableTranslation) ->
+                    if (enableTranslation && translationEnabled &&
                         translationState.value is TranslationState.Empty &&
                         article?.link != null &&
                         articleContent.elements.isNotEmpty()

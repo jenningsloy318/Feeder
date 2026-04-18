@@ -52,6 +52,7 @@ fun TranslationSettingsScreen(
     modifier: Modifier = Modifier,
 ) {
     val translationEnabled by viewModel.translationEnabled.collectAsStateWithLifecycle()
+    val enableTranslation by viewModel.enableTranslation.collectAsStateWithLifecycle()
     val translationLanguage by viewModel.translationLanguage.collectAsStateWithLifecycle()
     val translationTimeout by viewModel.translationTimeout.collectAsStateWithLifecycle()
 
@@ -88,12 +89,21 @@ fun TranslationSettingsScreen(
                         vertical = 8.dp,
                     ),
         ) {
-            // Enable/Disable Switch
+            SwitchSetting(
+                title = stringResource(R.string.enable_translation_title),
+                checked = enableTranslation,
+                onCheckedChange = { viewModel.setEnableTranslation(it) },
+                description = stringResource(R.string.enable_translation_description),
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
             SwitchSetting(
                 title = stringResource(R.string.translation_enabled_title),
                 checked = translationEnabled,
                 onCheckedChange = { viewModel.setTranslationEnabled(it) },
                 description = stringResource(R.string.translation_enabled_description),
+                enabled = enableTranslation,
             )
 
             Spacer(modifier = Modifier.height(8.dp))

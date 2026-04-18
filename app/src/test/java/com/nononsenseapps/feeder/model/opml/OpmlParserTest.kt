@@ -108,6 +108,7 @@ class OpmlParserTest : DIAware {
                         UserSettings.SETTING_SUMMARY_ENABLED -> "true"
                         UserSettings.SETTING_ENABLE_SUMMARY -> "true"
                         UserSettings.SETTING_BLOCKLIST_APPLY_TO_SUMMARIES -> "true"
+                        UserSettings.SETTING_ENABLE_TRANSLATION -> "true"
                     },
             )
         }
@@ -158,6 +159,7 @@ class OpmlParserTest : DIAware {
                 settingsStore.setSummaryEnabled(true)
                 settingsStore.setEnableSummary(true)
                 settingsStore.setApplyBlocklistToSummaries(true)
+                settingsStore.setEnableTranslation(true)
             }
 
             confirmVerified(settingsStore)

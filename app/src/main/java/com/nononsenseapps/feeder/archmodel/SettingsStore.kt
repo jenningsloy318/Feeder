@@ -861,6 +861,14 @@ class SettingsStore(
         sp.edit().putBoolean(PREF_TRANSLATION_ENABLED, value).apply()
     }
 
+    private val _enableTranslation = MutableStateFlow(sp.getBoolean(PREF_ENABLE_TRANSLATION, true))
+    val enableTranslation = _enableTranslation.asStateFlow()
+
+    fun setEnableTranslation(value: Boolean) {
+        _enableTranslation.value = value
+        sp.edit().putBoolean(PREF_ENABLE_TRANSLATION, value).apply()
+    }
+
     // Translation timeout setting
     private val _translationTimeout = MutableStateFlow(sp.getInt(PREF_TRANSLATION_TIMEOUT_SECONDS, 90))
     val translationTimeout = _translationTimeout.asStateFlow()
@@ -1047,6 +1055,7 @@ const val PREF_TRANSLATION_LANGUAGE = "pref_translation_language"
  * AI translation enabled setting
  */
 const val PREF_TRANSLATION_ENABLED = "pref_translation_enabled"
+const val PREF_ENABLE_TRANSLATION = "pref_enable_translation"
 
 /**
  * AI translation timeout setting
@@ -1121,6 +1130,9 @@ enum class UserSettings(
     SETTING_SUMMARY_ENABLED(key = PREF_SUMMARY_ENABLED),
     SETTING_ENABLE_SUMMARY(key = PREF_ENABLE_SUMMARY),
     SETTING_BLOCKLIST_APPLY_TO_SUMMARIES(key = PREF_BLOCKLIST_APPLY_TO_SUMMARIES),
+
+    // Translation settings
+    SETTING_ENABLE_TRANSLATION(key = PREF_ENABLE_TRANSLATION),
     ;
 
     companion object {

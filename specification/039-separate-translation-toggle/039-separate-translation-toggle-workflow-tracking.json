@@ -1,0 +1,29 @@
+{
+  "spec_identifier": "039-separate-translation-toggle",
+  "spec_index": 39,
+  "spec_name": "separate-translation-toggle",
+  "worktree_path": ".worktree/039-separate-translation-toggle",
+  "branch": "039-separate-translation-toggle",
+  "team_name": "super-dev-separate-translation-toggle",
+  "spec_directory": "specification/039-separate-translation-toggle",
+  "created_at": "2026-04-18T00:00:00Z",
+  "phases": {
+    "0": { "name": "Dev Rules", "status": "completed" },
+    "1": { "name": "Specification Setup", "status": "completed" },
+    "2": { "name": "Requirements Clarification", "status": "pending" },
+    "2.5": { "name": "BDD Scenarios", "status": "pending" },
+    "3": { "name": "Research", "status": "pending" },
+    "5": { "name": "Code Assessment", "status": "pending" },
+    "5.3": { "name": "Architecture Design", "status": "pending" },
+    "6": { "name": "Specification Writing", "status": "pending" },
+    "7": { "name": "Specification Review", "status": "pending" },
+    "8": { "name": "Implementation", "status": "pending" },
+    "9": { "name": "Code Review", "status": "pending" },
+    "10": { "name": "Documentation Update", "status": "pending" },
+    "10.5": { "name": "Handoff Writing", "status": "pending" },
+    "11": { "name": "Team Cleanup", "status": "pending" },
+    "12": { "name": "Commit and Merge", "status": "pending" },
+    "13": { "name": "Final Verification", "status": "pending" }
+  },
+  "iterations": {}
+}

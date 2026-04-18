@@ -405,6 +405,11 @@ class Repository(
 
     fun setTranslationEnabled(value: Boolean) = settingsStore.setTranslationEnabled(value)
 
+    // Enable Translation Setting (master toggle)
+    val enableTranslation = settingsStore.enableTranslation
+
+    fun setEnableTranslation(value: Boolean) = settingsStore.setEnableTranslation(value)
+
     // Translation Timeout Setting
     val translationTimeout = settingsStore.translationTimeout
 

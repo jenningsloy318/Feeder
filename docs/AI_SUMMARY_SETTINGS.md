@@ -46,7 +46,7 @@ Feeder currently supports the following AI providers:
 Once configured:
 - If **Enable Summary** is ON, the summarize button appears in the article toolbar
 - If **Auto Summary** is also ON, articles are automatically summarized when opened
-- The translate button is always available when an AI provider is configured (independent of summary settings)
+- The translate button is available when the **Enable Translation** toggle is ON and an AI provider is configured
 
 ---
 
@@ -194,7 +194,7 @@ When summaries are enabled, Feeder sends the following to your configured AI pro
 
 ### Q: Can I still translate articles if I disable summaries?
 
-**A**: Yes. The translate feature is independent of the summary toggles. As long as you have a valid AI provider configured, the translate button will appear in the article toolbar regardless of the Enable Summary setting.
+**A**: Yes, as long as the **Enable Translation** toggle is ON and you have a valid AI provider configured. The translate feature has its own master toggle, independent of the summary toggles.
 
 ---
 
@@ -254,7 +254,7 @@ For feature requests:
 - Master "Enable Summary" toggle to control whether the summary feature is available
 - "Auto Summary" toggle (formerly "Enable summaries") now depends on the master toggle
 - Auto Summary toggle appears visually disabled when master toggle is OFF
-- Translate button is independent of summary settings
+- Translate button is independent of summary settings but now gated by its own "Enable Translation" master toggle
 - Dedicated Summary settings screen
 - Improved UX for summary language selection
 - OPML import/export support for summary settings

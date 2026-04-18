@@ -329,8 +329,10 @@
   <string name="translation_title">Translation</string>
   <string name="translation_subtitle">Configure AI-powered translation</string>
   <string name="translation_settings_title">Translation Settings</string>
-  <string name="translation_enabled_title">Enable Auto Translation</string>
-  <string name="translation_enabled_description">Automatically translate foreign language articles</string>
+  <string name="enable_translation_title">Enable Translation</string>
+  <string name="enable_translation_description">Enable AI translation functionality</string>
+  <string name="translation_enabled_title">Auto Translation</string>
+  <string name="translation_enabled_description">Automatically translate articles when opened</string>
   <string name="translation_target_language_title">Target Language</string>
   <string name="translation_provider_title">AI Provider</string>
   <string name="translation_language_device_default">Device Default</string>

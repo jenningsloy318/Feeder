@@ -3,3 +3,6 @@
 build/
 .claude/
 *.keystore
+*.apk
+*.apk.idsig
+feeder-release-fdroid-signed.apk*

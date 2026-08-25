@@ -84,6 +84,26 @@ data class AnthropicSettings(
 }
 
 /**
+ * Settings for the DeepL translation provider.
+ *
+ * @property key DeepL API key (free-tier keys end with ":fx")
+ * @property baseUrl Custom base URL for API requests (empty for the official DeepL endpoint)
+ * @property timeoutSeconds Request timeout in seconds (30-600 range, default 90)
+ */
+@Serializable
+data class DeepLSettings(
+    val key: String = "",
+    val baseUrl: String = "",
+    val timeoutSeconds: Int = 90,
+) {
+    /**
+     * Check if settings are valid. DeepL needs only an API key.
+     */
+    val isValid: Boolean
+        get() = key.isNotEmpty()
+}
+
+/**
  * Sealed interface for provider-specific settings.
  */
 sealed interface AISettings {
@@ -114,6 +134,18 @@ sealed interface AISettings {
     }
 
     /**
+     * DeepL settings.
+     */
+    @Suppress("DataClassShouldBeImmutable")
+    data class DeepL(
+        val deepLSettings: DeepLSettings =
+            com.nononsenseapps.feeder.ai.model
+                .DeepLSettings(),
+    ) : AISettings {
+        override val providerType: AIProvider = AIProvider.DEEPL
+    }
+
+    /**
      * Check if settings are valid.
      */
     val isValid: Boolean
@@ -121,6 +153,7 @@ sealed interface AISettings {
             when (this) {
                 is OpenAI -> openaiSettings.isValid
                 is Anthropic -> anthropicSettings.isValid
+                is DeepL -> deepLSettings.isValid
             }
 
     /**
@@ -130,6 +163,7 @@ sealed interface AISettings {
         when (this) {
             is OpenAI -> OpenAISettings.DEFAULT_MODEL
             is Anthropic -> AnthropicSettings.DEFAULT_MODEL
+            is DeepL -> ""
         }
 
     companion object {
@@ -140,6 +174,7 @@ sealed interface AISettings {
             when (provider) {
                 AIProvider.OPENAI_COMPATIBLE -> OpenAI()
                 AIProvider.ANTHROPIC -> Anthropic()
+                AIProvider.DEEPL -> DeepL()
             }
     }
 }

@@ -9,6 +9,7 @@ import androidx.annotation.StringRes
 import com.nononsenseapps.feeder.R
 import com.nononsenseapps.feeder.ai.model.AISettings
 import com.nononsenseapps.feeder.ai.model.AnthropicSettings
+import com.nononsenseapps.feeder.ai.model.DeepLSettings
 import com.nononsenseapps.feeder.ai.model.ProviderConfig
 import com.nononsenseapps.feeder.ai.model.SummaryLanguage
 import com.nononsenseapps.feeder.ai.model.TranslationLanguage
@@ -799,6 +800,7 @@ class SettingsStore(
             return when (_aiProviderType.value) {
                 AIProvider.OPENAI_COMPATIBLE -> AISettings.OpenAI(_openAISettings.value)
                 AIProvider.ANTHROPIC -> AISettings.Anthropic(_anthropicSettings.value)
+                AIProvider.DEEPL -> AISettings.DeepL(deepLSettingsFromPrefs())
             }
         }
 
@@ -819,7 +821,18 @@ class SettingsStore(
         when (_aiProviderType.value) {
             AIProvider.OPENAI_COMPATIBLE -> AISettings.OpenAI(_openAISettings.value)
             AIProvider.ANTHROPIC -> AISettings.Anthropic(_anthropicSettings.value)
+            AIProvider.DEEPL -> AISettings.DeepL(deepLSettingsFromPrefs())
         }
+
+    /**
+     * Reconstruct DeepL settings from the legacy upstream translation-API prefs,
+     * so users upgrading from upstream builds keep their DeepL configuration.
+     */
+    private fun deepLSettingsFromPrefs(): DeepLSettings =
+        DeepLSettings(
+            key = sp.getString(PREF_TRANSLATION_API_KEY, null) ?: "",
+            baseUrl = sp.getString(PREF_TRANSLATION_API_URL, null) ?: "",
+        )
 
     // Summary language setting
     private val _summaryLanguage =

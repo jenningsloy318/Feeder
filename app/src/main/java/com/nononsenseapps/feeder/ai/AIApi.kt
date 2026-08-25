@@ -62,6 +62,9 @@ class AIApi(
             is AISettings.Anthropic -> {
                 // Anthropic doesn't have special endpoint checks
             }
+            is AISettings.DeepL -> {
+                // DeepL verification happens in the client (no models endpoint)
+            }
         }
         return try {
             AIClient
@@ -91,6 +94,10 @@ class AIApi(
                     is AISettings.Anthropic -> {
                         val updatedSettings = settings.anthropicSettings.copy(timeoutSeconds = summaryTimeout)
                         AISettings.Anthropic(updatedSettings)
+                    }
+                    is AISettings.DeepL -> {
+                        val updatedSettings = settings.deepLSettings.copy(timeoutSeconds = summaryTimeout)
+                        AISettings.DeepL(updatedSettings)
                     }
                 }
 
@@ -137,6 +144,10 @@ class AIApi(
                     is AISettings.Anthropic -> {
                         val updatedSettings = settings.anthropicSettings.copy(timeoutSeconds = translationTimeout)
                         AISettings.Anthropic(updatedSettings)
+                    }
+                    is AISettings.DeepL -> {
+                        val updatedSettings = settings.deepLSettings.copy(timeoutSeconds = translationTimeout)
+                        AISettings.DeepL(updatedSettings)
                     }
                 }
 

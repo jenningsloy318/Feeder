@@ -296,6 +296,7 @@ fun ProviderItemContent(
                             when (provider.providerType) {
                                 com.nononsenseapps.feeder.ai.provider.AIProvider.OPENAI_COMPATIBLE -> R.string.ai_provider_openai_compatible
                                 com.nononsenseapps.feeder.ai.provider.AIProvider.ANTHROPIC -> R.string.ai_provider_anthropic_compatible
+                                com.nononsenseapps.feeder.ai.provider.AIProvider.DEEPL -> R.string.ai_provider_deepl
                             },
                     ),
                 style = MaterialTheme.typography.bodyMedium,

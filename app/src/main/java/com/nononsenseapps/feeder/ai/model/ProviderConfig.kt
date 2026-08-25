@@ -11,6 +11,7 @@ import kotlinx.serialization.Serializable
  * @property providerType Type of provider (OpenAI or Anthropic)
  * @property openAISettings OpenAI-specific settings (null if not OpenAI)
  * @property anthropicSettings Anthropic-specific settings (null if not Anthropic)
+ * @property deepLSettings DeepL-specific settings (null if not DeepL)
  * @property isActive Whether this is the currently active provider
  * @property createdAt Timestamp when provider was created
  * @property updatedAt Timestamp when provider was last modified
@@ -22,6 +23,7 @@ data class ProviderConfig(
     val providerType: AIProvider,
     val openAISettings: OpenAISettings? = null,
     val anthropicSettings: AnthropicSettings? = null,
+    val deepLSettings: DeepLSettings? = null,
     val isActive: Boolean = false,
     val createdAt: Long,
     val updatedAt: Long,
@@ -35,6 +37,8 @@ data class ProviderConfig(
                 AISettings.OpenAI(openAISettings ?: OpenAISettings())
             AIProvider.ANTHROPIC ->
                 AISettings.Anthropic(anthropicSettings ?: AnthropicSettings())
+            AIProvider.DEEPL ->
+                AISettings.DeepL(deepLSettings ?: DeepLSettings())
         }
 
     /**
@@ -51,6 +55,7 @@ data class ProviderConfig(
             when (providerType) {
                 AIProvider.OPENAI_COMPATIBLE -> "OpenAI Provider"
                 AIProvider.ANTHROPIC -> "Anthropic Provider"
+                AIProvider.DEEPL -> "DeepL Provider"
             }
         }
 
@@ -85,6 +90,16 @@ data class ProviderConfig(
                         name = name,
                         providerType = AIProvider.ANTHROPIC,
                         anthropicSettings = settings.anthropicSettings,
+                        isActive = isActive,
+                        createdAt = System.currentTimeMillis(),
+                        updatedAt = System.currentTimeMillis(),
+                    )
+                is AISettings.DeepL ->
+                    ProviderConfig(
+                        id = generateId(),
+                        name = name,
+                        providerType = AIProvider.DEEPL,
+                        deepLSettings = settings.deepLSettings,
                         isActive = isActive,
                         createdAt = System.currentTimeMillis(),
                         updatedAt = System.currentTimeMillis(),

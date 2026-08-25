@@ -228,6 +228,7 @@ fun ProviderEditForm(
                             when (uiState.providerType) {
                                 AIProvider.OPENAI_COMPATIBLE -> R.string.ai_provider_openai_compatible
                                 AIProvider.ANTHROPIC -> R.string.ai_provider_anthropic_compatible
+                                AIProvider.DEEPL -> R.string.ai_provider_deepl
                             },
                     ),
                 onValueChange = {},
@@ -264,6 +265,7 @@ fun ProviderEditForm(
                                         when (provider) {
                                             AIProvider.OPENAI_COMPATIBLE -> R.string.ai_provider_openai_compatible
                                             AIProvider.ANTHROPIC -> R.string.ai_provider_anthropic_compatible
+                                            AIProvider.DEEPL -> R.string.ai_provider_deepl
                                         },
                                 ),
                             )
@@ -311,6 +313,7 @@ fun ProviderEditForm(
             when (uiState.providerType) {
                 AIProvider.OPENAI_COMPATIBLE -> "https://api.openai.com/v1"
                 AIProvider.ANTHROPIC -> "https://api.anthropic.com"
+                AIProvider.DEEPL -> "https://api.deepl.com"
             }
 
         OutlinedTextField(
@@ -337,68 +340,72 @@ fun ProviderEditForm(
             modifier = Modifier.fillMaxWidth(),
         )
 
-        // Model ID
-        OutlinedTextField(
-            value = uiState.modelId,
-            onValueChange = onModelIdChange,
-            label = {
-                Text(stringResource(R.string.model_id))
-            },
-            placeholder = {
-                Text(
-                    when (uiState.providerType) {
-                        AIProvider.OPENAI_COMPATIBLE -> "gpt-4o"
-                        AIProvider.ANTHROPIC -> "claude-3-5-sonnet-20241022"
-                    },
-                )
-            },
-            singleLine = true,
-            keyboardOptions =
-                KeyboardOptions(
-                    keyboardType = KeyboardType.Ascii,
-                    imeAction = ImeAction.Next,
-                ),
-            keyboardActions =
-                androidx.compose.foundation.text.KeyboardActions(
-                    onNext = {
-                        focusManager.moveFocus(FocusDirection.Down)
-                    },
-                ),
-            modifier = Modifier.fillMaxWidth(),
-        )
+        // Model ID and Max Tokens do not apply to DeepL (translation-only provider)
+        if (uiState.providerType != AIProvider.DEEPL) {
+            // Model ID
+            OutlinedTextField(
+                value = uiState.modelId,
+                onValueChange = onModelIdChange,
+                label = {
+                    Text(stringResource(R.string.model_id))
+                },
+                placeholder = {
+                    Text(
+                        when (uiState.providerType) {
+                            AIProvider.OPENAI_COMPATIBLE -> "gpt-4o"
+                            AIProvider.ANTHROPIC -> "claude-3-5-sonnet-20241022"
+                            AIProvider.DEEPL -> ""
+                        },
+                    )
+                },
+                singleLine = true,
+                keyboardOptions =
+                    KeyboardOptions(
+                        keyboardType = KeyboardType.Ascii,
+                        imeAction = ImeAction.Next,
+                    ),
+                keyboardActions =
+                    androidx.compose.foundation.text.KeyboardActions(
+                        onNext = {
+                            focusManager.moveFocus(FocusDirection.Down)
+                        },
+                    ),
+                modifier = Modifier.fillMaxWidth(),
+            )
 
-        // Max Tokens
-        OutlinedTextField(
-            value = uiState.maxTokens,
-            onValueChange = onMaxTokensChange,
-            label = {
-                Text(stringResource(R.string.max_tokens))
-            },
-            placeholder = {
-                Text(stringResource(R.string.max_tokens_hint))
-            },
-            singleLine = true,
-            supportingText = {
-                Text(stringResource(R.string.max_tokens_supporting))
-            },
-            keyboardOptions =
-                KeyboardOptions(
-                    keyboardType = KeyboardType.Number,
-                    imeAction = ImeAction.Done,
-                ),
-            keyboardActions =
-                androidx.compose.foundation.text.KeyboardActions(
-                    onDone = {
-                        focusManager.clearFocus()
-                        if (isFormValid) {
-                            onSave()
-                        } else {
-                            showValidationError = true
-                        }
-                    },
-                ),
-            modifier = Modifier.fillMaxWidth(),
-        )
+            // Max Tokens
+            OutlinedTextField(
+                value = uiState.maxTokens,
+                onValueChange = onMaxTokensChange,
+                label = {
+                    Text(stringResource(R.string.max_tokens))
+                },
+                placeholder = {
+                    Text(stringResource(R.string.max_tokens_hint))
+                },
+                singleLine = true,
+                supportingText = {
+                    Text(stringResource(R.string.max_tokens_supporting))
+                },
+                keyboardOptions =
+                    KeyboardOptions(
+                        keyboardType = KeyboardType.Number,
+                        imeAction = ImeAction.Done,
+                    ),
+                keyboardActions =
+                    androidx.compose.foundation.text.KeyboardActions(
+                        onDone = {
+                            focusManager.clearFocus()
+                            if (isFormValid) {
+                                onSave()
+                            } else {
+                                showValidationError = true
+                            }
+                        },
+                    ),
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
 
         // Set as Default checkbox
         Row(

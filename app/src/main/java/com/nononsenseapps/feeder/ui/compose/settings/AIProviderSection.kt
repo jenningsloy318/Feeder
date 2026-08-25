@@ -143,6 +143,7 @@ private fun AIProviderSectionItem(
         when (settings) {
             is AISettings.OpenAI -> settings.openaiSettings.key
             is AISettings.Anthropic -> settings.anthropicSettings.key
+            is AISettings.DeepL -> settings.deepLSettings.key
         }
 
     Row(
@@ -272,6 +273,7 @@ fun AIProviderSectionEdit(
         when (current) {
             is AISettings.OpenAI -> current.openaiSettings.timeoutSeconds
             is AISettings.Anthropic -> current.anthropicSettings.timeoutSeconds
+            is AISettings.DeepL -> current.deepLSettings.timeoutSeconds
         }
     var timeoutString by remember { mutableStateOf(timeoutSeconds.toString()) }
 
@@ -303,6 +305,7 @@ fun AIProviderSectionEdit(
                     when (current.providerType) {
                         AIProvider.OPENAI_COMPATIBLE -> stringResource(R.string.ai_provider_openai_compatible)
                         AIProvider.ANTHROPIC -> stringResource(R.string.ai_provider_anthropic_compatible)
+                        AIProvider.DEEPL -> stringResource(R.string.ai_provider_deepl)
                     },
                 onValueChange = {},
                 label = {
@@ -334,6 +337,7 @@ fun AIProviderSectionEdit(
                                 when (provider) {
                                     AIProvider.OPENAI_COMPATIBLE -> stringResource(R.string.ai_provider_openai_compatible)
                                     AIProvider.ANTHROPIC -> stringResource(R.string.ai_provider_anthropic_compatible)
+                                    AIProvider.DEEPL -> stringResource(R.string.ai_provider_deepl)
                                 },
                             )
                         },
@@ -352,6 +356,7 @@ fun AIProviderSectionEdit(
             when (current) {
                 is AISettings.OpenAI -> current.openaiSettings.key
                 is AISettings.Anthropic -> current.anthropicSettings.key
+                is AISettings.DeepL -> current.deepLSettings.key
             }
         TextField(
             modifier = Modifier.fillMaxWidth(),
@@ -376,83 +381,91 @@ fun AIProviderSectionEdit(
                         onEvent(AISettingsEvent.UpdateSettings(current.copy(openaiSettings = current.openaiSettings.copy(key = it))))
                     is AISettings.Anthropic ->
                         onEvent(AISettingsEvent.UpdateSettings(current.copy(anthropicSettings = current.anthropicSettings.copy(key = it))))
+                    is AISettings.DeepL ->
+                        onEvent(AISettingsEvent.UpdateSettings(current.copy(deepLSettings = current.deepLSettings.copy(key = it))))
                 }
             },
             visualTransformation = VisualTransformationApiKey(),
         )
 
-        // Model ID
-        val modelId =
-            when (current) {
-                is AISettings.OpenAI -> current.openaiSettings.modelId
-                is AISettings.Anthropic -> current.anthropicSettings.modelId
-            }
-        TextField(
-            modifier = Modifier.fillMaxWidth(),
-            value = modelId,
-            label = {
-                Text(stringResource(R.string.model_id))
-            },
-            keyboardOptions =
-                KeyboardOptions.Default.copy(
-                    keyboardType = KeyboardType.Ascii,
-                    imeAction = ImeAction.Next,
-                ),
-            keyboardActions =
-                KeyboardActions(
-                    onNext = {
-                        focusManager.moveFocus(focusDirection = FocusDirection.Down)
-                    },
-                ),
-            onValueChange = {
+        // Model ID and model list do not apply to DeepL (translation-only provider)
+        if (current !is AISettings.DeepL) {
+            // Model ID
+            val modelId =
                 when (current) {
-                    is AISettings.OpenAI ->
-                        onEvent(AISettingsEvent.UpdateSettings(current.copy(openaiSettings = current.openaiSettings.copy(modelId = it))))
-                    is AISettings.Anthropic ->
-                        onEvent(AISettingsEvent.UpdateSettings(current.copy(anthropicSettings = current.anthropicSettings.copy(modelId = it))))
+                    is AISettings.OpenAI -> current.openaiSettings.modelId
+                    is AISettings.Anthropic -> current.anthropicSettings.modelId
                 }
-            },
-            trailingIcon = {
-                IconButton(
-                    onClick = { modelsMenuExpanded = true },
-                    enabled = state.modelsResult is ModelsState.Success,
-                ) {
-                    if (state.modelsResult is ModelsState.Loading) {
-                        CircularProgressIndicator()
-                    } else {
-                        Icon(Icons.Filled.ExpandMore, contentDescription = stringResource(R.string.list_of_available_models))
-                        if (state.modelsResult is ModelsState.Success) {
-                            AIModelsDropdown(
-                                menuExpanded = modelsMenuExpanded,
-                                state = state.modelsResult,
-                                onValueChange = {
-                                    when (current) {
-                                        is AISettings.OpenAI ->
-                                            onEvent(AISettingsEvent.UpdateSettings(current.copy(openaiSettings = current.openaiSettings.copy(modelId = it))))
-                                        is AISettings.Anthropic ->
-                                            onEvent(AISettingsEvent.UpdateSettings(current.copy(anthropicSettings = current.anthropicSettings.copy(modelId = it))))
-                                    }
-                                },
-                                onDismissRequest = { modelsMenuExpanded = false },
-                            )
+            TextField(
+                modifier = Modifier.fillMaxWidth(),
+                value = modelId,
+                label = {
+                    Text(stringResource(R.string.model_id))
+                },
+                keyboardOptions =
+                    KeyboardOptions.Default.copy(
+                        keyboardType = KeyboardType.Ascii,
+                        imeAction = ImeAction.Next,
+                    ),
+                keyboardActions =
+                    KeyboardActions(
+                        onNext = {
+                            focusManager.moveFocus(focusDirection = FocusDirection.Down)
+                        },
+                    ),
+                onValueChange = {
+                    when (current) {
+                        is AISettings.OpenAI ->
+                            onEvent(AISettingsEvent.UpdateSettings(current.copy(openaiSettings = current.openaiSettings.copy(modelId = it))))
+                        is AISettings.Anthropic ->
+                            onEvent(AISettingsEvent.UpdateSettings(current.copy(anthropicSettings = current.anthropicSettings.copy(modelId = it))))
+                    }
+                },
+                trailingIcon = {
+                    IconButton(
+                        onClick = { modelsMenuExpanded = true },
+                        enabled = state.modelsResult is ModelsState.Success,
+                    ) {
+                        if (state.modelsResult is ModelsState.Loading) {
+                            CircularProgressIndicator()
+                        } else {
+                            Icon(Icons.Filled.ExpandMore, contentDescription = stringResource(R.string.list_of_available_models))
+                            if (state.modelsResult is ModelsState.Success) {
+                                AIModelsDropdown(
+                                    menuExpanded = modelsMenuExpanded,
+                                    state = state.modelsResult,
+                                    onValueChange = {
+                                        when (current) {
+                                            is AISettings.OpenAI ->
+                                                onEvent(AISettingsEvent.UpdateSettings(current.copy(openaiSettings = current.openaiSettings.copy(modelId = it))))
+                                            is AISettings.Anthropic ->
+                                                onEvent(AISettingsEvent.UpdateSettings(current.copy(anthropicSettings = current.anthropicSettings.copy(modelId = it))))
+                                            // Unreachable for DeepL: the model field is hidden
+                                            is AISettings.DeepL -> Unit
+                                        }
+                                    },
+                                    onDismissRequest = { modelsMenuExpanded = false },
+                                )
+                            }
                         }
                     }
-                }
-            },
-        )
+                },
+            )
 
-        AIModelsStatus(
-            state = state.modelsResult,
-            showError = state.showModelsError,
-            onEvent = onEvent,
-            isAnthropic = isAnthropic,
-        )
+            AIModelsStatus(
+                state = state.modelsResult,
+                showError = state.showModelsError,
+                onEvent = onEvent,
+                isAnthropic = isAnthropic,
+            )
+        }
 
         // Base URL
         val baseUrl =
             when (current) {
                 is AISettings.OpenAI -> current.openaiSettings.baseUrl
                 is AISettings.Anthropic -> current.anthropicSettings.baseUrl
+                is AISettings.DeepL -> current.deepLSettings.baseUrl
             }
         TextField(
             modifier = Modifier.fillMaxWidth(),
@@ -462,6 +475,7 @@ fun AIProviderSectionEdit(
                     when (current.providerType) {
                         AIProvider.OPENAI_COMPATIBLE -> "https://api.openai.com/v1"
                         AIProvider.ANTHROPIC -> "https://api.anthropic.com"
+                        AIProvider.DEEPL -> "https://api.deepl.com"
                     },
                 )
             },
@@ -485,6 +499,8 @@ fun AIProviderSectionEdit(
                         onEvent(AISettingsEvent.UpdateSettings(current.copy(openaiSettings = current.openaiSettings.copy(baseUrl = it))))
                     is AISettings.Anthropic ->
                         onEvent(AISettingsEvent.UpdateSettings(current.copy(anthropicSettings = current.anthropicSettings.copy(baseUrl = it))))
+                    is AISettings.DeepL ->
+                        onEvent(AISettingsEvent.UpdateSettings(current.copy(deepLSettings = current.deepLSettings.copy(baseUrl = it))))
                 }
             },
         )
@@ -528,6 +544,8 @@ fun AIProviderSectionEdit(
                             onEvent(AISettingsEvent.UpdateSettings(current.copy(openaiSettings = current.openaiSettings.copy(timeoutSeconds = timeoutString.toInt()))))
                         is AISettings.Anthropic ->
                             onEvent(AISettingsEvent.UpdateSettings(current.copy(anthropicSettings = current.anthropicSettings.copy(timeoutSeconds = timeoutString.toInt()))))
+                        is AISettings.DeepL ->
+                            onEvent(AISettingsEvent.UpdateSettings(current.copy(deepLSettings = current.deepLSettings.copy(timeoutSeconds = timeoutString.toInt()))))
                     }
                 }
             },

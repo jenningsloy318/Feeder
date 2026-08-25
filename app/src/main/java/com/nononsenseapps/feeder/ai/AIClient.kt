@@ -3,6 +3,7 @@ package com.nononsenseapps.feeder.ai
 import com.nononsenseapps.feeder.ai.model.AISettings
 import com.nononsenseapps.feeder.ai.model.SummaryLanguage
 import com.nononsenseapps.feeder.ai.provider.AnthropicClient
+import com.nononsenseapps.feeder.ai.provider.DeepLClient
 import com.nononsenseapps.feeder.ai.provider.OpenAICompatibleClient
 
 /**
@@ -146,6 +147,7 @@ interface AIClient {
             when (settings) {
                 is AISettings.OpenAI -> OpenAICompatibleClient(settings.openaiSettings)
                 is AISettings.Anthropic -> AnthropicClient(settings.anthropicSettings)
+                is AISettings.DeepL -> DeepLClient(settings.deepLSettings)
             }
     }
 }

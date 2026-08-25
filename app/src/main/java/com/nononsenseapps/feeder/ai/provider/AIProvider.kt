@@ -15,6 +15,12 @@ enum class AIProvider {
      * Supports Anthropic's Claude models and Anthropic-compatible endpoints.
      */
     ANTHROPIC,
+
+    /**
+     * DeepL translation provider.
+     * Translation-only: no summarization or model listing.
+     */
+    DEEPL,
     ;
 
     companion object {

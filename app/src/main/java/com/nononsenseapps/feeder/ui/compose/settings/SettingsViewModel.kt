@@ -206,6 +206,19 @@ class SettingsViewModel(
                         repository.setAIProviderType(com.nononsenseapps.feeder.ai.provider.AIProvider.ANTHROPIC)
                         repository.setAnthropicSettings(event.settings.anthropicSettings)
                     }
+                    is com.nononsenseapps.feeder.ai.model.AISettings.DeepL -> {
+                        // DeepL has no legacy single-provider setters; update the
+                        // active provider config so changes persist.
+                        val activeProvider = repository.providers.value.firstOrNull { it.isActive }
+                        if (activeProvider != null) {
+                            repository.updateProvider(
+                                activeProvider.copy(
+                                    deepLSettings = event.settings.deepLSettings,
+                                    updatedAt = System.currentTimeMillis(),
+                                ),
+                            )
+                        }
+                    }
                 }
             is AISettingsEvent.SwitchEditMode -> {
                 val current = _viewState.value.openAIState

@@ -736,6 +736,13 @@ class ArticleViewModel(
                     )
                 AISettings.Anthropic(updatedAnthropicSettings)
             }
+            is AISettings.DeepL -> {
+                val updatedDeepLSettings =
+                    currentSettings.deepLSettings.copy(
+                        timeoutSeconds = translationTimeoutSeconds,
+                    )
+                AISettings.DeepL(updatedDeepLSettings)
+            }
         }
 
     private fun resolveLanguageCode(language: TranslationLanguage): String = if (language.code.isEmpty()) Locale.getDefault().language else language.code

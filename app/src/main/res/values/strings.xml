@@ -311,6 +311,7 @@
   <string name="ai_provider">AI Provider</string>
   <string name="ai_provider_openai_compatible">OpenAI-compatible</string>
   <string name="ai_provider_anthropic_compatible">Anthropic-compatible</string>
+  <string name="ai_provider_deepl">DeepL (translation only)</string>
   <string name="fetch_og_images">Enhance thumbnails from article metadata</string>
   <string name="fetch_og_images_desc">Try to improve missing or low-quality thumbnails for this feed</string>
   <string name="summary_api_settings">Summary API</string>

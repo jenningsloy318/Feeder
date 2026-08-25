@@ -6,6 +6,8 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.nononsenseapps.feeder.ApplicationCoroutineScope
+import com.nononsenseapps.feeder.ai.model.AISettings
+import com.nononsenseapps.feeder.ai.model.TranslationLanguage
 import com.nononsenseapps.feeder.archmodel.FeedItemStyle
 import com.nononsenseapps.feeder.archmodel.FeedType
 import com.nononsenseapps.feeder.archmodel.ItemOpener
@@ -26,6 +28,7 @@ import com.nononsenseapps.feeder.model.PlaybackStatus
 import com.nononsenseapps.feeder.model.PodcastPlayerState
 import com.nononsenseapps.feeder.model.PodcastPlayerStateHolder
 import com.nononsenseapps.feeder.model.TTSStateHolder
+import com.nononsenseapps.feeder.model.TranslationManager
 import com.nononsenseapps.feeder.ui.compose.feed.FeedListItem
 import com.nononsenseapps.feeder.ui.compose.feed.FeedOrTag
 import com.nononsenseapps.feeder.ui.compose.text.htmlToAnnotatedString
@@ -37,6 +40,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -45,6 +49,7 @@ import org.kodein.di.DI
 import org.kodein.di.instance
 import java.io.FileNotFoundException
 import java.util.Locale
+import java.util.concurrent.ConcurrentHashMap
 
 class FeedViewModel(
     di: DI,
@@ -63,6 +68,142 @@ class FeedViewModel(
         repository
             .getCurrentFeedListItems()
             .cachedIn(viewModelScope)
+
+    private val translationManager: TranslationManager by instance()
+
+    private val translatedFeedCardEntries = MutableStateFlow<Map<FeedCardSource, FeedCardTranslationEntry>>(emptyMap())
+    private val feedCardTranslationGeneration = MutableStateFlow(0)
+    val translatedFeedCards: StateFlow<TranslatedFeedCards> =
+        combine(translatedFeedCardEntries, feedCardTranslationGeneration) { entries, generation ->
+            TranslatedFeedCards(
+                generation = generation,
+                items = entries.mapValues { it.value.item },
+            )
+        }.stateIn(
+            viewModelScope,
+            SharingStarted.Eagerly,
+            TranslatedFeedCards(),
+        )
+    private val inFlightFeedCardTranslations = ConcurrentHashMap.newKeySet<FeedCardTranslationRequest>()
+
+    init {
+        viewModelScope.launch {
+            combine(
+                repository.translateArticlePreviewsByDefault,
+                repository.translationEnabled,
+                repository.aiSettingsFlow,
+                repository.translationLanguage,
+            ) { previewsByDefault, translationEnabled, settings, language ->
+                FeedCardTranslationConfig(
+                    enabled = translationEnabled && previewsByDefault,
+                    settings = settings,
+                    language = language,
+                )
+            }.distinctUntilChanged()
+                .collect {
+                    inFlightFeedCardTranslations.clear()
+                    translatedFeedCardEntries.value = emptyMap()
+                    feedCardTranslationGeneration.update { it + 1 }
+                }
+        }
+    }
+
+    fun translateFeedCardIfNeeded(item: FeedListItem) {
+        if (item.id == ID_UNSET) {
+            return
+        }
+
+        val config = currentFeedCardTranslationConfig() ?: return
+        val source = FeedCardSource.from(item)
+        val existingEntry = translatedFeedCardEntries.value[source]
+        if (existingEntry?.isComplete == true) {
+            return
+        }
+
+        val request =
+            FeedCardTranslationRequest(
+                itemId = item.id,
+                sourceTitle = item.title,
+                sourceSnippet = item.snippet,
+            )
+        if (!inFlightFeedCardTranslations.add(request)) {
+            return
+        }
+
+        viewModelScope.launch {
+            try {
+                val cached =
+                    translationManager.getCachedTranslatedFeedListItem(
+                        item = item,
+                        settings = config.settings,
+                        language = config.language,
+                    )
+                if (cached.hasCachedTranslation) {
+                    updateTranslatedFeedCard(
+                        source = source,
+                        entry =
+                            FeedCardTranslationEntry(
+                                item = cached.item,
+                                isComplete = cached.isFullyCached,
+                            ),
+                    )
+                }
+
+                if (cached.isFullyCached) {
+                    return@launch
+                }
+
+                val translatedItem =
+                    translationManager.translateFeedListItem(
+                        item = item,
+                        settings = config.settings,
+                        language = config.language,
+                    )
+                val updatedCached =
+                    translationManager.getCachedTranslatedFeedListItem(
+                        item = item,
+                        settings = config.settings,
+                        language = config.language,
+                    )
+                val displayItem =
+                    when {
+                        updatedCached.hasCachedTranslation -> updatedCached.item
+                        translatedItem != item -> translatedItem
+                        else -> null
+                    }
+
+                if (displayItem != null && currentFeedCardTranslationConfig() == config) {
+                    updateTranslatedFeedCard(
+                        source = source,
+                        entry =
+                            FeedCardTranslationEntry(
+                                item = displayItem,
+                                isComplete = updatedCached.isFullyCached,
+                            ),
+                    )
+                }
+            } finally {
+                inFlightFeedCardTranslations.remove(request)
+            }
+        }
+    }
+
+    private fun currentFeedCardTranslationConfig(): FeedCardTranslationConfig? =
+        FeedCardTranslationConfig(
+            enabled = repository.translationEnabled.value && repository.translateArticlePreviewsByDefault.value,
+            settings = repository.aiSettings,
+            language = repository.translationLanguage.value,
+        ).takeIf(FeedCardTranslationConfig::isActive)
+
+    private fun updateTranslatedFeedCard(
+        source: FeedCardSource,
+        entry: FeedCardTranslationEntry,
+    ) {
+        translatedFeedCardEntries.update { current ->
+            current
+                .filterKeys { it.itemId != source.itemId } + (source to entry)
+        }
+    }
 
     val pagedNavDrawerItems: Flow<PagingData<FeedUnreadCount>> =
         repository
@@ -481,6 +622,54 @@ class FeedViewModel(
 
     override fun setRead(value: Boolean) {
         repository.setFeedListFilterRead(value)
+    }
+}
+
+private data class FeedCardTranslationConfig(
+    val enabled: Boolean,
+    val settings: AISettings,
+    val language: TranslationLanguage,
+)
+
+private fun FeedCardTranslationConfig.isActive(): Boolean = enabled && settings.isValid
+
+@Immutable
+class TranslatedFeedCards internal constructor(
+    val generation: Int = 0,
+    private val items: Map<FeedCardSource, FeedListItem> = emptyMap(),
+) {
+    fun merge(item: FeedListItem): FeedListItem =
+        items[FeedCardSource.from(item)]?.let { translatedItem ->
+            item.copy(
+                title = translatedItem.title.ifBlank { item.title },
+                snippet = translatedItem.snippet.ifBlank { item.snippet },
+            )
+        } ?: item
+}
+
+private data class FeedCardTranslationRequest(
+    val itemId: Long,
+    val sourceTitle: String,
+    val sourceSnippet: String,
+)
+
+private data class FeedCardTranslationEntry(
+    val item: FeedListItem,
+    val isComplete: Boolean,
+)
+
+internal data class FeedCardSource(
+    val itemId: Long,
+    val title: String,
+    val snippet: String,
+) {
+    companion object {
+        fun from(item: FeedListItem): FeedCardSource =
+            FeedCardSource(
+                itemId = item.id,
+                title = item.title,
+                snippet = item.snippet,
+            )
     }
 }
 

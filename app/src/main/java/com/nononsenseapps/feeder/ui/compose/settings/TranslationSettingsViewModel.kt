@@ -25,6 +25,8 @@ class TranslationSettingsViewModel(
     val enableTranslation: StateFlow<Boolean> = repository.enableTranslation
     val translationLanguage: StateFlow<TranslationLanguage> = repository.translationLanguage
     val translationTimeout: StateFlow<Int> = repository.translationTimeout
+    val translateArticlePreviewsByDefault: StateFlow<Boolean> = repository.translateArticlePreviewsByDefault
+    val translateArticlesByDefault: StateFlow<Boolean> = repository.translateArticlesByDefault
 
     fun setTranslationEnabled(enabled: Boolean) {
         viewModelScope.launch {
@@ -47,6 +49,18 @@ class TranslationSettingsViewModel(
     fun setTranslationTimeout(timeoutSeconds: Int) {
         viewModelScope.launch {
             repository.setTranslationTimeout(timeoutSeconds)
+        }
+    }
+
+    fun setTranslateArticlePreviewsByDefault(enabled: Boolean) {
+        viewModelScope.launch {
+            repository.setTranslateArticlePreviewsByDefault(enabled)
+        }
+    }
+
+    fun setTranslateArticlesByDefault(enabled: Boolean) {
+        viewModelScope.launch {
+            repository.setTranslateArticlesByDefault(enabled)
         }
     }
 }

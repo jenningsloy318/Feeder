@@ -3,6 +3,7 @@ package com.nononsenseapps.feeder.archmodel
 import android.app.Application
 import com.nononsenseapps.feeder.ApplicationCoroutineScope
 import com.nononsenseapps.feeder.FeederApplication
+import com.nononsenseapps.feeder.background.runOnceRssSync
 import com.nononsenseapps.feeder.db.room.Feed
 import com.nononsenseapps.feeder.db.room.ID_ALL_FEEDS
 import com.nononsenseapps.feeder.db.room.ID_SAVED_ARTICLES
@@ -87,6 +88,20 @@ class RepositoryTest : DIAware {
     @Before
     fun setup() {
         MockKAnnotations.init(this, relaxUnitFun = true, relaxed = true)
+
+        // Prevent Repository.init's feeder-news coroutine from reaching the real
+        // JobScheduler path, which crashes on the JVM and leaks an uncaught
+        // exception into unrelated test classes (UncaughtExceptionsBeforeTest).
+        mockkStatic("com.nononsenseapps.feeder.background.RssSyncJobKt")
+        every {
+            runOnceRssSync(
+                di = any(),
+                feedId = any(),
+                feedTag = any(),
+                forceNetwork = any(),
+                triggeredByUser = any(),
+            )
+        } just Runs
 
         every { settingsStore.syncOnlyWhenCharging } returns MutableStateFlow(false)
         every { settingsStore.syncOnlyOnWifi } returns MutableStateFlow(false)

@@ -427,6 +427,16 @@ class Repository(
 
     fun setTranslationEnabled(value: Boolean) = settingsStore.setTranslationEnabled(value)
 
+    // Translate feed previews by default
+    val translateArticlePreviewsByDefault = settingsStore.translateArticlePreviewsByDefault
+
+    fun setTranslateArticlePreviewsByDefault(value: Boolean) = settingsStore.setTranslateArticlePreviewsByDefault(value)
+
+    // Open articles translated by default
+    val translateArticlesByDefault = settingsStore.translateArticlesByDefault
+
+    fun setTranslateArticlesByDefault(value: Boolean) = settingsStore.setTranslateArticlesByDefault(value)
+
     // Enable Translation Setting (master toggle)
     val enableTranslation = settingsStore.enableTranslation
 

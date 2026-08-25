@@ -893,6 +893,26 @@ class SettingsStore(
         sp.edit().putBoolean(PREF_TRANSLATION_ENABLED, value).apply()
     }
 
+    // Translate feed list previews by default (titles and snippets)
+    private val _translateArticlePreviewsByDefault =
+        MutableStateFlow(sp.getBoolean(PREF_TRANSLATE_ARTICLE_PREVIEWS_BY_DEFAULT, false))
+    val translateArticlePreviewsByDefault = _translateArticlePreviewsByDefault.asStateFlow()
+
+    fun setTranslateArticlePreviewsByDefault(value: Boolean) {
+        _translateArticlePreviewsByDefault.value = value
+        sp.edit().putBoolean(PREF_TRANSLATE_ARTICLE_PREVIEWS_BY_DEFAULT, value).apply()
+    }
+
+    // Open articles translated by default
+    private val _translateArticlesByDefault =
+        MutableStateFlow(sp.getBoolean(PREF_TRANSLATE_ARTICLES_BY_DEFAULT, false))
+    val translateArticlesByDefault = _translateArticlesByDefault.asStateFlow()
+
+    fun setTranslateArticlesByDefault(value: Boolean) {
+        _translateArticlesByDefault.value = value
+        sp.edit().putBoolean(PREF_TRANSLATE_ARTICLES_BY_DEFAULT, value).apply()
+    }
+
     private val _enableTranslation = MutableStateFlow(sp.getBoolean(PREF_ENABLE_TRANSLATION, true))
     val enableTranslation = _enableTranslation.asStateFlow()
 
@@ -1190,6 +1210,8 @@ enum class UserSettings(
 
     // Translation settings
     SETTING_ENABLE_TRANSLATION(key = PREF_ENABLE_TRANSLATION),
+    SETTING_TRANSLATE_ARTICLE_PREVIEWS_BY_DEFAULT(key = PREF_TRANSLATE_ARTICLE_PREVIEWS_BY_DEFAULT),
+    SETTING_TRANSLATE_ARTICLES_BY_DEFAULT(key = PREF_TRANSLATE_ARTICLES_BY_DEFAULT),
     SETTINGS_FORCE_SINGLE_COLUMN(key = PREF_FORCE_SINGLE_COLUMN),
     ;
 

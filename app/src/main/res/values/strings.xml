@@ -370,6 +370,10 @@
   <string name="translation_language_hindi">Hindi</string>
   <string name="translation_timeout_title">Translation Timeout</string>
   <string name="translation_timeout_description">Maximum time to wait for translation (30–600 seconds)</string>
+  <string name="translate_feed_previews_by_default_title">Translate article previews</string>
+  <string name="translate_feed_previews_by_default_description">Automatically translate feed list titles and snippets</string>
+  <string name="translate_articles_by_default_title">Translate articles by default</string>
+  <string name="translate_articles_by_default_description">Automatically start translating articles when opened</string>
   <string name="translation_timeout_seconds">%d seconds</string>
   <string name="translation_timeout_seconds_label">seconds</string>
   <string name="selection_menu_title">Selection Menu</string>

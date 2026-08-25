@@ -55,6 +55,8 @@ fun TranslationSettingsScreen(
     val enableTranslation by viewModel.enableTranslation.collectAsStateWithLifecycle()
     val translationLanguage by viewModel.translationLanguage.collectAsStateWithLifecycle()
     val translationTimeout by viewModel.translationTimeout.collectAsStateWithLifecycle()
+    val translateArticlePreviewsByDefault by viewModel.translateArticlePreviewsByDefault.collectAsStateWithLifecycle()
+    val translateArticlesByDefault by viewModel.translateArticlesByDefault.collectAsStateWithLifecycle()
 
     var languageMenuExpanded by remember { mutableStateOf(false) }
 
@@ -125,6 +127,26 @@ fun TranslationSettingsScreen(
                 description = stringResource(R.string.translation_timeout_description),
                 timeoutSeconds = translationTimeout,
                 onTimeoutChange = { viewModel.setTranslationTimeout(it) },
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            SwitchSetting(
+                title = stringResource(R.string.translate_feed_previews_by_default_title),
+                checked = translateArticlePreviewsByDefault,
+                onCheckedChange = { viewModel.setTranslateArticlePreviewsByDefault(it) },
+                description = stringResource(R.string.translate_feed_previews_by_default_description),
+                enabled = enableTranslation && translationEnabled,
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            SwitchSetting(
+                title = stringResource(R.string.translate_articles_by_default_title),
+                checked = translateArticlesByDefault,
+                onCheckedChange = { viewModel.setTranslateArticlesByDefault(it) },
+                description = stringResource(R.string.translate_articles_by_default_description),
+                enabled = enableTranslation && translationEnabled,
             )
         }
     }

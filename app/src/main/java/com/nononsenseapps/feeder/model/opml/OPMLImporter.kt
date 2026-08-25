@@ -168,6 +168,10 @@ open class OPMLImporter(
 
             // Translation settings
             UserSettings.SETTING_ENABLE_TRANSLATION -> settingsStore.setEnableTranslation(value.toBoolean())
+            UserSettings.SETTING_TRANSLATE_ARTICLE_PREVIEWS_BY_DEFAULT ->
+                settingsStore.setTranslateArticlePreviewsByDefault(value.toBoolean())
+            UserSettings.SETTING_TRANSLATE_ARTICLES_BY_DEFAULT ->
+                settingsStore.setTranslateArticlesByDefault(value.toBoolean())
         }
     }
 

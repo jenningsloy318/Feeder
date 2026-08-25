@@ -247,6 +247,27 @@ class ArticleViewModel(
             }
         }
 
+        // Auto-translate article if setting is enabled
+        viewModelScope.launch {
+            try {
+                // Wait for article to be available
+                val article = articleFlow.filterNotNull().first()
+
+                val autoTranslate =
+                    repository.enableTranslation.first() &&
+                        repository.translationEnabled.first() &&
+                        repository.translateArticlesByDefault.first() &&
+                        repository.aiSettings.isValid
+
+                if (autoTranslate) {
+                    logDebug(LOG_TAG, "Auto-translate triggered for article ${article.id}")
+                    translate()
+                }
+            } catch (e: Exception) {
+                Log.e(LOG_TAG, "Error in auto-translate logic", e)
+            }
+        }
+
         viewModelScope.launch {
             combine(
                 articleFlow,

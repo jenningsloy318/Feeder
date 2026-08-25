@@ -344,7 +344,7 @@ class FeedViewModel(
                 feedScreenTitle = params[8] as ScreenTitle,
                 showEditDialog = params[9] as Boolean,
                 showDeleteDialog = params[10] as Boolean,
-                showRenameTagDialog = params[29] as Boolean,
+                showRenameTagDialog = params[28] as Boolean,
                 visibleFeeds = params[11] as List<FeedTitle>,
                 isArticleOpen = params[12] as Boolean,
                 // 13
@@ -365,7 +365,7 @@ class FeedViewModel(
                 showReadingTime = params[24] as Boolean,
                 showTitleUnreadCount = params[25] as Boolean,
                 isOpenDrawerOnFab = params[27] as Boolean,
-                forceSingleColumn = params[28] as Boolean,
+                forceSingleColumn = params[30] as Boolean,
             )
         }.stateIn(
             viewModelScope,

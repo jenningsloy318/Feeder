@@ -175,7 +175,7 @@ fun ProviderEditForm(
     val focusManager = LocalFocusManager.current
     val isFormValid =
         uiState.name.isNotBlank() &&
-            uiState.apiKey.isNotBlank()
+            (uiState.isConfigurationless || uiState.apiKey.isNotBlank())
 
     Column(
         modifier =

@@ -155,6 +155,12 @@ class BergamotModelManager(
 
     fun getRegistryEntries(): List<BergamotModelRegistryEntry> = loadRegistry(allowNetwork = false).orEmpty()
 
+    /** Fetches (or reloads) the model registry, allowing network access. */
+    suspend fun refreshRegistry(): List<BergamotModelRegistryEntry> =
+        withContext(Dispatchers.IO) {
+            loadRegistry(allowNetwork = true).orEmpty()
+        }
+
     private fun loadRegistry(
         allowNetwork: Boolean = true,
         sourceLanguage: String? = null,

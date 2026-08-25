@@ -383,6 +383,9 @@
   <string name="local_translation_setup_bergamot">If the OS has no on-device translator, Feeder downloads Mozilla/Bergamot models for supported %1$s language pairs.</string>
   <string name="downloaded_translation_models">Downloaded translation models</string>
   <string name="downloaded_translation_models_desc">Mozilla/Bergamot models stored on-device for offline translation. Delete unused language pairs to free up space.</string>
+  <string name="download_offline_translation_models">Download offline translation models</string>
+  <string name="no_translation_models_available">No translation models are available. Check your connection and try again.</string>
+  <string name="translation_model_downloading">Downloading %1$s → %2$s…</string>
   <string name="translation_timeout_seconds">%d seconds</string>
   <string name="translation_timeout_seconds_label">seconds</string>
   <string name="selection_menu_title">Selection Menu</string>

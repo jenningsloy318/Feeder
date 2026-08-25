@@ -5,6 +5,7 @@ import com.nononsenseapps.feeder.ai.model.AISettings
 import com.nononsenseapps.feeder.ai.model.TranslationLanguage
 import com.nononsenseapps.feeder.archmodel.Repository
 import com.nononsenseapps.feeder.base.DIAwareViewModel
+import com.nononsenseapps.feeder.localtranslation.BergamotModelDownloadProgress
 import com.nononsenseapps.feeder.localtranslation.BergamotModelManager
 import com.nononsenseapps.feeder.localtranslation.LanguagePairInfo
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -41,6 +42,14 @@ class TranslationSettingsViewModel(
     private val mutableDownloadedLanguagePairs = MutableStateFlow<List<LanguagePairInfo>>(emptyList())
     val downloadedLanguagePairs: StateFlow<List<LanguagePairInfo>> = mutableDownloadedLanguagePairs.asStateFlow()
 
+    private val mutableAvailableLanguagePairs = MutableStateFlow<List<LanguagePairInfo>>(emptyList())
+    val availableLanguagePairs: StateFlow<List<LanguagePairInfo>> = mutableAvailableLanguagePairs.asStateFlow()
+
+    val modelDownloadProgress: StateFlow<BergamotModelDownloadProgress?> = bergamotModelManager.downloadProgress
+
+    private val mutableIsLoadingRegistry = MutableStateFlow(false)
+    val isLoadingRegistry: StateFlow<Boolean> = mutableIsLoadingRegistry.asStateFlow()
+
     val isOnDeviceProvider: StateFlow<Boolean> =
         repository.aiSettingsFlow
             .map { it is AISettings.OnDevice }
@@ -48,6 +57,7 @@ class TranslationSettingsViewModel(
 
     init {
         refreshDownloadedLanguagePairs()
+        refreshAvailableLanguagePairs()
     }
 
     fun setTranslationEnabled(enabled: Boolean) {
@@ -90,6 +100,34 @@ class TranslationSettingsViewModel(
         viewModelScope.launch {
             bergamotModelManager.deleteLanguagePair(pair.sourceLanguage, pair.targetLanguage)
             refreshDownloadedLanguagePairs()
+        }
+    }
+
+    /** Downloads an offline translation model pair through [BergamotModelManager.prepare]. */
+    fun downloadLanguagePair(pair: LanguagePairInfo) {
+        viewModelScope.launch {
+            bergamotModelManager.prepare(pair.sourceLanguage, pair.targetLanguage)
+            refreshDownloadedLanguagePairs()
+        }
+    }
+
+    fun refreshAvailableLanguagePairs() {
+        viewModelScope.launch {
+            mutableIsLoadingRegistry.value = true
+            try {
+                mutableAvailableLanguagePairs.value =
+                    bergamotModelManager
+                        .refreshRegistry()
+                        .map { entry ->
+                            LanguagePairInfo(
+                                sourceLanguage = entry.from,
+                                targetLanguage = entry.to,
+                                sizeBytes = entry.files.values.sumOf { it.size },
+                            )
+                        }
+            } finally {
+                mutableIsLoadingRegistry.value = false
+            }
         }
     }
 

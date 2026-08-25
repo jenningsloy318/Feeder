@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -20,12 +22,16 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -60,6 +66,9 @@ fun TranslationSettingsScreen(
     val translateArticlePreviewsByDefault by viewModel.translateArticlePreviewsByDefault.collectAsStateWithLifecycle()
     val translateArticlesByDefault by viewModel.translateArticlesByDefault.collectAsStateWithLifecycle()
     val downloadedLanguagePairs by viewModel.downloadedLanguagePairs.collectAsStateWithLifecycle()
+    val availableLanguagePairs by viewModel.availableLanguagePairs.collectAsStateWithLifecycle()
+    val modelDownloadProgress by viewModel.modelDownloadProgress.collectAsStateWithLifecycle()
+    val isLoadingRegistry by viewModel.isLoadingRegistry.collectAsStateWithLifecycle()
     val isOnDeviceProvider by viewModel.isOnDeviceProvider.collectAsStateWithLifecycle()
 
     var languageMenuExpanded by remember { mutableStateOf(false) }
@@ -159,6 +168,11 @@ fun TranslationSettingsScreen(
                 DownloadedTranslationModelsSection(
                     languagePairs = downloadedLanguagePairs,
                     onDeleteLanguagePair = viewModel::deleteLanguagePair,
+                    availableLanguagePairs = availableLanguagePairs,
+                    modelDownloadProgress = modelDownloadProgress,
+                    isLoadingRegistry = isLoadingRegistry,
+                    onDownloadLanguagePair = viewModel::downloadLanguagePair,
+                    onRefreshAvailableLanguagePairs = viewModel::refreshAvailableLanguagePairs,
                 )
             }
         }
@@ -329,8 +343,26 @@ private fun TimeoutSetting(
 private fun DownloadedTranslationModelsSection(
     languagePairs: List<com.nononsenseapps.feeder.localtranslation.LanguagePairInfo>,
     onDeleteLanguagePair: (com.nononsenseapps.feeder.localtranslation.LanguagePairInfo) -> Unit,
+    availableLanguagePairs: List<com.nononsenseapps.feeder.localtranslation.LanguagePairInfo>,
+    modelDownloadProgress: com.nononsenseapps.feeder.localtranslation.BergamotModelDownloadProgress?,
+    isLoadingRegistry: Boolean,
+    onDownloadLanguagePair: (com.nononsenseapps.feeder.localtranslation.LanguagePairInfo) -> Unit,
+    onRefreshAvailableLanguagePairs: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    var showDownloadDialog by remember { mutableStateOf(false) }
+
+    if (showDownloadDialog) {
+        DownloadLanguagePairDialog(
+            availableLanguagePairs = availableLanguagePairs,
+            downloadedLanguagePairs = languagePairs,
+            modelDownloadProgress = modelDownloadProgress,
+            isLoadingRegistry = isLoadingRegistry,
+            onDownloadLanguagePair = onDownloadLanguagePair,
+            onDismiss = { showDownloadDialog = false },
+        )
+    }
+
     Column(modifier = modifier.fillMaxWidth()) {
         Text(
             text = stringResource(R.string.downloaded_translation_models),
@@ -374,5 +406,113 @@ private fun DownloadedTranslationModelsSection(
                 }
             }
         }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        OutlinedButton(
+            onClick = {
+                onRefreshAvailableLanguagePairs()
+                showDownloadDialog = true
+            },
+            enabled = modelDownloadProgress == null,
+        ) {
+            Text(stringResource(R.string.download_offline_translation_models))
+        }
     }
+}
+
+@Composable
+private fun DownloadLanguagePairDialog(
+    availableLanguagePairs: List<com.nononsenseapps.feeder.localtranslation.LanguagePairInfo>,
+    downloadedLanguagePairs: List<com.nononsenseapps.feeder.localtranslation.LanguagePairInfo>,
+    modelDownloadProgress: com.nononsenseapps.feeder.localtranslation.BergamotModelDownloadProgress?,
+    isLoadingRegistry: Boolean,
+    onDownloadLanguagePair: (com.nononsenseapps.feeder.localtranslation.LanguagePairInfo) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val downloadedKeys =
+        remember(downloadedLanguagePairs) {
+            downloadedLanguagePairs
+                .map { it.sourceLanguage to it.targetLanguage }
+                .toSet()
+        }
+    val downloadablePairs =
+        remember(availableLanguagePairs, downloadedKeys) {
+            availableLanguagePairs
+                .filterNot { (it.sourceLanguage to it.targetLanguage) in downloadedKeys }
+                .sortedWith(compareBy({ it.sourceLanguage }, { it.targetLanguage }))
+        }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(stringResource(R.string.download_offline_translation_models))
+        },
+        text = {
+            Column {
+                modelDownloadProgress?.let { progress ->
+                    val fraction =
+                        if (progress.totalBytes > 0 && !progress.isIndeterminate) {
+                            progress.downloadedBytes.toFloat() / progress.totalBytes.toFloat()
+                        } else {
+                            null
+                        }
+                    Text(
+                        text =
+                            stringResource(
+                                R.string.translation_model_downloading,
+                                progress.sourceLanguage,
+                                progress.targetLanguage,
+                            ),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                    if (fraction != null) {
+                        LinearProgressIndicator(
+                            progress = { fraction },
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                    } else {
+                        LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+
+                when {
+                    isLoadingRegistry -> LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                    downloadablePairs.isEmpty() ->
+                        Text(
+                            text = stringResource(R.string.no_translation_models_available),
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                    else ->
+                        LazyColumn(modifier = Modifier.heightIn(max = 360.dp)) {
+                            items(downloadablePairs) { pair ->
+                                Row(
+                                    modifier =
+                                        Modifier
+                                            .fillMaxWidth()
+                                            .clickable(enabled = modelDownloadProgress == null) {
+                                                onDownloadLanguagePair(pair)
+                                            }.padding(vertical = 10.dp),
+                                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+                                ) {
+                                    Text(
+                                        text =
+                                            "${pair.sourceLanguage} → ${pair.targetLanguage} " +
+                                                "(${pair.sizeBytes / (1024f * 1024f).toInt()} MB)",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        modifier = Modifier.weight(1f),
+                                    )
+                                }
+                            }
+                        }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.cancel))
+            }
+        },
+    )
 }

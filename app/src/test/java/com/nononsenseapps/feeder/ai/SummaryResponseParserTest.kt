@@ -12,7 +12,6 @@ import kotlin.test.assertTrue
  * Maps: SCENARIO-001 through SCENARIO-014.
  */
 class SummaryResponseParserTest {
-
     private val errorMessage = "Could not generate summary. Please try again."
 
     // ===== SCENARIO-001: Well-formed JSON response =====
@@ -545,9 +544,10 @@ Second paragraph."""
 
     @Test
     fun sanitizeErrorMessage_errorWithJson_returnsSanitized() {
-        val result = SummaryResponseParser.sanitizeErrorMessage(
-            """Request failed: {"error":"rate_limit"}""",
-        )
+        val result =
+            SummaryResponseParser.sanitizeErrorMessage(
+                """Request failed: {"error":"rate_limit"}""",
+            )
 
         assertEquals("Summary generation failed. Please try again.", result)
     }
@@ -611,31 +611,32 @@ I hope this summary captures the key points of the article!"""
 
     @Test
     fun parse_neverThrows_withAnyInput() {
-        val inputs = listOf(
-            "",
-            "   ",
-            "normal text",
-            "{}",
-            "{",
-            "}",
-            "[]",
-            "[",
-            "]",
-            "```",
-            "```json",
-            "```json\n{",
-            """{"broken""",
-            """{"summary":}""",
-            """{"summary":null}""",
-            "null",
-            "true",
-            "42",
-            "\"just a string\"",
-            "{\"a\":{\"b\":{\"c\":{\"d\":\"deep\"}}}}",
-            "Lang: en",
-            "Lang:",
-            "Lang: en\n",
-        )
+        val inputs =
+            listOf(
+                "",
+                "   ",
+                "normal text",
+                "{}",
+                "{",
+                "}",
+                "[]",
+                "[",
+                "]",
+                "```",
+                "```json",
+                "```json\n{",
+                """{"broken""",
+                """{"summary":}""",
+                """{"summary":null}""",
+                "null",
+                "true",
+                "42",
+                "\"just a string\"",
+                "{\"a\":{\"b\":{\"c\":{\"d\":\"deep\"}}}}",
+                "Lang: en",
+                "Lang:",
+                "Lang: en\n",
+            )
 
         for (input in inputs) {
             try {

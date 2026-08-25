@@ -393,6 +393,17 @@ class SettingsStoreTest : DIAware {
     }
 
     @Test
+    fun forceSingleColumn() {
+        store.setForceSingleColumn(true)
+
+        verify {
+            sp.edit().putBoolean(PREF_FORCE_SINGLE_COLUMN, true).apply()
+        }
+
+        assertEquals(true, store.forceSingleColumn.value)
+    }
+
+    @Test
     fun applyBlocklistToSummariesDefaultsToFalse() {
         every { sp.getBoolean(PREF_BLOCKLIST_APPLY_TO_SUMMARIES, false) } returns false
 
@@ -499,5 +510,38 @@ class SettingsStoreTest : DIAware {
 
         assertEquals(false, store.enableTranslation.value)
         assertEquals(true, store.translationEnabled.value)
+    }
+
+    @Test
+    fun applyBlocklistToLinksDefaultsToFalse() {
+        every { sp.getBoolean(PREF_BLOCKLIST_APPLY_TO_LINKS, false) } returns false
+
+        assertEquals(false, store.applyBlocklistToLinks.value)
+    }
+
+    @Test
+    fun applyBlocklistToLinksSetToTrue() {
+        store.setApplyBlocklistToLinks(true)
+
+        verify {
+            sp.edit().putBoolean(PREF_BLOCKLIST_APPLY_TO_LINKS, true).apply()
+        }
+
+        assertEquals(true, store.applyBlocklistToLinks.value)
+    }
+
+    @Test
+    fun applyBlocklistToLinksSetToFalse() {
+        every { sp.getBoolean(PREF_BLOCKLIST_APPLY_TO_LINKS, false) } returns true
+        clearMocks(sp, answers = false)
+        every { sp.getBoolean(PREF_BLOCKLIST_APPLY_TO_LINKS, false) } returns true
+
+        store.setApplyBlocklistToLinks(false)
+
+        verify {
+            sp.edit().putBoolean(PREF_BLOCKLIST_APPLY_TO_LINKS, false).apply()
+        }
+
+        assertEquals(false, store.applyBlocklistToLinks.value)
     }
 }

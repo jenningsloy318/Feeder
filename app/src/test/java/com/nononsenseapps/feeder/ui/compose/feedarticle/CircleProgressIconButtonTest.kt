@@ -56,7 +56,9 @@ class CircleProgressIconButtonTest {
     fun aiSummaryResult_mapsToIdleState() {
         val state =
             AISummaryState.Result(
-                value = com.nononsenseapps.feeder.ai.AIClient.SummaryResult.Error(content = "test"),
+                value =
+                    com.nononsenseapps.feeder.ai.AIClient.SummaryResult
+                        .Error(content = "test"),
             )
         val isInProgress = state is AISummaryState.Loading
         assertEquals(false, isInProgress)
@@ -235,8 +237,8 @@ class CircleProgressIconButtonTest {
                             AISummaryState.Result(
                                 value =
                                     com.nononsenseapps.feeder.ai.AIClient.SummaryResult.Error(
-                                content = "Should not reach here",
-                            ),
+                                        content = "Should not reach here",
+                                    ),
                             )
                     }
                 }
@@ -404,7 +406,9 @@ class CircleProgressIconButtonTest {
             aiSummary.value = AISummaryState.Loading
             aiSummary.value =
                 AISummaryState.Result(
-                    value = com.nononsenseapps.feeder.ai.AIClient.SummaryResult.Error(content = "Summary"),
+                    value =
+                        com.nononsenseapps.feeder.ai.AIClient.SummaryResult
+                            .Error(content = "Summary"),
                 )
             assertIs<AISummaryState.Result>(aiSummary.value)
 

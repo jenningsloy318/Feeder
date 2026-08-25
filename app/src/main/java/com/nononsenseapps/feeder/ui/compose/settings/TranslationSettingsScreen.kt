@@ -112,7 +112,7 @@ fun TranslationSettingsScreen(
             LanguageSelectorSetting(
                 title = stringResource(R.string.translation_target_language_title),
                 currentLanguage = translationLanguage,
-                onLanguageSelected = { viewModel.setTranslationLanguage(it) },
+                onLanguageSelect = { viewModel.setTranslationLanguage(it) },
                 menuExpanded = languageMenuExpanded,
                 onMenuExpandedChange = { languageMenuExpanded = it },
             )
@@ -134,7 +134,7 @@ fun TranslationSettingsScreen(
 private fun LanguageSelectorSetting(
     title: String,
     currentLanguage: TranslationLanguage,
-    onLanguageSelected: (TranslationLanguage) -> Unit,
+    onLanguageSelect: (TranslationLanguage) -> Unit,
     menuExpanded: Boolean,
     onMenuExpandedChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
@@ -195,7 +195,7 @@ private fun LanguageSelectorSetting(
                     }
                 },
                 onClick = {
-                    onLanguageSelected(language)
+                    onLanguageSelect(language)
                     onMenuExpandedChange(false)
                 },
             )

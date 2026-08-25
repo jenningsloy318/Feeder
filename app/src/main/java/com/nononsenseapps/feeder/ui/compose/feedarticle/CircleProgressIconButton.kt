@@ -39,16 +39,16 @@ fun CircleProgressIconButton(
 ) {
     if (isInProgress) {
         Box(
-            modifier = modifier
-                .size(48.dp)
-                .clickable(
-                    onClick = onCancel,
-                    role = Role.Button,
-                )
-                .semantics {
-                    this.contentDescription = progressContentDescription
-                    this.role = Role.Button
-                },
+            modifier =
+                modifier
+                    .size(48.dp)
+                    .clickable(
+                        onClick = onCancel,
+                        role = Role.Button,
+                    ).semantics {
+                        this.contentDescription = progressContentDescription
+                        this.role = Role.Button
+                    },
             contentAlignment = Alignment.Center,
         ) {
             if (progressFraction != null) {
@@ -66,12 +66,13 @@ fun CircleProgressIconButton(
                 )
             }
             Box(
-                modifier = Modifier
-                    .size(8.dp)
-                    .background(
-                        MaterialTheme.colorScheme.onSurface,
-                        RoundedCornerShape(1.dp),
-                    ),
+                modifier =
+                    Modifier
+                        .size(8.dp)
+                        .background(
+                            MaterialTheme.colorScheme.onSurface,
+                            RoundedCornerShape(1.dp),
+                        ),
             )
         }
     } else {

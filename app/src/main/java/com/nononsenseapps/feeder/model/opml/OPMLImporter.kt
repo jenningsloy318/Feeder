@@ -94,6 +94,7 @@ open class OPMLImporter(
             UserSettings.SETTINGS_FILTER_READ -> settingsStore.setFeedListFilterRead(value.toBoolean())
             UserSettings.SETTINGS_LIST_SHOW_ONLY_TITLES -> settingsStore.setShowOnlyTitles(value.toBoolean())
             UserSettings.SETTING_OPEN_ADJACENT -> settingsStore.setOpenAdjacent(value.toBoolean())
+            UserSettings.SETTING_USE_IN_APP_AUDIO_PLAYER -> settingsStore.setUseInAppAudioPlayer(value.toBoolean())
             UserSettings.SETTING_PAGING_MODE -> settingsStore.setIsPagingMode(value.toBoolean())
             UserSettings.SETTING_ANIMATED_PAGING -> settingsStore.setIsAnimatedPaging(value.toBoolean())
             UserSettings.SETTING_FONT ->
@@ -106,6 +107,7 @@ open class OPMLImporter(
             UserSettings.SETTING_LIST_SHOW_READING_TIME -> settingsStore.setShowReadingTime(value.toBoolean())
             UserSettings.SETTING_OPEN_DRAWER_ON_FAB -> settingsStore.setOpenDrawerOnFab(value.toBoolean())
             UserSettings.SETTING_SHOW_TITLE_UNREAD_COUNT -> settingsStore.setShowTitleUnreadCount(value.toBoolean())
+            UserSettings.SETTINGS_FORCE_SINGLE_COLUMN -> settingsStore.setForceSingleColumn(value.toBoolean())
             UserSettings.SETTING_MAX_ITEM_COUNT_PER_FEED -> settingsStore.setMaxCountPerFeed(value.toIntOrNull() ?: 100)
 
             // AI Provider Type
@@ -159,10 +161,10 @@ open class OPMLImporter(
                     settingsStore.anthropicSettings.value.copy(timeoutSeconds = value.toIntOrNull() ?: 90),
                 )
 
-            // Summary settings
             UserSettings.SETTING_SUMMARY_ENABLED -> settingsStore.setSummaryEnabled(value.toBoolean())
             UserSettings.SETTING_ENABLE_SUMMARY -> settingsStore.setEnableSummary(value.toBoolean())
             UserSettings.SETTING_BLOCKLIST_APPLY_TO_SUMMARIES -> settingsStore.setApplyBlocklistToSummaries(value.toBoolean())
+            UserSettings.SETTING_BLOCKLIST_APPLY_TO_LINKS -> settingsStore.setApplyBlocklistToLinks(value.toBoolean())
 
             // Translation settings
             UserSettings.SETTING_ENABLE_TRANSLATION -> settingsStore.setEnableTranslation(value.toBoolean())

@@ -7,7 +7,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class TranslationPromptBuilderTest {
-
     // ===== buildTranslationPrompt() =====
 
     @Test
@@ -28,10 +27,11 @@ class TranslationPromptBuilderTest {
 
     @Test
     fun buildTranslationPrompt_containsParagraphIndices() {
-        val texts = listOf(
-            TranslatableText.fromPlainText("First"),
-            TranslatableText.fromPlainText("Second"),
-        )
+        val texts =
+            listOf(
+                TranslatableText.fromPlainText("First"),
+                TranslatableText.fromPlainText("Second"),
+            )
         val prompt = TranslationPromptBuilder.buildTranslationPrompt(texts, TranslationLanguage.CHINESE)
 
         assertTrue(prompt.contains("\"index\": 1"), "Prompt should contain index 1")
@@ -40,11 +40,12 @@ class TranslationPromptBuilderTest {
 
     @Test
     fun buildTranslationPrompt_containsStructureDescriptions() {
-        val texts = listOf(
-            TranslatableText(text = "Title", elementType = ElementType.HEADING_2, nestingLevel = 0),
-            TranslatableText(text = "Content", elementType = ElementType.PARAGRAPH, nestingLevel = 0),
-            TranslatableText(text = "Item", elementType = ElementType.LIST_ITEM, nestingLevel = 1),
-        )
+        val texts =
+            listOf(
+                TranslatableText(text = "Title", elementType = ElementType.HEADING_2, nestingLevel = 0),
+                TranslatableText(text = "Content", elementType = ElementType.PARAGRAPH, nestingLevel = 0),
+                TranslatableText(text = "Item", elementType = ElementType.LIST_ITEM, nestingLevel = 1),
+            )
         val prompt = TranslationPromptBuilder.buildTranslationPrompt(texts, TranslationLanguage.CHINESE)
 
         assertTrue(prompt.contains("heading level 2"), "Prompt should contain heading type")
@@ -54,11 +55,12 @@ class TranslationPromptBuilderTest {
 
     @Test
     fun buildTranslationPrompt_containsExpectedParagraphCount() {
-        val texts = listOf(
-            TranslatableText.fromPlainText("One"),
-            TranslatableText.fromPlainText("Two"),
-            TranslatableText.fromPlainText("Three"),
-        )
+        val texts =
+            listOf(
+                TranslatableText.fromPlainText("One"),
+                TranslatableText.fromPlainText("Two"),
+                TranslatableText.fromPlainText("Three"),
+            )
         val prompt = TranslationPromptBuilder.buildTranslationPrompt(texts, TranslationLanguage.CHINESE)
 
         assertTrue(prompt.contains("3"), "Prompt should mention expected count")
@@ -75,9 +77,10 @@ class TranslationPromptBuilderTest {
 
     @Test
     fun buildTranslationPrompt_containsBlockquoteDescription() {
-        val texts = listOf(
-            TranslatableText(text = "Quoted text", elementType = ElementType.BLOCKQUOTE, nestingLevel = 1),
-        )
+        val texts =
+            listOf(
+                TranslatableText(text = "Quoted text", elementType = ElementType.BLOCKQUOTE, nestingLevel = 1),
+            )
         val prompt = TranslationPromptBuilder.buildTranslationPrompt(texts, TranslationLanguage.CHINESE)
 
         assertTrue(prompt.contains("blockquote (nesting level: 1)"), "Prompt should contain blockquote type")
@@ -147,13 +150,14 @@ class TranslationPromptBuilderTest {
 
     @Test
     fun buildTranslationPrompt_preservesXmlTagsInInputText() {
-        val texts = listOf(
-            TranslatableText(
-                text = "Click <link href=\"https://example.com\"><b>here</b></link> for info",
-                elementType = ElementType.PARAGRAPH,
-                nestingLevel = 0,
-            ),
-        )
+        val texts =
+            listOf(
+                TranslatableText(
+                    text = "Click <link href=\"https://example.com\"><b>here</b></link> for info",
+                    elementType = ElementType.PARAGRAPH,
+                    nestingLevel = 0,
+                ),
+            )
         val prompt = TranslationPromptBuilder.buildTranslationPrompt(texts, TranslationLanguage.CHINESE)
 
         assertTrue(
@@ -167,13 +171,14 @@ class TranslationPromptBuilderTest {
 
     @Test
     fun parseTranslationResponse_preservesXmlTagsInTranslation() {
-        val response = """
-        {
-          "translations": [
-            {"index": 1, "translation": "点击<link href=\"https://example.com\">这里</link>获取<b>重要</b>信息"}
-          ]
-        }
-        """.trimIndent()
+        val response =
+            """
+            {
+              "translations": [
+                {"index": 1, "translation": "点击<link href=\"https://example.com\">这里</link>获取<b>重要</b>信息"}
+              ]
+            }
+            """.trimIndent()
 
         val result = TranslationPromptBuilder.parseTranslationResponse(response, 1)
 
@@ -184,13 +189,14 @@ class TranslationPromptBuilderTest {
 
     @Test
     fun parseTranslationResponse_preservesCodeTagContent() {
-        val response = """
-        {
-          "translations": [
-            {"index": 1, "translation": "使用 <code>map()</code> 函数"}
-          ]
-        }
-        """.trimIndent()
+        val response =
+            """
+            {
+              "translations": [
+                {"index": 1, "translation": "使用 <code>map()</code> 函数"}
+              ]
+            }
+            """.trimIndent()
 
         val result = TranslationPromptBuilder.parseTranslationResponse(response, 1)
 
@@ -201,15 +207,16 @@ class TranslationPromptBuilderTest {
 
     @Test
     fun parseTranslationResponse_parsesValidJson() {
-        val response = """
-        {
-          "targetLanguage": "Chinese",
-          "translations": [
-            {"index": 1, "translation": "你好"},
-            {"index": 2, "translation": "世界"}
-          ]
-        }
-        """.trimIndent()
+        val response =
+            """
+            {
+              "targetLanguage": "Chinese",
+              "translations": [
+                {"index": 1, "translation": "你好"},
+                {"index": 2, "translation": "世界"}
+              ]
+            }
+            """.trimIndent()
 
         val result = TranslationPromptBuilder.parseTranslationResponse(response, 2)
 
@@ -218,7 +225,8 @@ class TranslationPromptBuilderTest {
 
     @Test
     fun parseTranslationResponse_parsesMarkdownWrappedJson() {
-        val response = """
+        val response =
+            """
 Here's the translation:
 ```json
 {
@@ -227,7 +235,7 @@ Here's the translation:
   ]
 }
 ```
-        """.trimIndent()
+            """.trimIndent()
 
         val result = TranslationPromptBuilder.parseTranslationResponse(response, 1)
 
@@ -236,7 +244,8 @@ Here's the translation:
 
     @Test
     fun parseTranslationResponse_parsesMarkdownCodeBlockWithoutJsonTag() {
-        val response = """
+        val response =
+            """
 ```
 {
   "translations": [
@@ -244,7 +253,7 @@ Here's the translation:
   ]
 }
 ```
-        """.trimIndent()
+            """.trimIndent()
 
         val result = TranslationPromptBuilder.parseTranslationResponse(response, 1)
 
@@ -253,13 +262,14 @@ Here's the translation:
 
     @Test
     fun parseTranslationResponse_handlesEscapedCharactersInTranslation() {
-        val response = """
-        {
-          "translations": [
-            {"index": 1, "translation": "Line 1\nLine 2"}
-          ]
-        }
-        """.trimIndent()
+        val response =
+            """
+            {
+              "translations": [
+                {"index": 1, "translation": "Line 1\nLine 2"}
+              ]
+            }
+            """.trimIndent()
 
         val result = TranslationPromptBuilder.parseTranslationResponse(response, 1)
 
@@ -268,13 +278,14 @@ Here's the translation:
 
     @Test
     fun parseTranslationResponse_handlesEscapedQuotesInTranslation() {
-        val response = """
-        {
-          "translations": [
-            {"index": 1, "translation": "He said \"hello\""}
-          ]
-        }
-        """.trimIndent()
+        val response =
+            """
+            {
+              "translations": [
+                {"index": 1, "translation": "He said \"hello\""}
+              ]
+            }
+            """.trimIndent()
 
         val result = TranslationPromptBuilder.parseTranslationResponse(response, 1)
 
@@ -298,13 +309,14 @@ Here's the translation:
 
     @Test
     fun parseTranslationResponse_throwsOnWrongParagraphCount() {
-        val response = """
-        {
-          "translations": [
-            {"index": 1, "translation": "Hello"}
-          ]
-        }
-        """.trimIndent()
+        val response =
+            """
+            {
+              "translations": [
+                {"index": 1, "translation": "Hello"}
+              ]
+            }
+            """.trimIndent()
 
         try {
             TranslationPromptBuilder.parseTranslationResponse(response, 2)
@@ -319,14 +331,15 @@ Here's the translation:
 
     @Test
     fun parseTranslationResponse_sortsTranslationsByIndex() {
-        val response = """
-        {
-          "translations": [
-            {"index": 2, "translation": "Second"},
-            {"index": 1, "translation": "First"}
-          ]
-        }
-        """.trimIndent()
+        val response =
+            """
+            {
+              "translations": [
+                {"index": 2, "translation": "Second"},
+                {"index": 1, "translation": "First"}
+              ]
+            }
+            """.trimIndent()
 
         val result = TranslationPromptBuilder.parseTranslationResponse(response, 2)
 
@@ -425,23 +438,25 @@ Here's the translation:
 
     @Test
     fun extractJsonFromResponse_extractsFromJsonCodeBlock() {
-        val input = """
+        val input =
+            """
 Here's the result:
 ```json
 {"translations": []}
 ```
-        """.trimIndent()
+            """.trimIndent()
 
         assertEquals("{\"translations\": []}", TranslationPromptBuilder.extractJsonFromResponse(input))
     }
 
     @Test
     fun extractJsonFromResponse_extractsFromPlainCodeBlock() {
-        val input = """
+        val input =
+            """
 ```
 {"translations": []}
 ```
-        """.trimIndent()
+            """.trimIndent()
 
         assertEquals("{\"translations\": []}", TranslationPromptBuilder.extractJsonFromResponse(input))
     }

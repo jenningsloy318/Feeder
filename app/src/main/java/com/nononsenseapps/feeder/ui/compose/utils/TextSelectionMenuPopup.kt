@@ -16,7 +16,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
@@ -38,21 +37,22 @@ import com.nononsenseapps.feeder.util.ActivityLauncher
  * Displays a horizontal toolbar with user-configured items when text is selected,
  * positioned below the selection with a small gap.
  *
- * @param menuState Mutable state holding toolbar state (null = menu hidden)
+ * @param menuState Current toolbar state (null = menu hidden)
  * @param menuConfig Current menu configuration (order + visibility)
  * @param menuItems List of all available menu items
  * @param activityLauncher Launcher for third-party activities
- * @param onActionExecuted Callback invoked when any menu action completes
+ * @param onActionExecute Callback invoked when any menu action completes
  */
 @Composable
 fun TextSelectionMenuPopup(
-    menuState: MutableState<ToolbarState?>,
+    menuState: ToolbarState?,
+    onDismiss: () -> Unit,
     menuConfig: MenuConfig,
     menuItems: List<SelectionMenuItem>,
     activityLauncher: ActivityLauncher,
-    onActionExecuted: () -> Unit,
+    onActionExecute: () -> Unit,
 ) {
-    val state = menuState.value
+    val state = menuState
     if (state == null) {
         return
     }
@@ -85,8 +85,8 @@ fun TextSelectionMenuPopup(
         alignment = androidx.compose.ui.Alignment.TopStart,
         offset = offset,
         onDismissRequest = {
-            menuState.value = null
-            onActionExecuted()
+            onDismiss()
+            onActionExecute()
         },
         // Make popup non-focusable to preserve text selection
         // This prevents the toolbar from stealing focus from SelectionContainer
@@ -117,8 +117,8 @@ fun TextSelectionMenuPopup(
                                 context = context,
                                 activityLauncher = activityLauncher,
                             )
-                            menuState.value = null
-                            onActionExecuted()
+                            onDismiss()
+                            onActionExecute()
                         },
                     )
                 }

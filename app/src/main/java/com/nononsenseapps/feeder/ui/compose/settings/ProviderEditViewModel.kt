@@ -57,9 +57,10 @@ data class ProviderEditUiState(
         get() = provider.openAISettings?.modelId ?: provider.anthropicSettings?.modelId ?: ""
 
     val maxTokens: String
-        get() = provider.openAISettings?.maxTokens?.toString()
-            ?: provider.anthropicSettings?.maxTokens?.toString()
-            ?: ""
+        get() =
+            provider.openAISettings?.maxTokens?.toString()
+                ?: provider.anthropicSettings?.maxTokens?.toString()
+                ?: ""
 
     val isActive: Boolean
         get() = provider.isActive
@@ -88,7 +89,7 @@ class ProviderEditViewModel(
             AIProvider.entries.find { it.name == typeString }
         }
 
-    private val _internalState =
+    private val mutableState =
         MutableStateFlow<ProviderEditState>(
             if (providerId != null) {
                 // Editing existing provider
@@ -123,7 +124,7 @@ class ProviderEditViewModel(
             },
         )
 
-    val viewModelState: StateFlow<ProviderEditState> = _internalState.asStateFlow()
+    val viewModelState: StateFlow<ProviderEditState> = mutableState.asStateFlow()
 
     /**
      * UI state for the screen.
@@ -149,14 +150,14 @@ class ProviderEditViewModel(
      * Update the provider configuration.
      */
     fun updateProvider(provider: ProviderConfig) {
-        _internalState.value = _internalState.value.copy(provider = provider)
+        mutableState.value = mutableState.value.copy(provider = provider)
     }
 
     /**
      * Update the provider name.
      */
     fun updateName(name: String) {
-        val current = _internalState.value.provider
+        val current = mutableState.value.provider
         updateProvider(current.copy(name = name))
     }
 
@@ -164,7 +165,7 @@ class ProviderEditViewModel(
      * Update provider settings based on the provider type.
      */
     fun updateSettings(settings: com.nononsenseapps.feeder.ai.model.AISettings) {
-        val current = _internalState.value.provider
+        val current = mutableState.value.provider
         val updatedProvider =
             when (settings) {
                 is com.nononsenseapps.feeder.ai.model.AISettings.OpenAI ->
@@ -179,7 +180,7 @@ class ProviderEditViewModel(
      * Update the provider type.
      */
     fun updateProviderType(type: AIProvider) {
-        val current = _internalState.value.provider
+        val current = mutableState.value.provider
         val newSettings =
             com.nononsenseapps.feeder.ai.model.AISettings
                 .defaultForProvider(type)
@@ -205,7 +206,7 @@ class ProviderEditViewModel(
      * Update the API key.
      */
     fun updateApiKey(key: String) {
-        val current = _internalState.value.provider
+        val current = mutableState.value.provider
         val updatedProvider =
             when (current.providerType) {
                 AIProvider.OPENAI_COMPATIBLE ->
@@ -230,7 +231,7 @@ class ProviderEditViewModel(
      * Update the base URL.
      */
     fun updateBaseUrl(url: String) {
-        val current = _internalState.value.provider
+        val current = mutableState.value.provider
         val updatedProvider =
             when (current.providerType) {
                 AIProvider.OPENAI_COMPATIBLE ->
@@ -255,7 +256,7 @@ class ProviderEditViewModel(
      * Update the model ID.
      */
     fun updateModelId(modelId: String) {
-        val current = _internalState.value.provider
+        val current = mutableState.value.provider
         val updatedProvider =
             when (current.providerType) {
                 AIProvider.OPENAI_COMPATIBLE ->
@@ -281,7 +282,7 @@ class ProviderEditViewModel(
      * Validates the input and converts to Int or null.
      */
     fun updateMaxTokens(maxTokens: String) {
-        val current = _internalState.value.provider
+        val current = mutableState.value.provider
         val parsedTokens =
             when {
                 maxTokens.isBlank() -> null
@@ -314,7 +315,7 @@ class ProviderEditViewModel(
      * Update the active status (set as default).
      */
     fun updateIsActive(isActive: Boolean) {
-        val current = _internalState.value.provider
+        val current = mutableState.value.provider
         updateProvider(current.copy(isActive = isActive))
     }
 
@@ -322,18 +323,18 @@ class ProviderEditViewModel(
      * Save the provider configuration.
      */
     fun saveProvider() {
-        val current = _internalState.value.provider
+        val current = mutableState.value.provider
 
         // Validate before saving
         if (!current.isValid) {
             return
         }
 
-        _internalState.value = _internalState.value.copy(isSaving = true, saveResult = null)
+        mutableState.value = mutableState.value.copy(isSaving = true, saveResult = null)
 
         viewModelScope.launch {
             try {
-                if (_internalState.value.isNew) {
+                if (mutableState.value.isNew) {
                     repository.addProvider(current)
                 } else {
                     repository.updateProvider(current)
@@ -345,11 +346,11 @@ class ProviderEditViewModel(
                     repository.activateProvider(current.id)
                 }
 
-                _internalState.value = _internalState.value.copy(isSaving = false, saveResult = Result.success(Unit))
+                mutableState.value = mutableState.value.copy(isSaving = false, saveResult = Result.success(Unit))
             } catch (e: com.nononsenseapps.feeder.archmodel.SettingsStore.DuplicateProviderNameException) {
                 // Handle duplicate name exception with user-friendly message
-                _internalState.value =
-                    _internalState.value.copy(
+                mutableState.value =
+                    mutableState.value.copy(
                         isSaving = false,
                         saveResult =
                             Result.failure(
@@ -360,7 +361,7 @@ class ProviderEditViewModel(
                             ),
                     )
             } catch (e: Exception) {
-                _internalState.value = _internalState.value.copy(isSaving = false, saveResult = Result.failure(e))
+                mutableState.value = mutableState.value.copy(isSaving = false, saveResult = Result.failure(e))
             }
         }
     }
@@ -369,7 +370,7 @@ class ProviderEditViewModel(
      * Clear save result.
      */
     fun clearSaveResult() {
-        _internalState.value = _internalState.value.copy(saveResult = null)
+        mutableState.value = mutableState.value.copy(saveResult = null)
     }
 
     private fun createDefaultProvider(): ProviderConfig =

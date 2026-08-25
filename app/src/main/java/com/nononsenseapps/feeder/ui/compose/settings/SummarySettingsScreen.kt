@@ -114,7 +114,7 @@ fun SummarySettingsScreen(
             LanguageSelectorSetting(
                 title = stringResource(R.string.summary_language_title),
                 currentLanguage = summaryLanguage,
-                onLanguageSelected = { viewModel.setSummaryLanguage(it) },
+                onLanguageSelect = { viewModel.setSummaryLanguage(it) },
                 menuExpanded = languageMenuExpanded,
                 onMenuExpandedChange = { languageMenuExpanded = it },
             )
@@ -136,7 +136,7 @@ fun SummarySettingsScreen(
 private fun LanguageSelectorSetting(
     title: String,
     currentLanguage: SummaryLanguage,
-    onLanguageSelected: (SummaryLanguage) -> Unit,
+    onLanguageSelect: (SummaryLanguage) -> Unit,
     menuExpanded: Boolean,
     onMenuExpandedChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
@@ -197,7 +197,7 @@ private fun LanguageSelectorSetting(
                     }
                 },
                 onClick = {
-                    onLanguageSelected(language)
+                    onLanguageSelect(language)
                     onMenuExpandedChange(false)
                 },
             )

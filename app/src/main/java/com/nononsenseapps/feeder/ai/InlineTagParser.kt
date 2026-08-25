@@ -14,7 +14,6 @@ import androidx.compose.ui.text.style.BaselineShift
 import androidx.compose.ui.text.style.TextDecoration
 import com.nononsenseapps.feeder.ui.compose.text.asFontFamily
 import com.nononsenseapps.feeder.ui.compose.theme.CodeInlineStyle
-import com.nononsenseapps.feeder.ui.compose.theme.LinkTextStyle
 import com.nononsenseapps.feeder.ui.compose.theme.LocalTypographySettings
 import com.nononsenseapps.feeder.ui.compose.theme.TypographySettings
 
@@ -45,12 +44,13 @@ object InlineTagParser {
         onLinkClick: (url: String) -> Unit = {},
     ): AnnotatedString {
         val codeStyle = SpanStyle(fontFamily = FontFamily.Monospace, background = Color.LightGray)
-        val typographySettings = TypographySettings(
-            fontScale = 1f,
-            sansFontFamily = FontFamily.SansSerif,
-            monoFontFamily = FontFamily.Monospace,
-            serifFontFamily = FontFamily.Serif,
-        )
+        val typographySettings =
+            TypographySettings(
+                fontScale = 1f,
+                sansFontFamily = FontFamily.SansSerif,
+                monoFontFamily = FontFamily.Monospace,
+                serifFontFamily = FontFamily.Serif,
+            )
         val linkColor = Color.Blue
         return parseInternal(text, onLinkClick, codeStyle, typographySettings, linkColor)
     }
@@ -134,12 +134,14 @@ object InlineTagParser {
                                 builder.pushLink(
                                     LinkAnnotation.Clickable(
                                         tag = href,
-                                        styles = TextLinkStyles(
-                                            style = SpanStyle(
-                                                color = linkColor,
-                                                textDecoration = TextDecoration.Underline,
+                                        styles =
+                                            TextLinkStyles(
+                                                style =
+                                                    SpanStyle(
+                                                        color = linkColor,
+                                                        textDecoration = TextDecoration.Underline,
+                                                    ),
                                             ),
-                                        ),
                                         linkInteractionListener = {
                                             onLinkClick(href)
                                         },
@@ -193,7 +195,10 @@ object InlineTagParser {
      * Tries to parse a tag starting at position i (which is '<').
      * Returns (TagInfo, chars consumed) or null if not a valid tag.
      */
-    private fun tryParseTag(text: String, start: Int): Pair<TagInfo, Int>? {
+    private fun tryParseTag(
+        text: String,
+        start: Int,
+    ): Pair<TagInfo, Int>? {
         if (start >= text.length || text[start] != '<') return null
 
         val closeAngle = text.indexOf('>', start)
@@ -216,11 +221,12 @@ object InlineTagParser {
         val name = parts[0].lowercase()
         if (name.isEmpty()) return null
 
-        val attributes = if (parts.size > 1) {
-            parseAttributes(parts[1])
-        } else {
-            emptyMap()
-        }
+        val attributes =
+            if (parts.size > 1) {
+                parseAttributes(parts[1])
+            } else {
+                emptyMap()
+            }
 
         return Pair(TagInfo(name = name, isClosing = false, attributes = attributes), consumed)
     }
@@ -243,20 +249,24 @@ object InlineTagParser {
      * Tries to parse an XML entity at position i (which is '&').
      * Returns (unescaped char, chars consumed) or null.
      */
-    private fun tryParseEntity(text: String, start: Int): Pair<Char, Int>? {
+    private fun tryParseEntity(
+        text: String,
+        start: Int,
+    ): Pair<Char, Int>? {
         if (start >= text.length || text[start] != '&') return null
 
         val semicolonPos = text.indexOf(';', start)
         if (semicolonPos == -1 || semicolonPos - start > 6) return null
 
         val entity = text.substring(start, semicolonPos + 1)
-        val unescaped = when (entity) {
-            "&amp;" -> '&'
-            "&lt;" -> '<'
-            "&gt;" -> '>'
-            "&quot;" -> '"'
-            else -> return null
-        }
+        val unescaped =
+            when (entity) {
+                "&amp;" -> '&'
+                "&lt;" -> '<'
+                "&gt;" -> '>'
+                "&quot;" -> '"'
+                else -> return null
+            }
 
         return Pair(unescaped, entity.length)
     }

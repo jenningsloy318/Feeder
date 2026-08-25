@@ -286,8 +286,7 @@ private fun GoFeed.asFeed(url: URL): ParsedFeed =
     ParsedFeed(
         title = title,
         home_page_url = link?.let { relativeLinkIntoAbsolute(url, it) },
-        // Keep original URL to maintain authentication data and/or tokens in query params
-        feed_url = url.toString(),
+        feed_url = feedLink?.let { relativeLinkIntoAbsolute(url, it) } ?: url.toString(),
         description = description,
         user_comment = "",
         next_url = "",
@@ -313,6 +312,7 @@ private fun FeederGoItem.asParsedArticle() =
         author = author?.asParsedAuthor(),
         tags = categories,
         attachments = enclosures?.map { it.asParsedEnclosure() },
+        hasFeedImage = thumbnail?.fromBody == false,
     )
 
 private fun GoEnclosure.asParsedEnclosure() =
@@ -572,4 +572,12 @@ data class FullTextDecodingFailure(
     override val url: String,
     override val throwable: Throwable?,
     override val description: String = throwable?.message ?: "",
+) : FeedParserError()
+
+@Parcelize
+data class FullTextTooLarge(
+    override val url: String,
+    val maxBytes: Int,
+    override val description: String = "Response body exceeded $maxBytes bytes",
+    override val throwable: Throwable? = null,
 ) : FeedParserError()

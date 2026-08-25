@@ -12,7 +12,7 @@ fun translationFile(
     itemId: Long,
     languageCode: String,
     translationsDir: File,
-): File = File(translationsDir, "${itemId}_${languageCode}.translation.json.gz")
+): File = File(translationsDir, "${itemId}_$languageCode.translation.json.gz")
 
 fun loadTranslation(
     itemId: Long,
@@ -48,7 +48,8 @@ fun deleteTranslationCache(
     translationsDir: File,
 ) {
     if (!translationsDir.isDirectory) return
-    translationsDir.listFiles { _, name ->
-        name.startsWith("${itemId}_") && name.endsWith(".translation.json.gz")
-    }?.forEach { it.delete() }
+    translationsDir
+        .listFiles { _, name ->
+            name.startsWith("${itemId}_") && name.endsWith(".translation.json.gz")
+        }?.forEach { it.delete() }
 }

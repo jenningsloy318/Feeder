@@ -109,6 +109,10 @@ class SettingsViewModel(
         repository.setLinkOpener(value)
     }
 
+    fun setUseInAppAudioPlayer(value: Boolean) {
+        repository.setUseInAppAudioPlayer(value)
+    }
+
     fun setSyncFrequency(value: SyncFrequency) =
         applicationCoroutineScope.launch {
             repository.setSyncFrequency(value)
@@ -131,6 +135,11 @@ class SettingsViewModel(
     fun setApplyBlocklistToSummaries(value: Boolean) =
         applicationCoroutineScope.launch {
             repository.setApplyBlocklistToSummaries(value)
+        }
+
+    fun setApplyBlocklistToLinks(value: Boolean) =
+        applicationCoroutineScope.launch {
+            repository.setApplyBlocklistToLinks(value)
         }
 
     fun toggleNotifications(
@@ -174,6 +183,10 @@ class SettingsViewModel(
 
     fun setIsPagingMode(value: Boolean) {
         repository.setIsPagingMode(value)
+    }
+
+    fun setForceSingleColumn(value: Boolean) {
+        repository.setForceSingleColumn(value)
     }
 
     fun setIsAnimatedPaging(value: Boolean) {
@@ -274,6 +287,9 @@ class SettingsViewModel(
                 repository.font,
                 repository.isPagingMode,
                 repository.isAnimatedPaging,
+                repository.useInAppAudioPlayer,
+                repository.forceSingleColumn,
+                repository.applyBlocklistToLinks,
             ) { params: Array<Any> ->
                 @Suppress("UNCHECKED_CAST")
                 SettingsViewState(
@@ -315,6 +331,9 @@ class SettingsViewModel(
                     font = params[32] as FontSelection,
                     isPagingMode = params[33] as Boolean,
                     isAnimatedPaging = params[34] as Boolean,
+                    useInAppAudioPlayer = params[35] as Boolean,
+                    forceSingleColumn = params[36] as Boolean,
+                    applyBlocklistToLinks = params[37] as Boolean,
                 )
             }.collect {
                 _viewState.value = it
@@ -382,6 +401,9 @@ data class SettingsViewState(
     val font: FontSelection = SystemDefault,
     val isPagingMode: Boolean = false,
     val isAnimatedPaging: Boolean = false,
+    val useInAppAudioPlayer: Boolean = true,
+    val forceSingleColumn: Boolean = false,
+    val applyBlocklistToLinks: Boolean = false,
 )
 
 data class UIFeedSettings(

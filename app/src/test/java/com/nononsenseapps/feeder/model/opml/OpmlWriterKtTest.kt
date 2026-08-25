@@ -40,6 +40,7 @@ class OpmlWriterKtTest {
                         fullTextByDefault = true,
                         openArticlesWith = "reader",
                         alternateId = true,
+                        fetchOgImages = false,
                     )
 
                 result.add(feed)
@@ -72,6 +73,7 @@ class OpmlWriterKtTest {
                         fullTextByDefault = true,
                         openArticlesWith = "reader",
                         alternateId = true,
+                        fetchOgImages = false,
                     )
 
                 result.add(feed)
@@ -92,7 +94,7 @@ class OpmlWriterKtTest {
           </head>
           <body>
             <outline title="quoted &quot;tag&quot;" text="quoted &quot;tag&quot;">
-              <outline feeder:notify="true" feeder:imageUrl="https://example.com/feedImage" feeder:fullTextByDefault="true" feeder:openArticlesWith="reader" feeder:alternateId="true" title="A custom &quot;title&quot; with id &apos;9&apos; &gt; 0 &amp; &lt; 1e" text="A custom &quot;title&quot; with id &apos;9&apos; &gt; 0 &amp; &lt; 1e" type="rss" xmlUrl="http://example.com/rss.xml?format=feed&amp;type=rss"/>
+              <outline feeder:notify="true" feeder:imageUrl="https://example.com/feedImage" feeder:fullTextByDefault="true" feeder:openArticlesWith="reader" feeder:alternateId="true" feeder:fetchOgImages="false" title="A custom &quot;title&quot; with id &apos;9&apos; &gt; 0 &amp; &lt; 1e" text="A custom &quot;title&quot; with id &apos;9&apos; &gt; 0 &amp; &lt; 1e" type="rss" xmlUrl="http://example.com/rss.xml?format=feed&amp;type=rss"/>
             </outline>
           </body>
         </opml>
@@ -109,7 +111,7 @@ class OpmlWriterKtTest {
           </head>
           <body>
             <outline title="news" text="news">
-              <outline feeder:notify="true" feeder:imageUrl="https://example.com/feedImage" feeder:fullTextByDefault="true" feeder:openArticlesWith="reader" feeder:alternateId="true" title="customTitle" text="customTitle" type="rss" xmlUrl="http://example.com/rss.xml?format=feed&amp;type=rss"/>
+              <outline feeder:notify="true" feeder:imageUrl="https://example.com/feedImage" feeder:fullTextByDefault="true" feeder:openArticlesWith="reader" feeder:alternateId="true" feeder:fetchOgImages="false" title="customTitle" text="customTitle" type="rss" xmlUrl="http://example.com/rss.xml?format=feed&amp;type=rss"/>
             </outline>
             <feeder:settings>
               <feeder:setting key="pref_added_feeder_news" value="true"/>
@@ -129,6 +131,7 @@ class OpmlWriterKtTest {
               <feeder:setting key="pref_default_open_item_with" value="3"/>
               <feeder:setting key="pref_open_links_with" value="3"/>
               <feeder:setting key="pref_open_adjacent" value="true"/>
+              <feeder:setting key="pref_use_in_app_audio_player" value="false"/>
               <feeder:setting key="pref_paging_mode" value="true"/>
               <feeder:setting key="pref_animated_paging" value="true"/>
               <feeder:setting key="pref_body_text_scale" value="1.6"/>
@@ -158,7 +161,9 @@ class OpmlWriterKtTest {
               <feeder:setting key="pref_summary_enabled" value="true"/>
               <feeder:setting key="pref_enable_summary" value="true"/>
               <feeder:setting key="pref_blocklist_apply_to_summaries" value="true"/>
+              <feeder:setting key="pref_blocklist_apply_to_links" value="true"/>
               <feeder:setting key="pref_enable_translation" value="true"/>
+              <feeder:setting key="pref_force_single_column" value="true"/>
               <feeder:blocked pattern="foo"/>
               <feeder:blocked pattern="break &quot;xml id &apos;9&apos; &gt; 0 &amp; &lt; 10"/>
             </feeder:settings>
@@ -185,6 +190,7 @@ class OpmlWriterKtTest {
                         UserSettings.SETTING_IMG_ONLY_WIFI -> "true"
                         UserSettings.SETTING_IMG_SHOW_THUMBNAILS -> "false"
                         UserSettings.SETTING_OPEN_ADJACENT -> "true"
+                        UserSettings.SETTING_USE_IN_APP_AUDIO_PLAYER -> "false"
                         UserSettings.SETTING_PAGING_MODE -> "true"
                         UserSettings.SETTING_ANIMATED_PAGING -> "true"
                         UserSettings.SETTING_TEXT_SCALE -> "1.6"
@@ -218,6 +224,8 @@ class OpmlWriterKtTest {
                         UserSettings.SETTING_ENABLE_SUMMARY -> "true"
                         UserSettings.SETTING_BLOCKLIST_APPLY_TO_SUMMARIES -> "true"
                         UserSettings.SETTING_ENABLE_TRANSLATION -> "true"
+                        UserSettings.SETTING_BLOCKLIST_APPLY_TO_LINKS -> "true"
+                        UserSettings.SETTINGS_FORCE_SINGLE_COLUMN -> "true"
                     }
             }
     }

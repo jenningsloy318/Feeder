@@ -18,7 +18,6 @@ import kotlinx.serialization.json.jsonPrimitive
  * - Plain text summaries
  */
 object SummaryResponseParser {
-
     private const val TAG = "SummaryResponseParser"
 
     private const val ERROR_MESSAGE = "Could not generate summary. Please try again."
@@ -56,27 +55,29 @@ object SummaryResponseParser {
             val title = jsonObject["title"]?.jsonPrimitive?.content ?: ""
             val sentiment = jsonObject["sentiment"]?.jsonPrimitive?.content ?: ""
 
-            val keyPoints = try {
-                val keyPointsElement = jsonObject["keyPoints"]
-                if (keyPointsElement is JsonArray) {
-                    keyPointsElement.mapNotNull { item ->
-                        item.jsonPrimitive.content.takeIf { it.isNotEmpty() }
+            val keyPoints =
+                try {
+                    val keyPointsElement = jsonObject["keyPoints"]
+                    if (keyPointsElement is JsonArray) {
+                        keyPointsElement.mapNotNull { item ->
+                            item.jsonPrimitive.content.takeIf { it.isNotEmpty() }
+                        }
+                    } else {
+                        emptyList()
                     }
-                } else {
+                } catch (e: Exception) {
                     emptyList()
                 }
-            } catch (e: Exception) {
-                emptyList()
-            }
 
             val summary = jsonObject["summary"]?.jsonPrimitive?.content ?: ""
 
-            val finalSummary = when {
-                summary.isNotBlank() -> summary
-                title.isNotBlank() || keyPoints.isNotEmpty() ->
-                    "Summary text not available, but article analysis succeeded."
-                else -> ERROR_MESSAGE
-            }
+            val finalSummary =
+                when {
+                    summary.isNotBlank() -> summary
+                    title.isNotBlank() || keyPoints.isNotEmpty() ->
+                        "Summary text not available, but article analysis succeeded."
+                    else -> ERROR_MESSAGE
+                }
 
             SummaryResponseData(
                 language = language,
@@ -123,9 +124,18 @@ object SummaryResponseParser {
             var escape = false
             for (i in jsonCandidate.indices) {
                 val c = jsonCandidate[i]
-                if (escape) { escape = false; continue }
-                if (c == '\\') { escape = true; continue }
-                if (c == '"') { inString = !inString; continue }
+                if (escape) {
+                    escape = false
+                    continue
+                }
+                if (c == '\\') {
+                    escape = true
+                    continue
+                }
+                if (c == '"') {
+                    inString = !inString
+                    continue
+                }
                 if (!inString) {
                     if (c == '{') depth++
                     if (c == '}') {
@@ -152,41 +162,47 @@ object SummaryResponseParser {
      */
     internal fun parseLegacyResponse(content: String): SummaryResponseData {
         val lines = content.lines()
-        val lang = if (lines.firstOrNull()?.startsWith("Lang:") == true) {
-            lines.first().removePrefix("Lang:").trim().take(2)
-        } else {
-            ""
-        }
-
-        val summary = if (lines.firstOrNull()?.startsWith("Lang:") == true) {
-            lines.drop(1).joinToString("\n").trim()
-        } else {
-            val trimmedContent = content.trim()
-            when {
-                // Starts with JSON
-                trimmedContent.startsWith("{") || trimmedContent.startsWith("[") -> {
-                    Log.w(TAG, "Detected raw JSON in legacy parser")
-                    ERROR_MESSAGE
-                }
-                // Double-encoded JSON string (e.g. "{\"language\":\"en\",...}")
-                trimmedContent.startsWith("\"") && trimmedContent.contains("\\\"") -> {
-                    Log.w(TAG, "Detected double-encoded JSON in legacy parser")
-                    ERROR_MESSAGE
-                }
-                // Truncated code block
-                trimmedContent.startsWith("```") -> {
-                    Log.w(TAG, "Detected truncated code block in legacy parser")
-                    ERROR_MESSAGE
-                }
-                // JSON fields embedded anywhere in text
-                JSON_FIELD_PATTERN.containsMatchIn(trimmedContent) -> {
-                    Log.w(TAG, "Detected embedded JSON fields in legacy parser")
-                    ERROR_MESSAGE
-                }
-                // Plain text - return as-is
-                else -> trimmedContent
+        val lang =
+            if (lines.firstOrNull()?.startsWith("Lang:") == true) {
+                lines
+                    .first()
+                    .removePrefix("Lang:")
+                    .trim()
+                    .take(2)
+            } else {
+                ""
             }
-        }
+
+        val summary =
+            if (lines.firstOrNull()?.startsWith("Lang:") == true) {
+                lines.drop(1).joinToString("\n").trim()
+            } else {
+                val trimmedContent = content.trim()
+                when {
+                    // Starts with JSON
+                    trimmedContent.startsWith("{") || trimmedContent.startsWith("[") -> {
+                        Log.w(TAG, "Detected raw JSON in legacy parser")
+                        ERROR_MESSAGE
+                    }
+                    // Double-encoded JSON string (e.g. "{\"language\":\"en\",...}")
+                    trimmedContent.startsWith("\"") && trimmedContent.contains("\\\"") -> {
+                        Log.w(TAG, "Detected double-encoded JSON in legacy parser")
+                        ERROR_MESSAGE
+                    }
+                    // Truncated code block
+                    trimmedContent.startsWith("```") -> {
+                        Log.w(TAG, "Detected truncated code block in legacy parser")
+                        ERROR_MESSAGE
+                    }
+                    // JSON fields embedded anywhere in text
+                    JSON_FIELD_PATTERN.containsMatchIn(trimmedContent) -> {
+                        Log.w(TAG, "Detected embedded JSON fields in legacy parser")
+                        ERROR_MESSAGE
+                    }
+                    // Plain text - return as-is
+                    else -> trimmedContent
+                }
+            }
 
         return SummaryResponseData(
             language = lang,

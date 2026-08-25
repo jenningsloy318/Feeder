@@ -118,7 +118,6 @@ import com.nononsenseapps.feeder.ui.compose.utils.WithAllPreviewProviders
 import com.nononsenseapps.feeder.ui.compose.utils.focusableInNonTouchMode
 import com.nononsenseapps.feeder.util.logDebug
 import kotlin.math.abs
-import kotlin.sequences.filterIsInstance
 
 private const val LOG_TAG = "FEEDER_LINEARCON"
 
@@ -364,11 +363,11 @@ fun ColumnArticleContent(
 @Composable
 fun LinearElementContent(
     linearElement: LinearElement,
-    translation: String? = null,
     allowHorizontalScroll: Boolean,
     idToIndex: Map<String, Int>,
     onLinkClick: (url: String, index: Int?) -> Unit,
     modifier: Modifier = Modifier,
+    translation: String? = null,
     translatedParagraphs: List<String>? = null,
     parentTranslationIndex: Int? = null,
 ) {
@@ -629,11 +628,11 @@ fun LinearListContent(
 @Composable
 fun LinearListItemContent(
     listItem: LinearListItem,
-    translation: String? = null,
     allowHorizontalScroll: Boolean,
     idToIndex: Map<String, Int>,
     onLinkClick: (url: String, index: Int?) -> Unit,
     modifier: Modifier = Modifier,
+    translation: String? = null,
     translatedParagraphs: List<String>? = null,
     childTranslationStartIndex: Int = 0,
 ) {
@@ -894,10 +893,10 @@ private fun LinearImage.getBestImageForMaxSize(
 @Composable
 fun LinearTextContent(
     linearText: LinearText,
-    translation: String? = null,
     idToIndex: Map<String, Int>,
     onLinkClick: (url: String, index: Int?) -> Unit,
     modifier: Modifier = Modifier,
+    translation: String? = null,
     softWrap: Boolean = true,
 ) {
     ProvideScaledText {
@@ -921,10 +920,11 @@ fun LinearTextContent(
             if (translation != null) {
                 Spacer(modifier = Modifier.height(8.dp))
                 WithBidiDeterminedLayoutDirection(translation) {
-                    val annotatedTranslation = InlineTagParser.parse(
-                        text = translation,
-                        onLinkClick = { url -> onLinkClick(url, null) },
-                    )
+                    val annotatedTranslation =
+                        InlineTagParser.parse(
+                            text = translation,
+                            onLinkClick = { url -> onLinkClick(url, null) },
+                        )
                     Text(
                         text = annotatedTranslation,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -1171,20 +1171,21 @@ fun LinearTableContent(
     val borderColor = MaterialTheme.colorScheme.outlineVariant
 
     // Pre-compute translation start index for each cell (row-major order, matching extraction order)
-    val cellTranslationStartIndices = remember(linearTable, tableTranslationStartIndex, translatedParagraphs) {
-        if (translatedParagraphs == null) return@remember emptyMap<Coordinate, Int>()
-        val map = mutableMapOf<Coordinate, Int>()
-        var currentIndex = tableTranslationStartIndex
-        for (row in 0 until linearTable.rowCount) {
-            for (col in 0 until linearTable.colCount) {
-                val cell = linearTable.cellAt(row, col) ?: continue
-                if (cell.isFiller) continue
-                map[Coordinate(row, col)] = currentIndex
-                currentIndex += countTranslatableTexts(cell.content)
+    val cellTranslationStartIndices =
+        remember(linearTable, tableTranslationStartIndex, translatedParagraphs) {
+            if (translatedParagraphs == null) return@remember emptyMap<Coordinate, Int>()
+            val map = mutableMapOf<Coordinate, Int>()
+            var currentIndex = tableTranslationStartIndex
+            for (row in 0 until linearTable.rowCount) {
+                for (col in 0 until linearTable.colCount) {
+                    val cell = linearTable.cellAt(row, col) ?: continue
+                    if (cell.isFiller) continue
+                    map[Coordinate(row, col)] = currentIndex
+                    currentIndex += countTranslatableTexts(cell.content)
+                }
             }
+            map
         }
-        map
-    }
 
     Table(
         tableData = linearTable.toTableData(),
@@ -1256,15 +1257,17 @@ fun LinearTableContent(
                             },
                     ) {
                         val cellStartIndex = cellTranslationStartIndices[Coordinate(row, column)] ?: 0
-                        val cellChildIndices = if (translatedParagraphs != null) {
-                            computeContentTranslationIndices(it.content, cellStartIndex)
-                        } else {
-                            emptyMap()
-                        }
-                        it.content.forEachIndexed { elementIndex, element ->
-                            val cellTranslation = cellChildIndices[elementIndex]?.let { idx ->
-                                translatedParagraphs?.getOrNull(idx)
+                        val cellChildIndices =
+                            if (translatedParagraphs != null) {
+                                computeContentTranslationIndices(it.content, cellStartIndex)
+                            } else {
+                                emptyMap()
                             }
+                        it.content.forEachIndexed { elementIndex, element ->
+                            val cellTranslation =
+                                cellChildIndices[elementIndex]?.let { idx ->
+                                    translatedParagraphs?.getOrNull(idx)
+                                }
                             LinearElementContent(
                                 linearElement = element,
                                 translation = cellTranslation,

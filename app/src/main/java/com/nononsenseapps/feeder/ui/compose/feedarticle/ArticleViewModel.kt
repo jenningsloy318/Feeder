@@ -4,15 +4,17 @@ import android.util.Log
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.text.AnnotatedString
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.application
 import androidx.lifecycle.viewModelScope
 import com.nononsenseapps.feeder.ApplicationCoroutineScope
-import com.nononsenseapps.feeder.ai.AIClient
-import com.nononsenseapps.feeder.ai.SummaryResponseParser
+import com.nononsenseapps.feeder.R
 import com.nononsenseapps.feeder.ai.AIApi
+import com.nononsenseapps.feeder.ai.AIClient
 import com.nononsenseapps.feeder.ai.ArticleTranslation
 import com.nononsenseapps.feeder.ai.ParagraphTranslation
 import com.nononsenseapps.feeder.ai.ParagraphTranslationCoordinator
 import com.nononsenseapps.feeder.ai.ParagraphTranslationProgress
+import com.nononsenseapps.feeder.ai.SummaryResponseParser
 import com.nononsenseapps.feeder.ai.TranslatableText
 import com.nononsenseapps.feeder.ai.TranslatableTextExtractor
 import com.nononsenseapps.feeder.ai.model.AISettings
@@ -34,11 +36,14 @@ import com.nononsenseapps.feeder.db.room.FeedItemForFetching
 import com.nononsenseapps.feeder.db.room.ID_UNSET
 import com.nononsenseapps.feeder.model.FeedParserError
 import com.nononsenseapps.feeder.model.FullTextParser
+import com.nononsenseapps.feeder.model.FullTextTooLarge
 import com.nononsenseapps.feeder.model.LocaleOverride
 import com.nononsenseapps.feeder.model.NoBody
 import com.nononsenseapps.feeder.model.NoUrl
 import com.nononsenseapps.feeder.model.NotHTML
 import com.nononsenseapps.feeder.model.PlaybackStatus
+import com.nononsenseapps.feeder.model.PodcastPlayerState
+import com.nononsenseapps.feeder.model.PodcastPlayerStateHolder
 import com.nononsenseapps.feeder.model.TTSStateHolder
 import com.nononsenseapps.feeder.model.ThumbnailImage
 import com.nononsenseapps.feeder.model.UnsupportedContentType
@@ -75,6 +80,7 @@ class ArticleViewModel(
 ) : DIAwareViewModel(di) {
     private val repository: Repository by instance()
     private val ttsStateHolder: TTSStateHolder by instance()
+    private val podcastPlayerStateHolder: PodcastPlayerStateHolder by instance()
     private val fullTextParser: FullTextParser by instance()
     private val filePathProvider: FilePathProvider by instance()
     private val aiApi: AIApi by instance()
@@ -156,6 +162,8 @@ class ArticleViewModel(
             translationState,
             repository.enableSummary,
             repository.enableTranslation,
+            podcastPlayerStateHolder.playerState,
+            repository.useInAppAudioPlayer,
         ) { params ->
             val article = params[0] as Article?
             val textToDisplay = params[1] as TextToDisplay
@@ -175,11 +183,15 @@ class ArticleViewModel(
             val showTranslate = enableTranslation && aiValid
             val aiSummary = (params[9] as AISummaryState)
             val translation = (params[10] as TranslationState)
+            val podcastPlayerState = params[13] as PodcastPlayerState
+            val useInAppAudioPlayer = params[14] as Boolean
 
             ArticleState(
                 useDetectLanguage = useDetectLanguage,
-                isBottomBarVisible = ttsState != PlaybackStatus.STOPPED,
+                isBottomBarVisible = ttsState != PlaybackStatus.STOPPED || podcastPlayerState.isVisible,
                 isTTSPlaying = ttsState == PlaybackStatus.PLAYING,
+                podcastPlayerState = podcastPlayerState,
+                useInAppAudioPlayer = useInAppAudioPlayer,
                 ttsLanguages = ttsLanguages,
                 articleFeedUrl = article?.feedUrl,
                 articleId = itemId,
@@ -277,7 +289,8 @@ class ArticleViewModel(
                 AutoTranslateData(article, articleContent, translationEnabled, enableTranslation)
             }.filterNotNull()
                 .collect { (article, articleContent, translationEnabled, enableTranslation) ->
-                    if (enableTranslation && translationEnabled &&
+                    if (enableTranslation &&
+                        translationEnabled &&
                         translationState.value is TranslationState.Empty &&
                         article?.link != null &&
                         articleContent.elements.isNotEmpty()
@@ -297,7 +310,12 @@ class ArticleViewModel(
         logDebug(LOG_TAG, "parseArticleContent(${article.id}, $fullText)")
         return try {
             withContext(Dispatchers.IO) {
-                val htmlLinearizer = HtmlLinearizer()
+                val htmlLinearizer =
+                    HtmlLinearizer(
+                        tooLargeText = application.getString(R.string.failed_to_fetch_full_article_too_large),
+                        openInBrowserText = application.getString(R.string.open_in_web_view),
+                        articleLink = article.link ?: "",
+                    )
                 when (fullText) {
                     false -> {
                         if (blobFile(article.id, filePathProvider.articleDir).isFile) {
@@ -350,6 +368,7 @@ class ArticleViewModel(
                                 is NoUrl -> TextToDisplay.FAILED_MISSING_LINK
                                 is UnsupportedContentType -> TextToDisplay.FAILED_NOT_HTML
                                 is NotHTML -> TextToDisplay.FAILED_NOT_HTML
+                                is FullTextTooLarge -> TextToDisplay.FAILED_FULLTEXT_TOO_LARGE
                                 else -> TextToDisplay.FAILED_TO_LOAD_FULLTEXT
                             }?.let { errorText ->
                                 textToDisplay.update { errorText }
@@ -420,6 +439,7 @@ class ArticleViewModel(
     }
 
     fun ttsPlay() {
+        stopPodcastPlayback()
         viewModelScope.launch(Dispatchers.IO) {
             val article =
                 repository.getCurrentArticle()
@@ -483,6 +503,35 @@ class ArticleViewModel(
         ttsStateHolder.stop()
     }
 
+    fun openPodcastPlayer(link: String) {
+        if (link.isBlank()) {
+            return
+        }
+
+        ttsStop()
+        podcastPlayerStateHolder.playLink(link)
+    }
+
+    fun podcastPlay() {
+        podcastPlayerStateHolder.play()
+    }
+
+    fun podcastPause() {
+        podcastPlayerStateHolder.pause()
+    }
+
+    fun stopPodcastPlayback() {
+        podcastPlayerStateHolder.stop()
+    }
+
+    fun podcastSeekBy(deltaMillis: Int) {
+        podcastPlayerStateHolder.seekBy(deltaMillis)
+    }
+
+    fun podcastSeekTo(positionMillis: Int) {
+        podcastPlayerStateHolder.seekTo(positionMillis)
+    }
+
     fun ttsSkipNext() {
         ttsStateHolder.skipNext()
     }
@@ -493,28 +542,30 @@ class ArticleViewModel(
 
     fun summarize() {
         summarizeJob?.cancel()
-        summarizeJob = viewModelScope.launch(Dispatchers.IO) {
-            try {
-                aiSummary.value = AISummaryState.Loading
-                val content = loadArticleContent()
-                aiSummary.value =
-                    AISummaryState.Result(
-                        value = aiApi.summarize(content),
-                    )
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: Exception) {
-                aiSummary.value =
-                    AISummaryState.Result(
-                        value =
-                            AIClient.SummaryResult
-                                .Error(
-                                    content = SummaryResponseParser
-                                        .sanitizeErrorMessage(e.message),
-                                ),
-                    )
+        summarizeJob =
+            viewModelScope.launch(Dispatchers.IO) {
+                try {
+                    aiSummary.value = AISummaryState.Loading
+                    val content = loadArticleContent()
+                    aiSummary.value =
+                        AISummaryState.Result(
+                            value = aiApi.summarize(content),
+                        )
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    aiSummary.value =
+                        AISummaryState.Result(
+                            value =
+                                AIClient.SummaryResult
+                                    .Error(
+                                        content =
+                                            SummaryResponseParser
+                                                .sanitizeErrorMessage(e.message),
+                                    ),
+                        )
+                }
             }
-        }
     }
 
     fun cancelSummarize() {
@@ -538,116 +589,128 @@ class ArticleViewModel(
         cacheSkipOnNextTranslate = false
 
         translateJob?.cancel()
-        translateJob = viewModelScope.launch(Dispatchers.IO) {
-            try {
-                // Step 0: Get target language and resolve code
-                val targetLanguage = repository.translationLanguage.first()
-                val languageCode = resolveLanguageCode(targetLanguage)
+        translateJob =
+            viewModelScope.launch(Dispatchers.IO) {
+                try {
+                    // Step 0: Get target language and resolve code
+                    val targetLanguage = repository.translationLanguage.first()
+                    val languageCode = resolveLanguageCode(targetLanguage)
 
-                // Step 0.5: Cache check (skip if re-translating)
-                if (!skipCache) {
-                    val cached = loadTranslation(
-                        itemId = itemId,
-                        languageCode = languageCode,
-                        translationsDir = filePathProvider.translationsDir,
-                    )
-                    if (cached != null) {
-                        translationState.value = TranslationState.Translated(cached)
-                        return@launch
-                    }
-                }
-
-                // Step 1: Extract paragraphs
-                val translatableTexts = extractTranslatableParagraphs()
-                if (translatableTexts.isEmpty()) {
-                    translationState.value = TranslationState.Error(
-                        errorMessage = "No translatable content found",
-                    )
-                    return@launch
-                }
-
-                // Step 2: Build initial ArticleTranslation
-                val initialArticleTranslation = ArticleTranslation(
-                    contents = translatableTexts.mapIndexed { zeroBasedIndex, translatableText ->
-                        ParagraphTranslation(
-                            index = zeroBasedIndex + 1,
-                            text = translatableText.text,
-                            translation = "",
-                            translated = 0,
-                        )
-                    },
-                    status = "translating",
-                )
-
-                // Step 3: Set initial translating state
-                translationState.value = TranslationState.Translating(
-                    articleTranslation = initialArticleTranslation,
-                )
-
-                // Step 4: Create coordinator with settings
-                val translationTimeout = repository.translationTimeout.first()
-                val settingsWithTimeout = createSettingsWithTimeout(translationTimeout)
-                val paragraphCoordinator = ParagraphTranslationCoordinator(
-                    aiClient = AIClient.create(settingsWithTimeout),
-                )
-
-                // Step 5: Collect progress and update per-paragraph
-                paragraphCoordinator.translateParagraphs(translatableTexts, targetLanguage)
-                    .collect { paragraphProgress ->
-                        translationState.update { currentState ->
-                            if (currentState !is TranslationState.Translating) return@update currentState
-
-                            val currentArticleTranslation = currentState.articleTranslation
-                            val updatedContents = currentArticleTranslation.contents.toMutableList()
-
-                            when (paragraphProgress) {
-                                is ParagraphTranslationProgress.ParagraphComplete -> {
-                                    val targetIndex = paragraphProgress.paragraphIndex - 1
-                                    updatedContents[targetIndex] = updatedContents[targetIndex].copy(
-                                        translation = paragraphProgress.translatedText,
-                                        translated = 1,
-                                    )
-                                }
-                                is ParagraphTranslationProgress.ParagraphFailed -> {
-                                    val targetIndex = paragraphProgress.paragraphIndex - 1
-                                    updatedContents[targetIndex] = updatedContents[targetIndex].copy(
-                                        translated = -1,
-                                    )
-                                }
-                            }
-
-                            val updatedArticleTranslation = currentArticleTranslation.copy(
-                                contents = updatedContents,
-                                status = if (updatedContents.all { it.translated != 0 }) "translated" else "translating",
+                    // Step 0.5: Cache check (skip if re-translating)
+                    if (!skipCache) {
+                        val cached =
+                            loadTranslation(
+                                itemId = itemId,
+                                languageCode = languageCode,
+                                translationsDir = filePathProvider.translationsDir,
                             )
-
-                            // Step 6: Transition to Translated when all resolved
-                            if (updatedArticleTranslation.status == "translated") {
-                                // Save to cache (already on Dispatchers.IO)
-                                try {
-                                    saveTranslation(
-                                        itemId = itemId,
-                                        languageCode = languageCode,
-                                        translationsDir = filePathProvider.translationsDir,
-                                        translation = updatedArticleTranslation,
-                                    )
-                                } catch (e: Exception) {
-                                    Log.w(LOG_TAG, "Failed to save translation cache", e)
-                                }
-                                TranslationState.Translated(articleTranslation = updatedArticleTranslation)
-                            } else {
-                                TranslationState.Translating(articleTranslation = updatedArticleTranslation)
-                            }
+                        if (cached != null) {
+                            translationState.value = TranslationState.Translated(cached)
+                            return@launch
                         }
                     }
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: Exception) {
-                translationState.value = TranslationState.Error(
-                    errorMessage = e.message ?: "Translation failed",
-                )
+
+                    // Step 1: Extract paragraphs
+                    val translatableTexts = extractTranslatableParagraphs()
+                    if (translatableTexts.isEmpty()) {
+                        translationState.value =
+                            TranslationState.Error(
+                                errorMessage = "No translatable content found",
+                            )
+                        return@launch
+                    }
+
+                    // Step 2: Build initial ArticleTranslation
+                    val initialArticleTranslation =
+                        ArticleTranslation(
+                            contents =
+                                translatableTexts.mapIndexed { zeroBasedIndex, translatableText ->
+                                    ParagraphTranslation(
+                                        index = zeroBasedIndex + 1,
+                                        text = translatableText.text,
+                                        translation = "",
+                                        translated = 0,
+                                    )
+                                },
+                            status = "translating",
+                        )
+
+                    // Step 3: Set initial translating state
+                    translationState.value =
+                        TranslationState.Translating(
+                            articleTranslation = initialArticleTranslation,
+                        )
+
+                    // Step 4: Create coordinator with settings
+                    val translationTimeout = repository.translationTimeout.first()
+                    val settingsWithTimeout = createSettingsWithTimeout(translationTimeout)
+                    val paragraphCoordinator =
+                        ParagraphTranslationCoordinator(
+                            aiClient = AIClient.create(settingsWithTimeout),
+                        )
+
+                    // Step 5: Collect progress and update per-paragraph
+                    paragraphCoordinator
+                        .translateParagraphs(translatableTexts, targetLanguage)
+                        .collect { paragraphProgress ->
+                            translationState.update { currentState ->
+                                if (currentState !is TranslationState.Translating) return@update currentState
+
+                                val currentArticleTranslation = currentState.articleTranslation
+                                val updatedContents = currentArticleTranslation.contents.toMutableList()
+
+                                when (paragraphProgress) {
+                                    is ParagraphTranslationProgress.ParagraphComplete -> {
+                                        val targetIndex = paragraphProgress.paragraphIndex - 1
+                                        updatedContents[targetIndex] =
+                                            updatedContents[targetIndex].copy(
+                                                translation = paragraphProgress.translatedText,
+                                                translated = 1,
+                                            )
+                                    }
+                                    is ParagraphTranslationProgress.ParagraphFailed -> {
+                                        val targetIndex = paragraphProgress.paragraphIndex - 1
+                                        updatedContents[targetIndex] =
+                                            updatedContents[targetIndex].copy(
+                                                translated = -1,
+                                            )
+                                    }
+                                }
+
+                                val updatedArticleTranslation =
+                                    currentArticleTranslation.copy(
+                                        contents = updatedContents,
+                                        status = if (updatedContents.all { it.translated != 0 }) "translated" else "translating",
+                                    )
+
+                                // Step 6: Transition to Translated when all resolved
+                                if (updatedArticleTranslation.status == "translated") {
+                                    // Save to cache (already on Dispatchers.IO)
+                                    try {
+                                        saveTranslation(
+                                            itemId = itemId,
+                                            languageCode = languageCode,
+                                            translationsDir = filePathProvider.translationsDir,
+                                            translation = updatedArticleTranslation,
+                                        )
+                                    } catch (e: Exception) {
+                                        Log.w(LOG_TAG, "Failed to save translation cache", e)
+                                    }
+                                    TranslationState.Translated(articleTranslation = updatedArticleTranslation)
+                                } else {
+                                    TranslationState.Translating(articleTranslation = updatedArticleTranslation)
+                                }
+                            }
+                        }
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    translationState.value =
+                        TranslationState.Error(
+                            errorMessage = e.message ?: "Translation failed",
+                        )
+                }
             }
-        }
     }
 
     fun cancelTranslation() {
@@ -657,25 +720,25 @@ class ArticleViewModel(
         cacheSkipOnNextTranslate = true
     }
 
-    private fun createSettingsWithTimeout(translationTimeoutSeconds: Int): AISettings {
-        return when (val currentSettings = repository.aiSettings) {
+    private fun createSettingsWithTimeout(translationTimeoutSeconds: Int): AISettings =
+        when (val currentSettings = repository.aiSettings) {
             is AISettings.OpenAI -> {
-                val updatedOpenAiSettings = currentSettings.openaiSettings.copy(
-                    timeoutSeconds = translationTimeoutSeconds,
-                )
+                val updatedOpenAiSettings =
+                    currentSettings.openaiSettings.copy(
+                        timeoutSeconds = translationTimeoutSeconds,
+                    )
                 AISettings.OpenAI(updatedOpenAiSettings)
             }
             is AISettings.Anthropic -> {
-                val updatedAnthropicSettings = currentSettings.anthropicSettings.copy(
-                    timeoutSeconds = translationTimeoutSeconds,
-                )
+                val updatedAnthropicSettings =
+                    currentSettings.anthropicSettings.copy(
+                        timeoutSeconds = translationTimeoutSeconds,
+                    )
                 AISettings.Anthropic(updatedAnthropicSettings)
             }
         }
-    }
 
-    private fun resolveLanguageCode(language: TranslationLanguage): String =
-        if (language.code.isEmpty()) Locale.getDefault().language else language.code
+    private fun resolveLanguageCode(language: TranslationLanguage): String = if (language.code.isEmpty()) Locale.getDefault().language else language.code
 
     /**
      * Extracts translatable text paragraphs with structure context from the article content.
@@ -700,7 +763,6 @@ class ArticleViewModel(
         val content = viewState.value.articleContent
         return TranslatableTextExtractor.extract(content.elements)
     }
-
 
     private suspend fun loadArticleContent(): String {
         val viewState = viewState.value
@@ -740,6 +802,8 @@ private data class ArticleState(
     override val useDetectLanguage: Boolean = false,
     override val isBottomBarVisible: Boolean = false,
     override val isTTSPlaying: Boolean = false,
+    override val podcastPlayerState: PodcastPlayerState = PodcastPlayerState(),
+    override val useInAppAudioPlayer: Boolean = true,
     override val ttsLanguages: List<Locale> = emptyList(),
     override val articleFeedUrl: String? = null,
     override val articleId: Long = ID_UNSET,
@@ -769,6 +833,8 @@ interface ArticleScreenViewState {
     val useDetectLanguage: Boolean
     val isBottomBarVisible: Boolean
     val isTTSPlaying: Boolean
+    val podcastPlayerState: PodcastPlayerState
+    val useInAppAudioPlayer: Boolean
     val ttsLanguages: List<Locale>
     val articleFeedUrl: String?
     val articleId: Long

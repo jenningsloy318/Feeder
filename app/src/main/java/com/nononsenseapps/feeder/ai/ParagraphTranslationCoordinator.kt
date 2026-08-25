@@ -37,22 +37,26 @@ class ParagraphTranslationCoordinator(
     fun translateParagraphs(
         paragraphTexts: List<TranslatableText>,
         targetLanguage: TranslationLanguage,
-    ): Flow<ParagraphTranslationProgress> = channelFlow {
-        val semaphore = Semaphore(paragraphConcurrency)
-        coroutineScope {
-            paragraphTexts.forEachIndexed { zeroBasedIndex, paragraphText ->
-                launch(Dispatchers.IO) {
-                    semaphore.withPermit {
-                        val paragraphIndex = zeroBasedIndex + 1
-                        val translationResult = translateParagraphWithRetry(
-                            paragraphText, targetLanguage, paragraphIndex,
-                        )
-                        send(translationResult)
+    ): Flow<ParagraphTranslationProgress> =
+        channelFlow {
+            val semaphore = Semaphore(paragraphConcurrency)
+            coroutineScope {
+                paragraphTexts.forEachIndexed { zeroBasedIndex, paragraphText ->
+                    launch(Dispatchers.IO) {
+                        semaphore.withPermit {
+                            val paragraphIndex = zeroBasedIndex + 1
+                            val translationResult =
+                                translateParagraphWithRetry(
+                                    paragraphText,
+                                    targetLanguage,
+                                    paragraphIndex,
+                                )
+                            send(translationResult)
+                        }
                     }
                 }
             }
         }
-    }
 
     private suspend fun translateParagraphWithRetry(
         paragraphText: TranslatableText,
@@ -61,9 +65,11 @@ class ParagraphTranslationCoordinator(
     ): ParagraphTranslationProgress {
         repeat(paragraphMaxRetries) { attempt ->
             try {
-                val translationResult = aiClient.translate(
-                    listOf(paragraphText), targetLanguage,
-                )
+                val translationResult =
+                    aiClient.translate(
+                        listOf(paragraphText),
+                        targetLanguage,
+                    )
                 return when (translationResult) {
                     is AIClient.TranslationResult.Success -> {
                         ParagraphTranslationProgress.ParagraphComplete(

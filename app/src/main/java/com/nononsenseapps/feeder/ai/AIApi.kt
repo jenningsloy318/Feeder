@@ -29,7 +29,7 @@ class AIApi(
     )
 
     companion object {
-        private val LANG_REGEX = Regex("^Lang: \"?([a-zA-Z]+)\"?$")
+        private val LANG_REGEX = Regex("^Lang: \"?([a-zA-Z_-]+)\"?$")
     }
 
     private val aiSettings: AISettings
@@ -76,8 +76,8 @@ class AIApi(
     /**
      * Generate a summary for the given content.
      */
-    suspend fun summarize(content: String): AIClient.SummaryResult {
-        return try {
+    suspend fun summarize(content: String): AIClient.SummaryResult =
+        try {
             // Get summary-specific timeout
             val summaryTimeout = repository.summaryTimeout.first()
 
@@ -102,7 +102,6 @@ class AIApi(
                 content = SummaryResponseParser.sanitizeErrorMessage(e.message ?: e.cause?.message),
             )
         }
-    }
 
     /**
      * Translate paragraphs with structure context to the configured target language.

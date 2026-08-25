@@ -55,11 +55,12 @@ fun TextSelectionMenuHandler(
 
         // Display popup when menu is shown
         TextSelectionMenuPopup(
-            menuState = textToolbar.menuState,
+            menuState = textToolbar.menuState.value,
+            onDismiss = { textToolbar.menuState.value = null },
             menuConfig = menuConfig,
             menuItems = menuItems,
             activityLauncher = activityLauncher,
-            onActionExecuted = {
+            onActionExecute = {
                 // Popup dismissed - no action needed
             },
         )

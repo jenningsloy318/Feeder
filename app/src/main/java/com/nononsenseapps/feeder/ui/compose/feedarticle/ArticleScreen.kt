@@ -1,7 +1,8 @@
 package com.nononsenseapps.feeder.ui.compose.feedarticle
 
+import android.content.Context
 import android.content.Intent
-import com.nononsenseapps.feeder.ai.SummaryResponseParser
+import android.text.format.DateFormat
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.foundation.BorderStroke
@@ -36,6 +37,7 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.outlined.ErrorOutline
+import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -66,6 +68,7 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nononsenseapps.feeder.R
+import com.nononsenseapps.feeder.ai.SummaryResponseParser
 import com.nononsenseapps.feeder.archmodel.TextToDisplay
 import com.nononsenseapps.feeder.db.room.ID_UNSET
 import com.nononsenseapps.feeder.model.LocaleOverride
@@ -89,8 +92,11 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 import org.kodein.di.compose.LocalDI
 import org.kodein.di.instance
+import java.text.SimpleDateFormat
 import java.time.ZoneId
 import java.time.ZonedDateTime
+import java.util.Date
+import java.util.TimeZone
 
 @Composable
 fun ArticleScreen(
@@ -180,12 +186,19 @@ fun ArticleScreen(
         onFeedTitleClick = {
             onNavigateToFeed(viewState.articleFeedId)
         },
+        onOpenAudioPlayer = viewModel::openPodcastPlayer,
         onShowToolbarMenu = viewModel::setToolbarMenuVisible,
         ttsOnPlay = viewModel::ttsPlay,
         ttsOnPause = viewModel::ttsPause,
         ttsOnStop = viewModel::ttsStop,
         ttsOnSkipNext = viewModel::ttsSkipNext,
         ttsOnSelectLanguage = viewModel::ttsOnSelectLanguage,
+        podcastOnPlay = viewModel::podcastPlay,
+        podcastOnPause = viewModel::podcastPause,
+        podcastOnStop = viewModel::stopPodcastPlayback,
+        podcastOnSeekBack = { viewModel.podcastSeekBy(-10_000) },
+        podcastOnSeekForward = { viewModel.podcastSeekBy(10_000) },
+        podcastOnSeekTo = viewModel::podcastSeekTo,
         onToggleBookmark = {
             viewModel.setBookmarked(!viewState.isBookmarked)
         },
@@ -221,12 +234,19 @@ fun ArticleScreen(
     onShare: () -> Unit,
     onOpenInCustomTab: () -> Unit,
     onFeedTitleClick: () -> Unit,
+    onOpenAudioPlayer: (url: String) -> Unit,
     onShowToolbarMenu: (Boolean) -> Unit,
     ttsOnPlay: () -> Unit,
     ttsOnPause: () -> Unit,
     ttsOnStop: () -> Unit,
     ttsOnSkipNext: () -> Unit,
     ttsOnSelectLanguage: (LocaleOverride) -> Unit,
+    podcastOnPlay: () -> Unit,
+    podcastOnPause: () -> Unit,
+    podcastOnStop: () -> Unit,
+    podcastOnSeekBack: () -> Unit,
+    podcastOnSeekForward: () -> Unit,
+    podcastOnSeekTo: (Int) -> Unit,
     onToggleBookmark: () -> Unit,
     articleScrollState: ScrollState,
     onNavigateUp: () -> Unit,
@@ -250,12 +270,19 @@ fun ArticleScreen(
             onShare = onShare,
             onOpenInCustomTab = onOpenInCustomTab,
             onFeedTitleClick = onFeedTitleClick,
+            onOpenAudioPlayer = onOpenAudioPlayer,
             onShowToolbarMenu = onShowToolbarMenu,
             ttsOnPlay = ttsOnPlay,
             ttsOnPause = ttsOnPause,
             ttsOnStop = ttsOnStop,
             ttsOnSkipNext = ttsOnSkipNext,
             ttsOnSelectLanguage = ttsOnSelectLanguage,
+            podcastOnPlay = podcastOnPlay,
+            podcastOnPause = podcastOnPause,
+            podcastOnStop = podcastOnStop,
+            podcastOnSeekBack = podcastOnSeekBack,
+            podcastOnSeekForward = podcastOnSeekForward,
+            podcastOnSeekTo = podcastOnSeekTo,
             onToggleBookmark = onToggleBookmark,
             articleScrollState = articleScrollState,
             onNavigateUp = onNavigateUp,
@@ -281,12 +308,19 @@ private fun ArticleScreenInternal(
     onShare: () -> Unit,
     onOpenInCustomTab: () -> Unit,
     onFeedTitleClick: () -> Unit,
+    onOpenAudioPlayer: (url: String) -> Unit,
     onShowToolbarMenu: (Boolean) -> Unit,
     ttsOnPlay: () -> Unit,
     ttsOnPause: () -> Unit,
     ttsOnStop: () -> Unit,
     ttsOnSkipNext: () -> Unit,
     ttsOnSelectLanguage: (LocaleOverride) -> Unit,
+    podcastOnPlay: () -> Unit,
+    podcastOnPause: () -> Unit,
+    podcastOnStop: () -> Unit,
+    podcastOnSeekBack: () -> Unit,
+    podcastOnSeekForward: () -> Unit,
+    podcastOnSeekTo: (Int) -> Unit,
     onToggleBookmark: () -> Unit,
     articleScrollState: ScrollState,
     onNavigateUp: () -> Unit,
@@ -343,8 +377,11 @@ private fun ArticleScreenInternal(
                             tooltip = {
                                 Text(
                                     stringResource(
-                                        if (isSummarizing) R.string.cancel_summarize
-                                        else R.string.summarize,
+                                        if (isSummarizing) {
+                                            R.string.cancel_summarize
+                                        } else {
+                                            R.string.summarize
+                                        },
                                     ),
                                 )
                             },
@@ -364,20 +401,24 @@ private fun ArticleScreenInternal(
                     // Translate button (conditional)
                     if (viewState.showTranslate) {
                         val isTranslating = viewState.translation is TranslationState.Translating
-                        val translationProgressFraction: (() -> Float)? = if (isTranslating) {
-                            val articleTranslation = (viewState.translation as TranslationState.Translating).articleTranslation
-                            val completed = articleTranslation.paragraphCompletedCount
-                            val total = articleTranslation.paragraphTotalCount
-                            { if (total > 0) completed.toFloat() / total else 0f }
-                        } else {
-                            null
-                        }
+                        val translationProgressFraction: (() -> Float)? =
+                            if (isTranslating) {
+                                val articleTranslation = (viewState.translation as TranslationState.Translating).articleTranslation
+                                val completed = articleTranslation.paragraphCompletedCount
+                                val total = articleTranslation.paragraphTotalCount
+                                { if (total > 0) completed.toFloat() / total else 0f }
+                            } else {
+                                null
+                            }
                         PlainTooltipBox(
                             tooltip = {
                                 Text(
                                     stringResource(
-                                        if (isTranslating) R.string.cancel_translation
-                                        else R.string.translate,
+                                        if (isTranslating) {
+                                            R.string.cancel_translation
+                                        } else {
+                                            R.string.translate
+                                        },
                                     ),
                                 )
                             },
@@ -387,16 +428,17 @@ private fun ArticleScreenInternal(
                                 progressFraction = translationProgressFraction,
                                 icon = Icons.Default.Translate,
                                 idleContentDescription = stringResource(R.string.translate_article_content_description),
-                                progressContentDescription = if (isTranslating) {
-                                    val articleTranslation = (viewState.translation as TranslationState.Translating).articleTranslation
-                                    stringResource(
-                                        R.string.translating_x_of_y_tap_to_cancel,
-                                        articleTranslation.paragraphCompletedCount,
-                                        articleTranslation.paragraphTotalCount,
-                                    )
-                                } else {
-                                    stringResource(R.string.translate_article_content_description)
-                                },
+                                progressContentDescription =
+                                    if (isTranslating) {
+                                        val articleTranslation = (viewState.translation as TranslationState.Translating).articleTranslation
+                                        stringResource(
+                                            R.string.translating_x_of_y_tap_to_cancel,
+                                            articleTranslation.paragraphCompletedCount,
+                                            articleTranslation.paragraphTotalCount,
+                                        )
+                                    } else {
+                                        stringResource(R.string.translate_article_content_description)
+                                    },
                                 onAction = onTranslate,
                                 onCancel = onCancelTranslation,
                             )
@@ -465,6 +507,26 @@ private fun ArticleScreenInternal(
                                         Text(stringResource(id = R.string.open_in_web_view))
                                     },
                                 )
+
+                                if (viewState.showTranslate) {
+                                    DropdownMenuItem(
+                                        onClick = {
+                                            onShowToolbarMenu(false)
+                                            onTranslate()
+                                        },
+                                        leadingIcon = {
+                                            Icon(
+                                                Icons.Default.Translate,
+                                                contentDescription = null,
+                                            )
+                                        },
+                                        text = {
+                                            Text(
+                                                stringResource(R.string.translate_article),
+                                            )
+                                        },
+                                    )
+                                }
 
                                 DropdownMenuItem(
                                     onClick = {
@@ -540,16 +602,29 @@ private fun ArticleScreenInternal(
             )
         },
         bottomBar = {
-            HideableTTSPlayer(
-                visibleState = bottomBarVisibleState,
-                currentlyPlaying = viewState.isTTSPlaying,
-                onPlay = ttsOnPlay,
-                onPause = ttsOnPause,
-                onStop = ttsOnStop,
-                onSkipNext = ttsOnSkipNext,
-                languages = ImmutableHolder(viewState.ttsLanguages),
-                onSelectLanguage = ttsOnSelectLanguage,
-            )
+            if (viewState.podcastPlayerState.isVisible) {
+                HideablePodcastPlayer(
+                    visibleState = bottomBarVisibleState,
+                    viewState = viewState.podcastPlayerState,
+                    onPlay = podcastOnPlay,
+                    onPause = podcastOnPause,
+                    onStop = podcastOnStop,
+                    onSeekBack = podcastOnSeekBack,
+                    onSeekForward = podcastOnSeekForward,
+                    onSeekTo = podcastOnSeekTo,
+                )
+            } else {
+                HideableTTSPlayer(
+                    visibleState = bottomBarVisibleState,
+                    currentlyPlaying = viewState.isTTSPlaying,
+                    onPlay = ttsOnPlay,
+                    onPause = ttsOnPause,
+                    onStop = ttsOnStop,
+                    onSkipNext = ttsOnSkipNext,
+                    languages = ImmutableHolder(viewState.ttsLanguages),
+                    onSelectLanguage = ttsOnSelectLanguage,
+                )
+            }
         },
     ) { padding ->
         // Box handles the dynamic padding so ArticleContent don't have to recompose on scroll
@@ -570,6 +645,8 @@ private fun ArticleScreenInternal(
                 screenType = ScreenType.SINGLE,
                 articleScrollState = articleScrollState,
                 onFeedTitleClick = onFeedTitleClick,
+                onOpenAudioPlayer = onOpenAudioPlayer,
+                onOpenInCustomTab = onOpenInCustomTab,
                 modifier =
                     Modifier
                         .focusGroup()
@@ -633,6 +710,8 @@ fun ArticleContent(
     viewState: ArticleScreenViewState,
     screenType: ScreenType,
     onFeedTitleClick: () -> Unit,
+    onOpenAudioPlayer: (url: String) -> Unit,
+    onOpenInCustomTab: () -> Unit,
     articleScrollState: ScrollState,
     modifier: Modifier = Modifier,
 ) {
@@ -644,13 +723,18 @@ fun ArticleContent(
 
     // Track Y positions of article elements by index for anchor link scrolling
     val elementPositions = remember { mutableMapOf<Int, Float>() }
+    val contentImageUrls = remember(viewState.articleContent) { viewState.articleContent.imageUrls }
 
     ReaderView(
         screenType = screenType,
         wordCount = viewState.wordCount,
         onEnclosureClick = {
             if (viewState.enclosure.present) {
-                activityLauncher.openLinkInBrowser(link = viewState.enclosure.link)
+                if (viewState.useInAppAudioPlayer && shouldOpenInPodcastPlayer(viewState.enclosure.link, viewState.enclosure)) {
+                    onOpenAudioPlayer(viewState.enclosure.link)
+                } else {
+                    activityLauncher.openLinkInBrowser(link = viewState.enclosure.link)
+                }
             }
         },
         onFeedTitleClick = onFeedTitleClick,
@@ -662,9 +746,7 @@ fun ArticleContent(
                 viewState.author == null && viewState.pubDate != null ->
                     stringResource(
                         R.string.on_date,
-                        (viewState.pubDate?.withZoneSameInstant(ZoneId.systemDefault()) ?: ZonedDateTime.now()).format(
-                            dateTimeFormat,
-                        ),
+                        formatArticleDate(context, viewState.pubDate),
                     )
 
                 viewState.author != null && viewState.pubDate != null ->
@@ -673,15 +755,14 @@ fun ArticleContent(
                         // Must wrap author in unicode marks to ensure it formats
                         // correctly in RTL
                         context.unicodeWrap(viewState.author ?: ""),
-                        (viewState.pubDate?.withZoneSameInstant(ZoneId.systemDefault()) ?: ZonedDateTime.now()).format(
-                            dateTimeFormat,
-                        ),
+                        formatArticleDate(context, viewState.pubDate),
                     )
 
                 else -> null
             },
         image = viewState.image,
-        isFeedText = viewState.textToDisplay == TextToDisplay.CONTENT,
+        showHeaderImage = viewState.textToDisplay == TextToDisplay.CONTENT,
+        contentImageUrls = contentImageUrls,
         modifier = modifier,
         articleScrollState = articleScrollState,
     ) { indexOffset ->
@@ -706,10 +787,12 @@ fun ArticleContent(
                     val translatedParagraphs =
                         when (val translation = viewState.translation) {
                             is TranslationState.Translating ->
-                                translation.articleTranslation.buildTranslatedParagraphsList()
+                                translation.articleTranslation
+                                    .buildTranslatedParagraphsList()
                                     .map { it ?: "" }
                             is TranslationState.Translated ->
-                                translation.articleTranslation.buildTranslatedParagraphsList()
+                                translation.articleTranslation
+                                    .buildTranslatedParagraphsList()
                                     .map { it ?: "" }
                             else -> null
                         }
@@ -727,11 +810,15 @@ fun ArticleContent(
                                     }
                                 }
                             } else {
-                                // External link - open in browser/custom tab
-                                activityLauncher.openLink(
-                                    link = link,
-                                    toolbarColor = toolbarColor,
-                                )
+                                if (viewState.useInAppAudioPlayer && shouldOpenInPodcastPlayer(link, viewState.enclosure)) {
+                                    onOpenAudioPlayer(link)
+                                } else {
+                                    // External link - open in browser/custom tab
+                                    activityLauncher.openLink(
+                                        link = link,
+                                        toolbarColor = toolbarColor,
+                                    )
+                                }
                             }
                         },
                         onElementPosition = { index, yPosition ->
@@ -759,10 +846,31 @@ fun ArticleContent(
                 TextToDisplay.FAILED_NOT_HTML -> {
                     Text(text = stringResource(id = R.string.failed_to_fetch_full_article_not_html))
                 }
+
+                TextToDisplay.FAILED_FULLTEXT_TOO_LARGE -> {
+                    Text(text = stringResource(id = R.string.failed_to_fetch_full_article_too_large))
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Button(onClick = onOpenInCustomTab) {
+                        Text(text = stringResource(id = R.string.open_in_web_view))
+                    }
+                }
             }
         }
     }
 }
+
+internal fun formatArticleDate(
+    context: Context,
+    publicationDate: ZonedDateTime?,
+    zoneId: ZoneId = ZoneId.systemDefault(),
+): String =
+    publicationDate?.let {
+        val skeleton = if (DateFormat.is24HourFormat(context)) "yMMMMEEEEdHm" else "yMMMMEEEEdhm"
+        val locale = context.resources.configuration.locales[0]
+        SimpleDateFormat(DateFormat.getBestDateTimePattern(locale, skeleton), locale)
+            .apply { timeZone = TimeZone.getTimeZone(zoneId) }
+            .format(Date.from(it.toInstant()))
+    } ?: ""
 
 @Composable
 private fun SummarySection(summary: AISummaryState) {
@@ -774,14 +882,15 @@ private fun SummarySection(summary: AISummaryState) {
             AISummaryState.Loading -> {}
             is AISummaryState.Result -> {
                 val displayContent = summary.value.content.trim()
-                val safeContent = if (
-                    SummaryResponseParser.containsRawJson(displayContent)
-                ) {
-                    android.util.Log.w("ArticleScreen", "Detected raw JSON in summary, replacing with error message")
-                    "Could not generate summary. Please try again."
-                } else {
-                    displayContent
-                }
+                val safeContent =
+                    if (
+                        SummaryResponseParser.containsRawJson(displayContent)
+                    ) {
+                        android.util.Log.w("ArticleScreen", "Detected raw JSON in summary, replacing with error message")
+                        "Could not generate summary. Please try again."
+                    } else {
+                        displayContent
+                    }
 
                 MarkdownText(
                     modifier = Modifier.padding(8.dp),

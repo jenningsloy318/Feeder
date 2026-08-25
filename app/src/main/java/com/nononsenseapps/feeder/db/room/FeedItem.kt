@@ -32,7 +32,9 @@ import com.nononsenseapps.feeder.db.FEED_ITEMS_TABLE_NAME
 import com.nononsenseapps.feeder.model.ParsedArticle
 import com.nononsenseapps.feeder.model.ParsedFeed
 import com.nononsenseapps.feeder.model.ThumbnailImage
+import com.nononsenseapps.feeder.model.ThumbnailImagePolicy
 import com.nononsenseapps.feeder.model.host
+import com.nononsenseapps.feeder.model.html.HtmlLinearizer
 import com.nononsenseapps.feeder.ui.text.HtmlToPlainTextConverter
 import java.net.URI
 import java.time.Clock
@@ -156,7 +158,11 @@ data class FeedItem
             this.title = this.plainTitle
             this.plainSnippet = summary
 
-            this.thumbnailImage = entry.image
+            this.thumbnailImage =
+                ThumbnailImagePolicy.applyParsedEntryImage(
+                    current = this.thumbnailImage,
+                    incoming = entry.image,
+                )
             val firstEnclosure = entry.attachments?.firstOrNull()
             this.enclosureLink = firstEnclosure?.url
             this.enclosureType = firstEnclosure?.mime_type?.lowercase()
@@ -211,14 +217,20 @@ interface FeedItemCursor {
 
 /**
  * If language doesn't use spaces, then this function will try to return 0
+ *
+ * This takes the max chars in HtmlLinearizer into account.
  */
 fun estimateWordCount(plainText: String): Int {
-    val charCount = plainText.length.toFloat()
-    val wordCount = plainText.splitToSequence(patternWhitespace).count()
+    val charCount = minOf(plainText.length, HtmlLinearizer.MAX_CHARS).toFloat()
+    val wordCount =
+        plainText
+            .take(HtmlLinearizer.MAX_CHARS)
+            .splitToSequence(patternWhitespace)
+            .count()
 
     // Calculate average length of chars between spaces
-    // A typical value for english is 5-7
-    // A typical value for japanese is 50-80
+    // A typical value for English is 5-7
+    // A typical value for Japanese is 50-80
     return if (charCount / wordCount < 15.0) {
         wordCount
     } else {

@@ -23,6 +23,8 @@ import com.nononsenseapps.feeder.db.room.ID_UNSET
 import com.nononsenseapps.feeder.model.FeedUnreadCount
 import com.nononsenseapps.feeder.model.LocaleOverride
 import com.nononsenseapps.feeder.model.PlaybackStatus
+import com.nononsenseapps.feeder.model.PodcastPlayerState
+import com.nononsenseapps.feeder.model.PodcastPlayerStateHolder
 import com.nononsenseapps.feeder.model.TTSStateHolder
 import com.nononsenseapps.feeder.ui.compose.feed.FeedListItem
 import com.nononsenseapps.feeder.ui.compose.feed.FeedOrTag
@@ -51,6 +53,7 @@ class FeedViewModel(
     FeedListFilterCallback {
     private val repository: Repository by instance()
     private val ttsStateHolder: TTSStateHolder by instance()
+    private val podcastPlayerStateHolder: PodcastPlayerStateHolder by instance()
     private val filePathProvider: FilePathProvider by instance()
 
     // Use this for actions which should complete even if app goes off screen
@@ -98,6 +101,13 @@ class FeedViewModel(
         applicationCoroutineScope.launch {
             repository.deleteFeeds(feedIds)
         }
+
+    fun renameTag(
+        oldTag: String,
+        newTag: String,
+    ) = applicationCoroutineScope.launch {
+        repository.renameTag(oldTag, newTag)
+    }
 
     fun markAllAsRead() =
         applicationCoroutineScope.launch {
@@ -200,6 +210,12 @@ class FeedViewModel(
 
     fun setShowDeleteDialog(visible: Boolean) {
         deleteDialogVisible.update { visible }
+    }
+
+    private val renameTagDialogVisible = MutableStateFlow(false)
+
+    fun setShowRenameTagDialog(visible: Boolean) {
+        renameTagDialogVisible.update { visible }
     }
 
     private fun setCurrentArticle(itemId: Long) {
@@ -305,10 +321,14 @@ class FeedViewModel(
             repository.showTitleUnreadCount,
             repository.syncWorkerRunning,
             repository.isOpenDrawerOnFab,
-        ) { params: Array<Any> ->
+            renameTagDialogVisible,
+            podcastPlayerStateHolder.playerState,
+            repository.forceSingleColumn,
+        ) { params: Array<Any?> ->
             val haveVisibleFeedItems = (params[7] as Int) > 0
             val currentFeedOrTag = params[13] as FeedOrTag
             val ttsState = params[14] as PlaybackStatus
+            val podcastPlayerState = params[29] as PodcastPlayerState
 
             @Suppress("UNCHECKED_CAST")
             FeedState(
@@ -324,14 +344,15 @@ class FeedViewModel(
                 feedScreenTitle = params[8] as ScreenTitle,
                 showEditDialog = params[9] as Boolean,
                 showDeleteDialog = params[10] as Boolean,
+                showRenameTagDialog = params[29] as Boolean,
                 visibleFeeds = params[11] as List<FeedTitle>,
                 isArticleOpen = params[12] as Boolean,
                 // 13
                 currentFeedOrTag = currentFeedOrTag,
                 // 14
                 isTTSPlaying = ttsState == PlaybackStatus.PLAYING,
-                // 14
-                isBottomBarVisible = ttsState != PlaybackStatus.STOPPED,
+                podcastPlayerState = podcastPlayerState,
+                isBottomBarVisible = ttsState != PlaybackStatus.STOPPED || podcastPlayerState.isVisible,
                 swipeAsRead = params[15] as SwipeAsRead,
                 ttsLanguages = params[16] as List<Locale>,
                 markAsReadOnScroll = params[17] as Boolean,
@@ -344,6 +365,7 @@ class FeedViewModel(
                 showReadingTime = params[24] as Boolean,
                 showTitleUnreadCount = params[25] as Boolean,
                 isOpenDrawerOnFab = params[27] as Boolean,
+                forceSingleColumn = params[28] as Boolean,
             )
         }.stateIn(
             viewModelScope,
@@ -353,6 +375,26 @@ class FeedViewModel(
 
     fun ttsStop() {
         ttsStateHolder.stop()
+    }
+
+    fun podcastPlay() {
+        podcastPlayerStateHolder.play()
+    }
+
+    fun podcastPause() {
+        podcastPlayerStateHolder.pause()
+    }
+
+    fun podcastStop() {
+        podcastPlayerStateHolder.stop()
+    }
+
+    fun podcastSeekBy(deltaMillis: Int) {
+        podcastPlayerStateHolder.seekBy(deltaMillis)
+    }
+
+    fun podcastSeekTo(positionMillis: Int) {
+        podcastPlayerStateHolder.seekTo(positionMillis)
     }
 
     fun ttsPause() {
@@ -368,6 +410,7 @@ class FeedViewModel(
     }
 
     fun ttsPlay() {
+        podcastPlayerStateHolder.stop()
         viewModelScope.launch(Dispatchers.IO) {
             val article =
                 repository.getCurrentArticle()
@@ -439,10 +482,6 @@ class FeedViewModel(
     override fun setRead(value: Boolean) {
         repository.setFeedListFilterRead(value)
     }
-
-    companion object {
-        private const val LOG_TAG = "FEEDER_FeedVM"
-    }
 }
 
 @Immutable
@@ -459,10 +498,12 @@ data class FeedState(
     override val expandedTags: Set<String> = emptySet(),
     override val isBottomBarVisible: Boolean = false,
     override val isTTSPlaying: Boolean = false,
+    override val podcastPlayerState: PodcastPlayerState = PodcastPlayerState(),
     override val ttsLanguages: List<Locale> = emptyList(),
     override val showToolbarMenu: Boolean = false,
     override val showDeleteDialog: Boolean = false,
     override val showEditDialog: Boolean = false,
+    override val showRenameTagDialog: Boolean = false,
     // Defaults to true so empty screen doesn't appear before load
     override val haveVisibleFeedItems: Boolean = true,
     override val swipeAsRead: SwipeAsRead = SwipeAsRead.ONLY_FROM_END,
@@ -477,6 +518,7 @@ data class FeedState(
     override val search: String = "",
     override val showTitleUnreadCount: Boolean = false,
     override val isOpenDrawerOnFab: Boolean = false,
+    override val forceSingleColumn: Boolean = false,
 ) : FeedScreenViewState
 
 @Immutable
@@ -492,10 +534,12 @@ interface FeedScreenViewState {
     val expandedTags: Set<String>
     val isBottomBarVisible: Boolean
     val isTTSPlaying: Boolean
+    val podcastPlayerState: PodcastPlayerState
     val ttsLanguages: List<Locale>
     val showToolbarMenu: Boolean
     val showDeleteDialog: Boolean
     val showEditDialog: Boolean
+    val showRenameTagDialog: Boolean
     val haveVisibleFeedItems: Boolean
     val swipeAsRead: SwipeAsRead
     val markAsReadOnScroll: Boolean
@@ -508,6 +552,7 @@ interface FeedScreenViewState {
     val search: String
     val showTitleUnreadCount: Boolean
     val isOpenDrawerOnFab: Boolean
+    val forceSingleColumn: Boolean
 }
 
 @Immutable

@@ -87,6 +87,7 @@ class OpmlParserTest : DIAware {
                         UserSettings.SETTINGS_FILTER_READ -> "false"
                         UserSettings.SETTINGS_LIST_SHOW_ONLY_TITLES -> "true"
                         UserSettings.SETTING_OPEN_ADJACENT -> "true"
+                        UserSettings.SETTING_USE_IN_APP_AUDIO_PLAYER -> "false"
                         UserSettings.SETTING_FONT -> "bundled/roboto_flex"
                         UserSettings.SETTING_LIST_SHOW_READING_TIME -> "false"
                         UserSettings.SETTING_OPEN_DRAWER_ON_FAB -> "true"
@@ -109,6 +110,8 @@ class OpmlParserTest : DIAware {
                         UserSettings.SETTING_ENABLE_SUMMARY -> "true"
                         UserSettings.SETTING_BLOCKLIST_APPLY_TO_SUMMARIES -> "true"
                         UserSettings.SETTING_ENABLE_TRANSLATION -> "true"
+                        UserSettings.SETTING_BLOCKLIST_APPLY_TO_LINKS -> "true"
+                        UserSettings.SETTINGS_FORCE_SINGLE_COLUMN -> "true"
                     },
             )
         }
@@ -144,6 +147,7 @@ class OpmlParserTest : DIAware {
                 settingsStore.setFeedListFilterSaved(true)
                 settingsStore.setShowOnlyTitles(true)
                 settingsStore.setOpenAdjacent(true)
+                settingsStore.setUseInAppAudioPlayer(false)
                 settingsStore.setFont(FontSelection.RobotoFlex)
                 settingsStore.setShowReadingTime(false)
                 settingsStore.setOpenDrawerOnFab(true)
@@ -160,6 +164,8 @@ class OpmlParserTest : DIAware {
                 settingsStore.setEnableSummary(true)
                 settingsStore.setApplyBlocklistToSummaries(true)
                 settingsStore.setEnableTranslation(true)
+                settingsStore.setApplyBlocklistToLinks(true)
+                settingsStore.setForceSingleColumn(true)
             }
 
             confirmVerified(settingsStore)

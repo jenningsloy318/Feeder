@@ -1,7 +1,6 @@
 package com.nononsenseapps.feeder.model.html
 
 import androidx.collection.ArrayMap
-import com.nononsenseapps.feeder.util.logDebug
 
 private const val LOG_TAG = "FEEDER_LINEAR"
 
@@ -16,13 +15,22 @@ data class LinearArticle(
 
                 when {
                     itemIds.isNotEmpty() -> {
-                        logDebug(LOG_TAG, "mapping ${element.javaClass.simpleName} $itemIds to $index")
                         itemIds.map { it to index }
                     }
                     else -> null
                 }
             }.flatten()
             .toMap()
+
+    val imageUrls: Set<String> by lazy {
+        buildSet {
+            elements.forEach { element ->
+                element.collectImageUrls(this)
+            }
+        }
+    }
+
+    fun containsImageUrl(url: String): Boolean = url in imageUrls
 }
 
 /**
@@ -40,6 +48,24 @@ fun LinearElement.ids(): Set<String> =
         is LinearTable -> ids
         is LinearVideo -> ids
     }
+
+private fun LinearElement.collectImageUrls(target: MutableSet<String>) {
+    when (this) {
+        is LinearAudio,
+        is LinearText,
+        is LinearVideo,
+        -> Unit
+        is LinearImage -> sources.mapTo(target) { it.imgUri }
+        is LinearBlockQuote -> content.forEach { it.collectImageUrls(target) }
+        is LinearListItem -> content.forEach { it.collectImageUrls(target) }
+        is LinearTable ->
+            cells.values
+                .filterNot { it.isFiller }
+                .forEach { cell ->
+                    cell.content.forEach { it.collectImageUrls(target) }
+                }
+    }
+}
 
 /**
  * Represents a list of items, ordered or unordered

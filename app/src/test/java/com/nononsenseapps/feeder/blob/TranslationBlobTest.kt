@@ -20,14 +20,15 @@ class TranslationBlobTest {
 
     private fun sampleTranslation(paragraphCount: Int = 3): ArticleTranslation =
         ArticleTranslation(
-            contents = (1..paragraphCount).map { i ->
-                ParagraphTranslation(
-                    index = i,
-                    text = "Source paragraph $i",
-                    translation = "Translated paragraph $i",
-                    translated = 1,
-                )
-            },
+            contents =
+                (1..paragraphCount).map { i ->
+                    ParagraphTranslation(
+                        index = i,
+                        text = "Source paragraph $i",
+                        translation = "Translated paragraph $i",
+                        translated = 1,
+                    )
+                },
             status = "translated",
         )
 
@@ -106,18 +107,22 @@ class TranslationBlobTest {
     @Test
     fun multipleLanguagesForSameItemCoexistIndependently() {
         val dir = createTranslationsDir()
-        val zhTranslation = ArticleTranslation(
-            contents = listOf(
-                ParagraphTranslation(index = 1, text = "Hello", translation = "你好", translated = 1),
-            ),
-            status = "translated",
-        )
-        val enTranslation = ArticleTranslation(
-            contents = listOf(
-                ParagraphTranslation(index = 1, text = "Bonjour", translation = "Hello", translated = 1),
-            ),
-            status = "translated",
-        )
+        val zhTranslation =
+            ArticleTranslation(
+                contents =
+                    listOf(
+                        ParagraphTranslation(index = 1, text = "Hello", translation = "你好", translated = 1),
+                    ),
+                status = "translated",
+            )
+        val enTranslation =
+            ArticleTranslation(
+                contents =
+                    listOf(
+                        ParagraphTranslation(index = 1, text = "Bonjour", translation = "Hello", translated = 1),
+                    ),
+                status = "translated",
+            )
 
         saveTranslation(itemId = 42, languageCode = "zh", translationsDir = dir, translation = zhTranslation)
         saveTranslation(itemId = 42, languageCode = "en", translationsDir = dir, translation = enTranslation)
@@ -183,7 +188,8 @@ class TranslationBlobTest {
         // Write JSON with extra unknown keys
         dir.mkdirs()
         val file = translationFile(itemId = 42, languageCode = "zh", translationsDir = dir)
-        val jsonWithExtraKeys = """
+        val jsonWithExtraKeys =
+            """
             {
                 "contents": [
                     {"index": 1, "text": "Hello", "translation": "你好", "translated": 1, "futureField": "ignored"}
@@ -191,7 +197,7 @@ class TranslationBlobTest {
                 "status": "translated",
                 "newTopLevelField": 42
             }
-        """.trimIndent()
+            """.trimIndent()
         GZIPOutputStream(file.outputStream()).bufferedWriter().use { writer ->
             writer.write(jsonWithExtraKeys)
         }

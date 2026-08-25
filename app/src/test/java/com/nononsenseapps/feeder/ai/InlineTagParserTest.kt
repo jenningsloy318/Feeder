@@ -16,7 +16,6 @@ import kotlin.test.assertTrue
  * which doesn't require a @Composable context.
  */
 class InlineTagParserTest {
-
     // ===== Plain text (no tags) =====
 
     @Test
@@ -128,10 +127,11 @@ class InlineTagParserTest {
     @Test
     fun parse_linkTag() {
         var clickedUrl: String? = null
-        val result = callParse(
-            "<link href=\"https://example.com\">click me</link>",
-            onLinkClick = { url -> clickedUrl = url },
-        )
+        val result =
+            callParse(
+                "<link href=\"https://example.com\">click me</link>",
+                onLinkClick = { url -> clickedUrl = url },
+            )
 
         assertEquals("click me", result.text)
         // Link uses pushLink, not pushStyle - check link annotations
@@ -248,24 +248,25 @@ class InlineTagParserTest {
 
     @Test
     fun parse_neverThrows_withGarbledInput() {
-        val inputs = listOf(
-            "<",
-            ">",
-            "<>",
-            "</",
-            "<b",
-            "<<b>>",
-            "<b>text<b>",
-            "</b>",
-            "<<<>>>",
-            "<b><i>text</b></i>",
-            "<link href=>text</link>",
-            "<link>no href</link>",
-            "normal <  text > here",
-            "&",
-            "&amp",
-            "&invalid;",
-        )
+        val inputs =
+            listOf(
+                "<",
+                ">",
+                "<>",
+                "</",
+                "<b",
+                "<<b>>",
+                "<b>text<b>",
+                "</b>",
+                "<<<>>>",
+                "<b><i>text</b></i>",
+                "<link href=>text</link>",
+                "<link>no href</link>",
+                "normal <  text > here",
+                "&",
+                "&amp",
+                "&invalid;",
+            )
 
         for (input in inputs) {
             try {

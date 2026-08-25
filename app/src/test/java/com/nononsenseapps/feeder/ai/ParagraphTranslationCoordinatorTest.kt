@@ -13,11 +13,9 @@ import kotlin.test.assertTrue
 class ParagraphTranslationCoordinatorTest {
     private val targetLanguage = TranslationLanguage.CHINESE
 
-    private fun createParagraphs(count: Int): List<TranslatableText> =
-        (1..count).map { TranslatableText.fromPlainText("Paragraph $it") }
+    private fun createParagraphs(count: Int): List<TranslatableText> = (1..count).map { TranslatableText.fromPlainText("Paragraph $it") }
 
-    private fun createSuccessMock(delayMs: Long = 0): MockAIClient =
-        MockAIClient(delayMs = delayMs)
+    private fun createSuccessMock(delayMs: Long = 0): MockAIClient = MockAIClient(delayMs = delayMs)
 
     @Test
     fun translateParagraphs_should_emitCompleteForEachParagraph() =
@@ -257,5 +255,4 @@ private class MockAIClient(
             onTranslateEnd?.invoke()
         }
     }
-
 }

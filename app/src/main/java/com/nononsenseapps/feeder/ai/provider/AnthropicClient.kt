@@ -276,5 +276,4 @@ Now, summarize the following article:
 
         return builder.build()
     }
-
 }

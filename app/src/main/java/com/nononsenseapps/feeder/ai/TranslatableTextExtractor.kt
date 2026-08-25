@@ -105,7 +105,10 @@ object TranslatableTextExtractor {
      * 3. Sort events: by position, opens before closes, wider spans first among opens
      * 4. Walk through escaped text inserting tags at event positions
      */
-    internal fun toTaggedText(text: String, annotations: List<LinearTextAnnotation>): String {
+    internal fun toTaggedText(
+        text: String,
+        annotations: List<LinearTextAnnotation>,
+    ): String {
         if (annotations.isEmpty()) {
             return escapeXmlContent(text)
         }
@@ -172,15 +175,19 @@ object TranslatableTextExtractor {
     /**
      * Maps a position in the original text to the corresponding position in the escaped text.
      */
-    private fun mapPositionToEscaped(originalText: String, position: Int): Int {
+    private fun mapPositionToEscaped(
+        originalText: String,
+        position: Int,
+    ): Int {
         var escapedPos = 0
         for (i in 0 until minOf(position, originalText.length)) {
-            escapedPos += when (originalText[i]) {
-                '&' -> 5  // &amp;
-                '<' -> 4  // &lt;
-                '>' -> 4  // &gt;
-                else -> 1
-            }
+            escapedPos +=
+                when (originalText[i]) {
+                    '&' -> 5 // &amp;
+                    '<' -> 4 // &lt;
+                    '>' -> 4 // &gt;
+                    else -> 1
+                }
         }
         return escapedPos
     }

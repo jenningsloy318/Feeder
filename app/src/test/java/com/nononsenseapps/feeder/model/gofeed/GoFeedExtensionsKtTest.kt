@@ -1,6 +1,7 @@
 package com.nononsenseapps.feeder.model.gofeed
 
 import com.nononsenseapps.feeder.model.ImageFromHTML
+import com.nononsenseapps.feeder.model.MediaImage
 import org.junit.Test
 import java.net.URL
 import kotlin.test.assertEquals

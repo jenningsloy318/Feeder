@@ -422,6 +422,14 @@ class SettingsStore(
         sp.edit().putBoolean(PREF_OPEN_ADJACENT, value).apply()
     }
 
+    private val _useInAppAudioPlayer = MutableStateFlow(sp.getBoolean(PREF_USE_IN_APP_AUDIO_PLAYER, true))
+    val useInAppAudioPlayer = _useInAppAudioPlayer.asStateFlow()
+
+    fun setUseInAppAudioPlayer(value: Boolean) {
+        _useInAppAudioPlayer.value = value
+        sp.edit().putBoolean(PREF_USE_IN_APP_AUDIO_PLAYER, value).apply()
+    }
+
     private val _isPagingMode = MutableStateFlow(sp.getBoolean(PREF_PAGING_MODE, false))
     val isPagingMode = _isPagingMode.asStateFlow()
 
@@ -515,6 +523,17 @@ class SettingsStore(
     fun setApplyBlocklistToSummaries(value: Boolean) {
         _applyBlocklistToSummaries.value = value
         sp.edit().putBoolean(PREF_BLOCKLIST_APPLY_TO_SUMMARIES, value).apply()
+    }
+
+    private val _applyBlocklistToLinks =
+        MutableStateFlow(
+            sp.getBoolean(PREF_BLOCKLIST_APPLY_TO_LINKS, false),
+        )
+    val applyBlocklistToLinks: StateFlow<Boolean> = _applyBlocklistToLinks.asStateFlow()
+
+    fun setApplyBlocklistToLinks(value: Boolean) {
+        _applyBlocklistToLinks.value = value
+        sp.edit().putBoolean(PREF_BLOCKLIST_APPLY_TO_LINKS, value).apply()
     }
 
     private val _syncFrequency by lazy {
@@ -894,6 +913,14 @@ class SettingsStore(
         sp.edit().putBoolean(PREF_OPEN_DRAWER_ON_FAB, value).apply()
     }
 
+    private val _forceSingleColumn = MutableStateFlow(sp.getBoolean(PREF_FORCE_SINGLE_COLUMN, false))
+    val forceSingleColumn = _forceSingleColumn.asStateFlow()
+
+    fun setForceSingleColumn(value: Boolean) {
+        _forceSingleColumn.value = value
+        sp.edit().putBoolean(PREF_FORCE_SINGLE_COLUMN, value).apply()
+    }
+
     fun getAllSettings(): Map<String, String> {
         val all = sp.all ?: emptyMap()
 
@@ -953,6 +980,7 @@ const val PREF_SWIPE_AS_READ = "pref_swipe_as_read"
  * Block list settings
  */
 const val PREF_BLOCKLIST_APPLY_TO_SUMMARIES = "pref_blocklist_apply_to_summaries"
+const val PREF_BLOCKLIST_APPLY_TO_LINKS = "pref_blocklist_apply_to_links"
 
 /**
  * Sync settings
@@ -975,6 +1003,7 @@ const val PREF_IMG_SHOW_THUMBNAILS = "pref_img_show_thumbnails"
 const val PREF_DEFAULT_OPEN_ITEM_WITH = "pref_default_open_item_with"
 const val PREF_OPEN_LINKS_WITH = "pref_open_links_with"
 const val PREF_OPEN_ADJACENT = "pref_open_adjacent"
+const val PREF_USE_IN_APP_AUDIO_PLAYER = "pref_use_in_app_audio_player"
 
 const val PREF_PAGING_MODE = "pref_paging_mode"
 const val PREF_ANIMATED_PAGING = "pref_animated_paging"
@@ -1015,6 +1044,19 @@ const val PREF_OPENAI_URL = "pref_openai_url"
 const val PREF_OPENAI_AZURE_VERSION = "pref_openai_azure_version"
 const val PREF_OPENAI_AZURE_DEPLOYMENT_ID = "pref_openai_azure_deployment_id"
 const val PREF_OPENAI_REQUEST_TIMEOUT_SECONDS = "pref_openai_request_timeout_seconds"
+
+// Keep the legacy persisted key name for preference and OPML compatibility.
+const val PREF_PREFERRED_TRANSLATION_LANGUAGE = "pref_openai_translation_language"
+const val PREF_TRANSLATION_API_KEY = "pref_translation_api_key"
+const val PREF_TRANSLATION_API_MODEL_ID = "pref_translation_api_model_id"
+const val PREF_TRANSLATION_API_URL = "pref_translation_api_url"
+const val PREF_TRANSLATION_API_AZURE_VERSION = "pref_translation_api_azure_version"
+const val PREF_TRANSLATION_API_AZURE_DEPLOYMENT_ID = "pref_translation_api_azure_deployment_id"
+const val PREF_TRANSLATION_API_REQUEST_TIMEOUT_SECONDS = "pref_translation_api_request_timeout_seconds"
+
+// Keep the legacy persisted key name for preference and OPML compatibility.
+const val PREF_TRANSLATE_ARTICLE_PREVIEWS_BY_DEFAULT = "pref_translate_feed_cards_by_default"
+const val PREF_TRANSLATE_ARTICLES_BY_DEFAULT = "pref_translate_articles_by_default"
 
 /**
  * Anthropic integration settings
@@ -1066,6 +1108,7 @@ const val PREF_TRANSLATION_TIMEOUT_SECONDS = "pref_translation_timeout_seconds"
  * Appearance settings
  */
 const val PREF_SHOW_TITLE_UNREAD_COUNT = "pref_show_title_unread_count"
+const val PREF_FORCE_SINGLE_COLUMN = "pref_force_single_column"
 
 /**
  * Used for OPML Import/Export. Please add new (only) user configurable settings here
@@ -1090,6 +1133,7 @@ enum class UserSettings(
     SETTING_DEFAULT_OPEN_ITEM_WITH(key = PREF_DEFAULT_OPEN_ITEM_WITH),
     SETTING_OPEN_LINKS_WITH(key = PREF_OPEN_LINKS_WITH),
     SETTING_OPEN_ADJACENT(key = PREF_OPEN_ADJACENT),
+    SETTING_USE_IN_APP_AUDIO_PLAYER(key = PREF_USE_IN_APP_AUDIO_PLAYER),
     SETTING_PAGING_MODE(key = PREF_PAGING_MODE),
     SETTING_ANIMATED_PAGING(key = PREF_ANIMATED_PAGING),
     SETTING_TEXT_SCALE(key = PREF_TEXT_SCALE),
@@ -1116,7 +1160,6 @@ enum class UserSettings(
     SETTING_OPENAI_AZURE_DEPLOYMENT_ID(key = PREF_OPENAI_AZURE_DEPLOYMENT_ID),
     SETTING_OPENAI_REQUEST_TIMEOUT_SECONDS(key = PREF_OPENAI_REQUEST_TIMEOUT_SECONDS),
 
-
     // Anthropic settings
     SETTING_ANTHROPIC_KEY(key = PREF_ANTHROPIC_KEY),
     SETTING_ANTHROPIC_MODEL_ID(key = PREF_ANTHROPIC_MODEL_ID),
@@ -1130,9 +1173,11 @@ enum class UserSettings(
     SETTING_SUMMARY_ENABLED(key = PREF_SUMMARY_ENABLED),
     SETTING_ENABLE_SUMMARY(key = PREF_ENABLE_SUMMARY),
     SETTING_BLOCKLIST_APPLY_TO_SUMMARIES(key = PREF_BLOCKLIST_APPLY_TO_SUMMARIES),
+    SETTING_BLOCKLIST_APPLY_TO_LINKS(key = PREF_BLOCKLIST_APPLY_TO_LINKS),
 
     // Translation settings
     SETTING_ENABLE_TRANSLATION(key = PREF_ENABLE_TRANSLATION),
+    SETTINGS_FORCE_SINGLE_COLUMN(key = PREF_FORCE_SINGLE_COLUMN),
     ;
 
     companion object {

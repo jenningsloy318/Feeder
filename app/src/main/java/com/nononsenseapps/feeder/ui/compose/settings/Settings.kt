@@ -5,7 +5,6 @@ import android.os.Build
 import android.provider.Settings
 import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
-import androidx.compose.ui.draw.alpha
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -56,6 +55,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -165,6 +165,8 @@ fun SettingsScreen(
             blockListValue = ImmutableHolder(viewState.blockList.sorted()),
             applyBlocklistToSummaries = viewState.applyBlocklistToSummaries,
             onApplyBlocklistToSummariesChange = settingsViewModel::setApplyBlocklistToSummaries,
+            applyBlocklistToLinks = viewState.applyBlocklistToLinks,
+            onApplyBlocklistToLinksChange = settingsViewModel::setApplyBlocklistToLinks,
             swipeAsReadValue = viewState.swipeAsRead,
             onSwipeAsReadOptionChange = settingsViewModel::setSwipeAsRead,
             syncOnStartupValue = viewState.syncOnResume,
@@ -189,6 +191,8 @@ fun SettingsScreen(
             onLinkOpenerChange = settingsViewModel::setLinkOpener,
             currentSyncFrequencyValue = viewState.syncFrequency,
             onSyncFrequencyChange = settingsViewModel::setSyncFrequency,
+            useInAppAudioPlayer = viewState.useInAppAudioPlayer,
+            onUseInAppAudioPlayerChange = settingsViewModel::setUseInAppAudioPlayer,
             batteryOptimizationIgnoredValue = viewState.batteryOptimizationIgnored,
             onOpenSyncSettings = onNavigateToSyncScreen,
             useDynamicTheme = viewState.useDynamicTheme,
@@ -232,6 +236,8 @@ fun SettingsScreen(
                     intent = openGithubIssues(),
                 )
             },
+            forceSingleColumn = viewState.forceSingleColumn,
+            onForceSingleColumnChange = settingsViewModel::setForceSingleColumn,
             modifier = Modifier.padding(padding),
         )
     }
@@ -256,6 +262,8 @@ private fun SettingsScreenPreview() {
             blockListValue = ImmutableHolder(emptyList()),
             applyBlocklistToSummaries = false,
             onApplyBlocklistToSummariesChange = {},
+            applyBlocklistToLinks = false,
+            onApplyBlocklistToLinksChange = {},
             swipeAsReadValue = SwipeAsRead.ONLY_FROM_END,
             onSwipeAsReadOptionChange = {},
             syncOnStartupValue = true,
@@ -280,6 +288,8 @@ private fun SettingsScreenPreview() {
             onLinkOpenerChange = {},
             currentSyncFrequencyValue = SyncFrequency.EVERY_12_HOURS,
             onSyncFrequencyChange = {},
+            useInAppAudioPlayer = true,
+            onUseInAppAudioPlayerChange = {},
             batteryOptimizationIgnoredValue = false,
             onOpenSyncSettings = {},
             useDynamicTheme = true,
@@ -313,6 +323,8 @@ private fun SettingsScreenPreview() {
             isAnimatedPaging = false,
             onIsAnimatedPagingChange = {},
             onSendFeedback = {},
+            forceSingleColumn = false,
+            onForceSingleColumnChange = {},
             modifier = Modifier,
         )
     }
@@ -333,6 +345,8 @@ fun SettingsList(
     blockListValue: ImmutableHolder<List<String>>,
     applyBlocklistToSummaries: Boolean,
     onApplyBlocklistToSummariesChange: (Boolean) -> Unit,
+    applyBlocklistToLinks: Boolean,
+    onApplyBlocklistToLinksChange: (Boolean) -> Unit,
     swipeAsReadValue: SwipeAsRead,
     onSwipeAsReadOptionChange: (SwipeAsRead) -> Unit,
     syncOnStartupValue: Boolean,
@@ -357,6 +371,8 @@ fun SettingsList(
     onLinkOpenerChange: (LinkOpener) -> Unit,
     currentSyncFrequencyValue: SyncFrequency,
     onSyncFrequencyChange: (SyncFrequency) -> Unit,
+    useInAppAudioPlayer: Boolean,
+    onUseInAppAudioPlayerChange: (Boolean) -> Unit,
     batteryOptimizationIgnoredValue: Boolean,
     onOpenSyncSettings: () -> Unit,
     useDynamicTheme: Boolean,
@@ -393,6 +409,8 @@ fun SettingsList(
     onIsAnimatedPagingChange: (Boolean) -> Unit,
     onTextSettings: () -> Unit,
     onSendFeedback: () -> Unit,
+    forceSingleColumn: Boolean,
+    onForceSingleColumnChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val scrollState = rememberScrollState()
@@ -460,39 +478,57 @@ fun SettingsList(
                     .width(dimens.maxContentWidth),
         )
 
-        ListDialogSetting(
-            title = stringResource(id = R.string.block_list),
-            dialogTitle = {
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    Text(
-                        text = stringResource(id = R.string.block_list),
-                        style = MaterialTheme.typography.titleLarge,
-                    )
-                    Text(
-                        text = stringResource(id = R.string.block_list_description),
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
-                    Text(
-                        text = "feeder feed?r fe*er",
-                        style = MaterialTheme.typography.bodySmall.copy(fontFamily = LocalTypographySettings.current.monoFontFamily),
-                    )
-                }
-            },
-            currentValue = blockListValue,
-            showToggle = true,
-            toggleValue = applyBlocklistToSummaries,
-            toggleLabel = stringResource(id = R.string.apply_blocklist_to_summaries),
-            onAddItem = onBlockListAdd,
-            onRemoveItem = onBlockListRemove,
-            onToggleChange = onApplyBlocklistToSummariesChange,
-        )
-
         NotificationsSetting(
             items = feedsSettings,
             onToggleItem = onToggleNotification,
         )
+
+        HorizontalDivider(modifier = Modifier.width(dimens.maxContentWidth))
+
+        SettingsGroup(
+            title = R.string.block_list,
+        ) {
+            ListDialogSetting(
+                title = stringResource(id = R.string.filters),
+                dialogTitle = {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        Text(
+                            text = stringResource(id = R.string.filters),
+                            style = MaterialTheme.typography.titleLarge,
+                        )
+                        Text(
+                            text = stringResource(id = R.string.block_list_description),
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                        Text(
+                            text = "feeder feed?r fe*er",
+                            style = MaterialTheme.typography.bodySmall.copy(fontFamily = LocalTypographySettings.current.monoFontFamily),
+                        )
+                    }
+                },
+                currentValue = blockListValue,
+                showToggle = false,
+                toggleValue = false,
+                toggleLabel = "",
+                onAddItem = onBlockListAdd,
+                onRemoveItem = onBlockListRemove,
+                onToggleChange = {},
+            )
+
+            SwitchSetting(
+                title = stringResource(id = R.string.apply_blocklist_to_summaries),
+                checked = applyBlocklistToSummaries,
+                onCheckedChange = onApplyBlocklistToSummariesChange,
+            )
+
+            SwitchSetting(
+                title = stringResource(id = R.string.apply_blocklist_to_links),
+                checked = applyBlocklistToLinks,
+                onCheckedChange = onApplyBlocklistToLinksChange,
+            )
+        }
 
         HorizontalDivider(modifier = Modifier.width(dimens.maxContentWidth))
 
@@ -694,6 +730,12 @@ fun SettingsList(
                 checked = showTitleUnreadCount,
                 onCheckedChange = onShowTitleUnreadCountChange,
             )
+
+            SwitchSetting(
+                title = stringResource(id = R.string.force_single_column),
+                checked = forceSingleColumn,
+                onCheckedChange = onForceSingleColumnChange,
+            )
         }
 
         HorizontalDivider(modifier = Modifier.width(dimens.maxContentWidth))
@@ -732,6 +774,13 @@ fun SettingsList(
                 modifier =
                     Modifier
                         .width(dimens.maxContentWidth),
+            )
+
+            SwitchSetting(
+                title = stringResource(id = R.string.use_in_app_audio_player),
+                checked = useInAppAudioPlayer,
+                onCheckedChange = onUseInAppAudioPlayerChange,
+                description = stringResource(id = R.string.use_in_app_audio_player_description),
             )
 
             val notCompactScreen = LocalConfiguration.current.smallestScreenWidthDp >= 600

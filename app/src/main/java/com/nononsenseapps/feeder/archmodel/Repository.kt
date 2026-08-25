@@ -143,6 +143,17 @@ class Repository(
         settingsStore.setCurrentWidgetFeedAndTag(feedId, tag)
     }
 
+    suspend fun renameTag(
+        oldTag: String,
+        newTag: String,
+    ) {
+        feedStore.renameTag(oldTag, newTag)
+        val (currentFeedId, currentTag) = currentFeedAndTag.value
+        if (currentFeedId == ID_UNSET && currentTag == oldTag) {
+            setCurrentFeedAndTag(ID_UNSET, newTag)
+        }
+    }
+
     val isArticleOpen: StateFlow<Boolean> = settingsStore.isArticleOpen
 
     fun setIsArticleOpen(open: Boolean) {
@@ -226,8 +237,15 @@ class Repository(
 
     val applyBlocklistToSummaries: StateFlow<Boolean> = settingsStore.applyBlocklistToSummaries
 
-    suspend fun setApplyBlocklistToSummaries(value: Boolean) {
+    fun setApplyBlocklistToSummaries(value: Boolean) {
         settingsStore.setApplyBlocklistToSummaries(value)
+        runOnceBlocklistUpdate(di)
+    }
+
+    val applyBlocklistToLinks: StateFlow<Boolean> = settingsStore.applyBlocklistToLinks
+
+    fun setApplyBlocklistToLinks(value: Boolean) {
+        settingsStore.setApplyBlocklistToLinks(value)
         runOnceBlocklistUpdate(di)
     }
 
@@ -339,6 +357,10 @@ class Repository(
 
     fun setLinkOpener(value: LinkOpener) = settingsStore.setLinkOpener(value)
 
+    val useInAppAudioPlayer = settingsStore.useInAppAudioPlayer
+
+    fun setUseInAppAudioPlayer(value: Boolean) = settingsStore.setUseInAppAudioPlayer(value)
+
     val syncFrequency = settingsStore.syncFrequency
 
     fun setSyncFrequency(value: SyncFrequency) = settingsStore.setSyncFrequency(value)
@@ -430,6 +452,10 @@ class Repository(
     val isOpenDrawerOnFab = settingsStore.openDrawerOnFab
 
     fun setOpenDrawerOnFab(value: Boolean) = settingsStore.setOpenDrawerOnFab(value)
+
+    val forceSingleColumn = settingsStore.forceSingleColumn
+
+    fun setForceSingleColumn(value: Boolean) = settingsStore.setForceSingleColumn(value)
 
     /**
      * Returns true if the latest sync timestamp is within the last 10 seconds
@@ -1016,4 +1042,5 @@ enum class TextToDisplay {
     FAILED_MISSING_BODY,
     FAILED_MISSING_LINK,
     FAILED_NOT_HTML,
+    FAILED_FULLTEXT_TOO_LARGE,
 }

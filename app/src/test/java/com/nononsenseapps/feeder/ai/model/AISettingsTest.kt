@@ -37,31 +37,34 @@ class AISettingsTest {
 
     @Test
     fun testOpenAISettings_WithMaxTokens_RemainsValid() {
-        val settings = OpenAISettings(
-            key = "test-key",
-            modelId = "gpt-4o",
-            maxTokens = 4096
-        )
+        val settings =
+            OpenAISettings(
+                key = "test-key",
+                modelId = "gpt-4o",
+                maxTokens = 4096,
+            )
         assertTrue(settings.isValid, "Settings with maxTokens should remain valid")
     }
 
     @Test
     fun testAnthropicSettings_WithMaxTokens_RemainsValid() {
-        val settings = AnthropicSettings(
-            key = "test-key",
-            modelId = "claude-3-5-sonnet-20241022",
-            maxTokens = 8192
-        )
+        val settings =
+            AnthropicSettings(
+                key = "test-key",
+                modelId = "claude-3-5-sonnet-20241022",
+                maxTokens = 8192,
+            )
         assertTrue(settings.isValid, "Settings with maxTokens should remain valid")
     }
 
     @Test
     fun testOpenAISettings_MaxTokens_Copy() {
-        val original = OpenAISettings(
-            key = "test-key",
-            modelId = "gpt-4o",
-            maxTokens = 4096
-        )
+        val original =
+            OpenAISettings(
+                key = "test-key",
+                modelId = "gpt-4o",
+                maxTokens = 4096,
+            )
         val copy = original.copy(maxTokens = 8192)
 
         assertEquals(4096, original.maxTokens, "Original maxTokens should not change")
@@ -70,11 +73,12 @@ class AISettingsTest {
 
     @Test
     fun testAnthropicSettings_MaxTokens_Copy() {
-        val original = AnthropicSettings(
-            key = "test-key",
-            modelId = "claude-3-5-sonnet-20241022",
-            maxTokens = 4096
-        )
+        val original =
+            AnthropicSettings(
+                key = "test-key",
+                modelId = "claude-3-5-sonnet-20241022",
+                maxTokens = 4096,
+            )
         val copy = original.copy(maxTokens = 8192)
 
         assertEquals(4096, original.maxTokens, "Original maxTokens should not change")

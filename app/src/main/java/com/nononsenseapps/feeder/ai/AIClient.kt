@@ -4,7 +4,9 @@ import com.nononsenseapps.feeder.ai.model.AISettings
 import com.nononsenseapps.feeder.ai.model.SummaryLanguage
 import com.nononsenseapps.feeder.ai.provider.AnthropicClient
 import com.nononsenseapps.feeder.ai.provider.DeepLClient
+import com.nononsenseapps.feeder.ai.provider.LocalTranslationClient
 import com.nononsenseapps.feeder.ai.provider.OpenAICompatibleClient
+import org.kodein.di.DI
 
 /**
  * Unified interface for AI clients supporting multiple providers.
@@ -142,12 +144,21 @@ interface AIClient {
     companion object {
         /**
          * Factory method to create the appropriate client based on settings.
+         *
+         * @param settings Provider settings
+         * @param di App DI container; required for the on-device provider,
+         *   which routes through DI-bound LocalTranslator. Callers that are
+         *   DIAware should always pass it.
          */
-        fun create(settings: AISettings): AIClient =
+        fun create(
+            settings: AISettings,
+            di: DI? = null,
+        ): AIClient =
             when (settings) {
                 is AISettings.OpenAI -> OpenAICompatibleClient(settings.openaiSettings)
                 is AISettings.Anthropic -> AnthropicClient(settings.anthropicSettings)
                 is AISettings.DeepL -> DeepLClient(settings.deepLSettings)
+                is AISettings.OnDevice -> LocalTranslationClient(di, settings.onDeviceSettings)
             }
     }
 }

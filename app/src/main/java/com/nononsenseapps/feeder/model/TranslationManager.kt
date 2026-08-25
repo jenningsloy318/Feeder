@@ -18,7 +18,6 @@ import org.kodein.di.DIAware
 import org.kodein.di.instance
 import java.io.File
 import java.security.MessageDigest
-import java.util.Locale
 
 /**
  * Translates feed list items (titles and snippets) via the active AI
@@ -164,7 +163,7 @@ class TranslationManager(
                 return@withContext item
             }
 
-            val client = AIClient.create(settings)
+            val client = AIClient.create(settings, di)
             val translatedSnippet =
                 cachedSnippet
                     ?: item.snippet
@@ -268,6 +267,7 @@ class TranslationManager(
                 is AISettings.OpenAI -> "openai"
                 is AISettings.Anthropic -> "anthropic"
                 is AISettings.DeepL -> "deepl"
+                is AISettings.OnDevice -> "local"
             }
         return filePathProvider.cacheDir
             .resolve("translations")
@@ -339,132 +339,3 @@ internal data class CachedTranslations(
     val fullArticleHtmlHash: String? = null,
     val translatedFullArticleHtml: String? = null,
 )
-
-/**
- * Resolve the target language code used for cache keys and language
- * matching: the configured code, or the device locale tag for
- * DEVICE_DEFAULT.
- */
-internal fun TranslationLanguage.resolvedTargetCode(): String =
-    if (this == TranslationLanguage.DEVICE_DEFAULT) {
-        Locale.getDefault().toLanguageTag()
-    } else {
-        code
-    }
-
-private fun String?.isUsableCachedTranslation(
-    original: String,
-    sourceLanguage: String,
-    targetLanguage: String,
-): Boolean {
-    if (isNullOrBlank()) {
-        return false
-    }
-    if (this != original) {
-        return true
-    }
-    return sourceLanguage.isBlank() ||
-        detectedLanguageMatchesTranslationTarget(
-            detectedLanguage = sourceLanguage,
-            targetLanguage = targetLanguage,
-        )
-}
-
-private const val MAX_LANGUAGE_DETECTION_TEXT_LENGTH = 4000
-private const val MIN_LANGUAGE_DETECTION_LETTERS = 20
-
-internal fun prepareTextSamplesForLanguageDetection(content: String): List<String> {
-    val text =
-        content
-            .replace(Regex("\\s+"), " ")
-            .trim()
-    if (text.length <= MAX_LANGUAGE_DETECTION_TEXT_LENGTH) {
-        return listOf(text)
-    }
-
-    val middleStart = ((text.length - MAX_LANGUAGE_DETECTION_TEXT_LENGTH) / 2).coerceAtLeast(0)
-    val endStart = (text.length - MAX_LANGUAGE_DETECTION_TEXT_LENGTH).coerceAtLeast(0)
-    return listOf(
-        text.take(MAX_LANGUAGE_DETECTION_TEXT_LENGTH),
-        text.substring(middleStart, middleStart + MAX_LANGUAGE_DETECTION_TEXT_LENGTH),
-        text.substring(endStart),
-    ).distinct()
-}
-
-internal fun hasEnoughTextForLanguageDetection(content: String): Boolean = content.count(Char::isLetter) >= MIN_LANGUAGE_DETECTION_LETTERS
-
-internal fun detectedLanguageMatchesTranslationTarget(
-    detectedLanguage: String,
-    targetLanguage: String,
-): Boolean {
-    val detected = detectedLanguage.asComparableDetectedLanguage() ?: return false
-    val target = targetLanguage.asComparableTranslationTarget() ?: return false
-
-    return detected.language == target.language &&
-        (target.region == null || detected.region == target.region)
-}
-
-private data class ComparableTranslationLanguage(
-    val language: String,
-    val region: String? = null,
-)
-
-private fun String.asComparableDetectedLanguage(): ComparableTranslationLanguage? {
-    val normalized = trim().replace('_', '-')
-    if (normalized.isBlank()) {
-        return null
-    }
-
-    val locale = Locale.forLanguageTag(normalized)
-    val language =
-        locale.language
-            .takeUnless { it.isBlank() || it == "und" }
-            ?: normalized.substringBefore('-').takeIf { it.isNotBlank() }
-            ?: return null
-
-    val region =
-        locale.country
-            .takeIf { it.isNotBlank() }
-            ?: normalized
-                .split('-')
-                .drop(1)
-                .firstOrNull { it.length == 2 || it.length == 3 }
-
-    return ComparableTranslationLanguage(
-        language = language.toCanonicalLanguageCode(),
-        region = region?.uppercase(Locale.ROOT),
-    )
-}
-
-private fun String.asComparableTranslationTarget(): ComparableTranslationLanguage? {
-    val normalized = trim().replace('_', '-')
-    if (normalized.isBlank()) {
-        return null
-    }
-
-    val locale = Locale.forLanguageTag(normalized)
-    val language =
-        locale.language
-            .takeUnless { it.isBlank() || it == "und" }
-            ?: normalized.substringBefore('-').takeIf { it.isNotBlank() }
-            ?: return null
-
-    val region =
-        locale.country
-            .takeIf { it.isNotBlank() }
-            ?: normalized
-                .split('-')
-                .drop(1)
-                .firstOrNull { it.length == 2 || it.length == 3 }
-
-    return ComparableTranslationLanguage(
-        language = language.toCanonicalLanguageCode(),
-        region = region?.uppercase(Locale.ROOT),
-    )
-}
-
-private fun String.toCanonicalLanguageCode(): String =
-    when (lowercase(Locale.ROOT)) {
-        "nb" -> "no"
-        else -> lowercase(Locale.ROOT)
-    }

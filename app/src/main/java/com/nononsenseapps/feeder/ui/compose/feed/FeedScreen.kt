@@ -14,6 +14,7 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
@@ -65,6 +66,7 @@ import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.TooltipDefaults
@@ -178,6 +180,7 @@ fun FeedScreen(
     val toastMaker: ToastMaker by instance()
     val viewState: FeedScreenViewState by viewModel.viewState.collectAsStateWithLifecycle()
     val translatedFeedCards by viewModel.translatedFeedCards.collectAsStateWithLifecycle()
+    val bergamotDownloadProgress by viewModel.bergamotDownloadProgress.collectAsStateWithLifecycle()
     val pagedFeedItems = viewModel.currentFeedListItems.collectAsLazyPagingItems()
     val pagedNavDrawerItems = viewModel.pagedNavDrawerItems.collectAsLazyPagingItems()
 
@@ -506,6 +509,7 @@ fun FeedScreen(
             searchCallback = viewModel::searchCallback,
             translatedFeedCards = translatedFeedCards,
             onTranslateFeedCard = viewModel::translateFeedCardIfNeeded,
+            bergamotDownloadProgress = bergamotDownloadProgress,
             feedListState = feedListState,
             feedGridState = feedGridState,
             pagedFeedItems = pagedFeedItems,
@@ -563,6 +567,7 @@ fun FeedScreen(
     searchCallback: (String) -> Unit,
     translatedFeedCards: TranslatedFeedCards,
     onTranslateFeedCard: (FeedListItem) -> Unit,
+    bergamotDownloadProgress: com.nononsenseapps.feeder.localtranslation.BergamotModelDownloadProgress?,
     feedListState: LazyListState,
     feedGridState: LazyStaggeredGridState,
     pagedFeedItems: LazyPagingItems<FeedListItem>,
@@ -1064,6 +1069,7 @@ fun FeedScreen(
                     pagedFeedItems = pagedFeedItems,
                     translatedFeedCards = translatedFeedCards,
                     onTranslateFeedCard = onTranslateFeedCard,
+                    bergamotDownloadProgress = bergamotDownloadProgress,
                     modifier = innerModifier,
                 )
 
@@ -1093,6 +1099,7 @@ fun FeedScreen(
                     pagedFeedItems = pagedFeedItems,
                     translatedFeedCards = translatedFeedCards,
                     onTranslateFeedCard = onTranslateFeedCard,
+                    bergamotDownloadProgress = bergamotDownloadProgress,
                     modifier = innerModifier,
                 )
         }
@@ -1358,6 +1365,7 @@ fun FeedListContent(
     pagedFeedItems: LazyPagingItems<FeedListItem>,
     translatedFeedCards: TranslatedFeedCards,
     onTranslateFeedCard: (FeedListItem) -> Unit,
+    bergamotDownloadProgress: com.nononsenseapps.feeder.localtranslation.BergamotModelDownloadProgress?,
     modifier: Modifier = Modifier,
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -1429,6 +1437,11 @@ fun FeedListContent(
                 This is a trick to make the list stay at item 0 when updates come in IF it is
                 scrolled to the top.
                  */
+                if (bergamotDownloadProgress != null) {
+                    item(key = "BergamotDownloadProgress", contentType = "BergamotDownloadProgress") {
+                        BergamotDownloadProgressBanner(progress = bergamotDownloadProgress)
+                    }
+                }
                 item(
                     key = "SpacerScrollTrick",
                     contentType = "SpacerScrollTrick",
@@ -1623,6 +1636,7 @@ fun FeedGridContent(
     pagedFeedItems: LazyPagingItems<FeedListItem>,
     translatedFeedCards: TranslatedFeedCards,
     onTranslateFeedCard: (FeedListItem) -> Unit,
+    bergamotDownloadProgress: com.nononsenseapps.feeder.localtranslation.BergamotModelDownloadProgress?,
     modifier: Modifier = Modifier,
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -1679,6 +1693,11 @@ fun FeedGridContent(
                 horizontalArrangement = arrangement,
                 modifier = Modifier.fillMaxSize(),
             ) {
+                if (bergamotDownloadProgress != null) {
+                    item(key = "BergamotDownloadProgress", contentType = "BergamotDownloadProgress") {
+                        BergamotDownloadProgressBanner(progress = bergamotDownloadProgress)
+                    }
+                }
                 items(
                     count = pagedFeedItems.itemCount,
                     key = pagedFeedItems.itemKey { it.id },
@@ -1890,4 +1909,46 @@ fun PlainTooltipBox(
         modifier = modifier,
         content = content,
     )
+}
+
+@Composable
+fun BergamotDownloadProgressBanner(
+    progress: com.nononsenseapps.feeder.localtranslation.BergamotModelDownloadProgress?,
+    modifier: Modifier = Modifier,
+) {
+    if (progress == null) return
+
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        tonalElevation = 2.dp,
+    ) {
+        Column(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+        ) {
+            val percent =
+                if (progress.isIndeterminate) {
+                    -1
+                } else {
+                    ((progress.downloadedBytes * 100) / progress.totalBytes.coerceAtLeast(1L)).toInt()
+                }
+            Text(
+                text =
+                    stringResource(
+                        R.string.downloading_offline_translation_model,
+                        progress.sourceLanguage,
+                        progress.targetLanguage,
+                        percent,
+                    ),
+                style = MaterialTheme.typography.bodySmall,
+            )
+            if (progress.isIndeterminate) {
+                androidx.compose.material3.LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+            } else {
+                androidx.compose.material3.LinearProgressIndicator(
+                    progress = { progress.downloadedBytes.toFloat() / progress.totalBytes.coerceAtLeast(1L).toFloat() },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+        }
+    }
 }

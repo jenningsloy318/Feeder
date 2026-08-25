@@ -104,6 +104,24 @@ data class DeepLSettings(
 }
 
 /**
+ * Settings for the on-device (offline) translation provider.
+ *
+ * No API key; translation models are managed from the translation settings.
+ *
+ * @property timeoutSeconds Request timeout in seconds (30-600 range, default 90)
+ */
+@Serializable
+data class OnDeviceSettings(
+    val timeoutSeconds: Int = 90,
+) {
+    /**
+     * On-device settings are always valid; models are optional.
+     */
+    val isValid: Boolean
+        get() = true
+}
+
+/**
  * Sealed interface for provider-specific settings.
  */
 sealed interface AISettings {
@@ -146,6 +164,18 @@ sealed interface AISettings {
     }
 
     /**
+     * On-device offline translation settings.
+     */
+    @Suppress("DataClassShouldBeImmutable")
+    data class OnDevice(
+        val onDeviceSettings: OnDeviceSettings =
+            com.nononsenseapps.feeder.ai.model
+                .OnDeviceSettings(),
+    ) : AISettings {
+        override val providerType: AIProvider = AIProvider.ON_DEVICE
+    }
+
+    /**
      * Check if settings are valid.
      */
     val isValid: Boolean
@@ -154,6 +184,7 @@ sealed interface AISettings {
                 is OpenAI -> openaiSettings.isValid
                 is Anthropic -> anthropicSettings.isValid
                 is DeepL -> deepLSettings.isValid
+                is OnDevice -> onDeviceSettings.isValid
             }
 
     /**
@@ -164,6 +195,7 @@ sealed interface AISettings {
             is OpenAI -> OpenAISettings.DEFAULT_MODEL
             is Anthropic -> AnthropicSettings.DEFAULT_MODEL
             is DeepL -> ""
+            is OnDevice -> ""
         }
 
     companion object {
@@ -175,6 +207,7 @@ sealed interface AISettings {
                 AIProvider.OPENAI_COMPATIBLE -> OpenAI()
                 AIProvider.ANTHROPIC -> Anthropic()
                 AIProvider.DEEPL -> DeepL()
+                AIProvider.ON_DEVICE -> OnDevice()
             }
     }
 }

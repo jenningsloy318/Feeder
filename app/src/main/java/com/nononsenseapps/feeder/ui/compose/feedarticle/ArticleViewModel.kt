@@ -667,7 +667,7 @@ class ArticleViewModel(
                     val settingsWithTimeout = createSettingsWithTimeout(translationTimeout)
                     val paragraphCoordinator =
                         ParagraphTranslationCoordinator(
-                            aiClient = AIClient.create(settingsWithTimeout),
+                            aiClient = AIClient.create(settingsWithTimeout, di),
                         )
 
                     // Step 5: Collect progress and update per-paragraph
@@ -763,6 +763,13 @@ class ArticleViewModel(
                         timeoutSeconds = translationTimeoutSeconds,
                     )
                 AISettings.DeepL(updatedDeepLSettings)
+            }
+            is AISettings.OnDevice -> {
+                val updatedOnDeviceSettings =
+                    currentSettings.onDeviceSettings.copy(
+                        timeoutSeconds = translationTimeoutSeconds,
+                    )
+                AISettings.OnDevice(updatedOnDeviceSettings)
             }
         }
 

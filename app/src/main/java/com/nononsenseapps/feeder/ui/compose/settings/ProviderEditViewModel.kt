@@ -53,6 +53,10 @@ data class ProviderEditUiState(
     val baseUrl: String
         get() = provider.openAISettings?.baseUrl ?: provider.anthropicSettings?.baseUrl ?: provider.deepLSettings?.baseUrl ?: ""
 
+    /** True when the provider needs no configuration fields (on-device). */
+    val isConfigurationless: Boolean
+        get() = provider.providerType == AIProvider.ON_DEVICE
+
     val modelId: String
         get() = provider.openAISettings?.modelId ?: provider.anthropicSettings?.modelId ?: ""
 
@@ -174,6 +178,8 @@ class ProviderEditViewModel(
                     current.copy(anthropicSettings = settings.anthropicSettings)
                 is com.nononsenseapps.feeder.ai.model.AISettings.DeepL ->
                     current.copy(deepLSettings = settings.deepLSettings)
+                is com.nononsenseapps.feeder.ai.model.AISettings.OnDevice ->
+                    current.copy(onDeviceSettings = settings.onDeviceSettings)
             }
         updateProvider(updatedProvider)
     }
@@ -207,6 +213,14 @@ class ProviderEditViewModel(
                         anthropicSettings = null,
                         deepLSettings = newSettings.deepLSettings,
                     )
+                is com.nononsenseapps.feeder.ai.model.AISettings.OnDevice ->
+                    current.copy(
+                        providerType = type,
+                        openAISettings = null,
+                        anthropicSettings = null,
+                        deepLSettings = null,
+                        onDeviceSettings = newSettings.onDeviceSettings,
+                    )
             }
         updateProvider(updatedProvider)
     }
@@ -239,6 +253,8 @@ class ProviderEditViewModel(
                                 ?: com.nononsenseapps.feeder.ai.model
                                     .DeepLSettings(key = key),
                     )
+                // On-device translation has no API key
+                AIProvider.ON_DEVICE -> current
             }
         updateProvider(updatedProvider)
     }
@@ -271,6 +287,8 @@ class ProviderEditViewModel(
                                 ?: com.nononsenseapps.feeder.ai.model
                                     .DeepLSettings(baseUrl = url),
                     )
+                // On-device translation has no base URL
+                AIProvider.ON_DEVICE -> current
             }
         updateProvider(updatedProvider)
     }
@@ -296,8 +314,9 @@ class ProviderEditViewModel(
                                 ?: com.nononsenseapps.feeder.ai.model
                                     .AnthropicSettings(modelId = modelId),
                     )
-                // DeepL is translation-only and has no model selection
+                // Translation-only providers have no model selection
                 AIProvider.DEEPL -> current
+                AIProvider.ON_DEVICE -> current
             }
         updateProvider(updatedProvider)
     }
@@ -332,8 +351,9 @@ class ProviderEditViewModel(
                                 ?: com.nononsenseapps.feeder.ai.model
                                     .AnthropicSettings(maxTokens = parsedTokens),
                     )
-                // DeepL is translation-only and has no token limit setting
+                // Translation-only providers have no token limit setting
                 AIProvider.DEEPL -> current
+                AIProvider.ON_DEVICE -> current
             }
         updateProvider(updatedProvider)
     }

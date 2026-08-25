@@ -144,6 +144,7 @@ private fun AIProviderSectionItem(
             is AISettings.OpenAI -> settings.openaiSettings.key
             is AISettings.Anthropic -> settings.anthropicSettings.key
             is AISettings.DeepL -> settings.deepLSettings.key
+            is AISettings.OnDevice -> ""
         }
 
     Row(
@@ -274,6 +275,7 @@ fun AIProviderSectionEdit(
             is AISettings.OpenAI -> current.openaiSettings.timeoutSeconds
             is AISettings.Anthropic -> current.anthropicSettings.timeoutSeconds
             is AISettings.DeepL -> current.deepLSettings.timeoutSeconds
+            is AISettings.OnDevice -> current.onDeviceSettings.timeoutSeconds
         }
     var timeoutString by remember { mutableStateOf(timeoutSeconds.toString()) }
 
@@ -306,6 +308,7 @@ fun AIProviderSectionEdit(
                         AIProvider.OPENAI_COMPATIBLE -> stringResource(R.string.ai_provider_openai_compatible)
                         AIProvider.ANTHROPIC -> stringResource(R.string.ai_provider_anthropic_compatible)
                         AIProvider.DEEPL -> stringResource(R.string.ai_provider_deepl)
+                        AIProvider.ON_DEVICE -> stringResource(R.string.ai_provider_on_device)
                     },
                 onValueChange = {},
                 label = {
@@ -338,6 +341,7 @@ fun AIProviderSectionEdit(
                                     AIProvider.OPENAI_COMPATIBLE -> stringResource(R.string.ai_provider_openai_compatible)
                                     AIProvider.ANTHROPIC -> stringResource(R.string.ai_provider_anthropic_compatible)
                                     AIProvider.DEEPL -> stringResource(R.string.ai_provider_deepl)
+                                    AIProvider.ON_DEVICE -> stringResource(R.string.ai_provider_on_device)
                                 },
                             )
                         },
@@ -357,6 +361,7 @@ fun AIProviderSectionEdit(
                 is AISettings.OpenAI -> current.openaiSettings.key
                 is AISettings.Anthropic -> current.anthropicSettings.key
                 is AISettings.DeepL -> current.deepLSettings.key
+                is AISettings.OnDevice -> ""
             }
         TextField(
             modifier = Modifier.fillMaxWidth(),
@@ -383,13 +388,15 @@ fun AIProviderSectionEdit(
                         onEvent(AISettingsEvent.UpdateSettings(current.copy(anthropicSettings = current.anthropicSettings.copy(key = it))))
                     is AISettings.DeepL ->
                         onEvent(AISettingsEvent.UpdateSettings(current.copy(deepLSettings = current.deepLSettings.copy(key = it))))
+                    // On-device translation has no API key
+                    is AISettings.OnDevice -> Unit
                 }
             },
             visualTransformation = VisualTransformationApiKey(),
         )
 
-        // Model ID and model list do not apply to DeepL (translation-only provider)
-        if (current !is AISettings.DeepL) {
+        // Model ID and model list do not apply to translation-only providers
+        if (current !is AISettings.DeepL && current !is AISettings.OnDevice) {
             // Model ID
             val modelId =
                 when (current) {
@@ -440,8 +447,9 @@ fun AIProviderSectionEdit(
                                                 onEvent(AISettingsEvent.UpdateSettings(current.copy(openaiSettings = current.openaiSettings.copy(modelId = it))))
                                             is AISettings.Anthropic ->
                                                 onEvent(AISettingsEvent.UpdateSettings(current.copy(anthropicSettings = current.anthropicSettings.copy(modelId = it))))
-                                            // Unreachable for DeepL: the model field is hidden
+                                            // Unreachable for translation-only providers: the model field is hidden
                                             is AISettings.DeepL -> Unit
+                                            is AISettings.OnDevice -> Unit
                                         }
                                     },
                                     onDismissRequest = { modelsMenuExpanded = false },
@@ -466,6 +474,7 @@ fun AIProviderSectionEdit(
                 is AISettings.OpenAI -> current.openaiSettings.baseUrl
                 is AISettings.Anthropic -> current.anthropicSettings.baseUrl
                 is AISettings.DeepL -> current.deepLSettings.baseUrl
+                is AISettings.OnDevice -> ""
             }
         TextField(
             modifier = Modifier.fillMaxWidth(),
@@ -476,6 +485,7 @@ fun AIProviderSectionEdit(
                         AIProvider.OPENAI_COMPATIBLE -> "https://api.openai.com/v1"
                         AIProvider.ANTHROPIC -> "https://api.anthropic.com"
                         AIProvider.DEEPL -> "https://api.deepl.com"
+                        AIProvider.ON_DEVICE -> ""
                     },
                 )
             },
@@ -501,6 +511,8 @@ fun AIProviderSectionEdit(
                         onEvent(AISettingsEvent.UpdateSettings(current.copy(anthropicSettings = current.anthropicSettings.copy(baseUrl = it))))
                     is AISettings.DeepL ->
                         onEvent(AISettingsEvent.UpdateSettings(current.copy(deepLSettings = current.deepLSettings.copy(baseUrl = it))))
+                    // On-device translation has no base URL
+                    is AISettings.OnDevice -> Unit
                 }
             },
         )
@@ -546,6 +558,8 @@ fun AIProviderSectionEdit(
                             onEvent(AISettingsEvent.UpdateSettings(current.copy(anthropicSettings = current.anthropicSettings.copy(timeoutSeconds = timeoutString.toInt()))))
                         is AISettings.DeepL ->
                             onEvent(AISettingsEvent.UpdateSettings(current.copy(deepLSettings = current.deepLSettings.copy(timeoutSeconds = timeoutString.toInt()))))
+                        is AISettings.OnDevice ->
+                            onEvent(AISettingsEvent.UpdateSettings(current.copy(onDeviceSettings = current.onDeviceSettings.copy(timeoutSeconds = timeoutString.toInt()))))
                     }
                 }
             },

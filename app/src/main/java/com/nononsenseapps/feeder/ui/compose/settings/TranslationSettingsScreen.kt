@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -17,6 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -57,6 +59,8 @@ fun TranslationSettingsScreen(
     val translationTimeout by viewModel.translationTimeout.collectAsStateWithLifecycle()
     val translateArticlePreviewsByDefault by viewModel.translateArticlePreviewsByDefault.collectAsStateWithLifecycle()
     val translateArticlesByDefault by viewModel.translateArticlesByDefault.collectAsStateWithLifecycle()
+    val downloadedLanguagePairs by viewModel.downloadedLanguagePairs.collectAsStateWithLifecycle()
+    val isOnDeviceProvider by viewModel.isOnDeviceProvider.collectAsStateWithLifecycle()
 
     var languageMenuExpanded by remember { mutableStateOf(false) }
 
@@ -148,6 +152,15 @@ fun TranslationSettingsScreen(
                 description = stringResource(R.string.translate_articles_by_default_description),
                 enabled = enableTranslation && translationEnabled,
             )
+
+            if (isOnDeviceProvider) {
+                Spacer(modifier = Modifier.height(16.dp))
+
+                DownloadedTranslationModelsSection(
+                    languagePairs = downloadedLanguagePairs,
+                    onDeleteLanguagePair = viewModel::deleteLanguagePair,
+                )
+            }
         }
     }
 }
@@ -307,6 +320,58 @@ private fun TimeoutSetting(
                     contentDescription = null,
                     modifier = Modifier.importSize(16.dp),
                 )
+            }
+        }
+    }
+}
+
+@Composable
+private fun DownloadedTranslationModelsSection(
+    languagePairs: List<com.nononsenseapps.feeder.localtranslation.LanguagePairInfo>,
+    onDeleteLanguagePair: (com.nononsenseapps.feeder.localtranslation.LanguagePairInfo) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier = modifier.fillMaxWidth()) {
+        Text(
+            text = stringResource(R.string.downloaded_translation_models),
+            style = MaterialTheme.typography.titleMedium,
+        )
+        Text(
+            text = stringResource(R.string.downloaded_translation_models_desc),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        if (languagePairs.isEmpty()) {
+            Text(
+                text = stringResource(R.string.offline_translation_model_download_hint),
+                style = MaterialTheme.typography.bodyMedium,
+            )
+        } else {
+            languagePairs.forEach { pair ->
+                Row(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp),
+                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text =
+                            "${pair.sourceLanguage} → ${pair.targetLanguage} " +
+                                "(${pair.sizeBytes / (1024f * 1024f).toInt()} MB)",
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.weight(1f),
+                    )
+                    IconButton(onClick = { onDeleteLanguagePair(pair) }) {
+                        Icon(
+                            Icons.Filled.Delete,
+                            contentDescription = stringResource(R.string.delete),
+                        )
+                    }
+                }
             }
         }
     }

@@ -22,6 +22,8 @@ import com.nononsenseapps.feeder.blob.blobInputStream
 import com.nononsenseapps.feeder.db.room.FeedItemCursor
 import com.nononsenseapps.feeder.db.room.FeedTitle
 import com.nononsenseapps.feeder.db.room.ID_UNSET
+import com.nononsenseapps.feeder.localtranslation.BergamotModelDownloadProgress
+import com.nononsenseapps.feeder.localtranslation.BergamotModelManager
 import com.nononsenseapps.feeder.model.FeedUnreadCount
 import com.nononsenseapps.feeder.model.LocaleOverride
 import com.nononsenseapps.feeder.model.PlaybackStatus
@@ -70,6 +72,11 @@ class FeedViewModel(
             .cachedIn(viewModelScope)
 
     private val translationManager: TranslationManager by instance()
+    private val bergamotModelManager: BergamotModelManager by instance()
+
+    /** Model download progress for on-device translation, surfaced as a banner. */
+    val bergamotDownloadProgress: StateFlow<BergamotModelDownloadProgress?> =
+        bergamotModelManager.downloadProgress
 
     private val translatedFeedCardEntries = MutableStateFlow<Map<FeedCardSource, FeedCardTranslationEntry>>(emptyMap())
     private val feedCardTranslationGeneration = MutableStateFlow(0)

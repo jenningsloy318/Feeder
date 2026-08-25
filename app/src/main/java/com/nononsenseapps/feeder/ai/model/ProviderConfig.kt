@@ -12,6 +12,7 @@ import kotlinx.serialization.Serializable
  * @property openAISettings OpenAI-specific settings (null if not OpenAI)
  * @property anthropicSettings Anthropic-specific settings (null if not Anthropic)
  * @property deepLSettings DeepL-specific settings (null if not DeepL)
+ * @property onDeviceSettings On-device translation settings (null if not on-device)
  * @property isActive Whether this is the currently active provider
  * @property createdAt Timestamp when provider was created
  * @property updatedAt Timestamp when provider was last modified
@@ -24,6 +25,7 @@ data class ProviderConfig(
     val openAISettings: OpenAISettings? = null,
     val anthropicSettings: AnthropicSettings? = null,
     val deepLSettings: DeepLSettings? = null,
+    val onDeviceSettings: OnDeviceSettings? = null,
     val isActive: Boolean = false,
     val createdAt: Long,
     val updatedAt: Long,
@@ -39,6 +41,8 @@ data class ProviderConfig(
                 AISettings.Anthropic(anthropicSettings ?: AnthropicSettings())
             AIProvider.DEEPL ->
                 AISettings.DeepL(deepLSettings ?: DeepLSettings())
+            AIProvider.ON_DEVICE ->
+                AISettings.OnDevice(onDeviceSettings ?: OnDeviceSettings())
         }
 
     /**
@@ -56,6 +60,7 @@ data class ProviderConfig(
                 AIProvider.OPENAI_COMPATIBLE -> "OpenAI Provider"
                 AIProvider.ANTHROPIC -> "Anthropic Provider"
                 AIProvider.DEEPL -> "DeepL Provider"
+                AIProvider.ON_DEVICE -> "On-device Provider"
             }
         }
 
@@ -100,6 +105,16 @@ data class ProviderConfig(
                         name = name,
                         providerType = AIProvider.DEEPL,
                         deepLSettings = settings.deepLSettings,
+                        isActive = isActive,
+                        createdAt = System.currentTimeMillis(),
+                        updatedAt = System.currentTimeMillis(),
+                    )
+                is AISettings.OnDevice ->
+                    ProviderConfig(
+                        id = generateId(),
+                        name = name,
+                        providerType = AIProvider.ON_DEVICE,
+                        onDeviceSettings = settings.onDeviceSettings,
                         isActive = isActive,
                         createdAt = System.currentTimeMillis(),
                         updatedAt = System.currentTimeMillis(),

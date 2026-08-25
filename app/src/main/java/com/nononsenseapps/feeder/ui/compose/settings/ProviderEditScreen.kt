@@ -229,6 +229,7 @@ fun ProviderEditForm(
                                 AIProvider.OPENAI_COMPATIBLE -> R.string.ai_provider_openai_compatible
                                 AIProvider.ANTHROPIC -> R.string.ai_provider_anthropic_compatible
                                 AIProvider.DEEPL -> R.string.ai_provider_deepl
+                                AIProvider.ON_DEVICE -> R.string.ai_provider_on_device
                             },
                     ),
                 onValueChange = {},
@@ -266,6 +267,7 @@ fun ProviderEditForm(
                                             AIProvider.OPENAI_COMPATIBLE -> R.string.ai_provider_openai_compatible
                                             AIProvider.ANTHROPIC -> R.string.ai_provider_anthropic_compatible
                                             AIProvider.DEEPL -> R.string.ai_provider_deepl
+                                            AIProvider.ON_DEVICE -> R.string.ai_provider_on_device
                                         },
                                 ),
                             )
@@ -279,69 +281,75 @@ fun ProviderEditForm(
             }
         }
 
-        // API Key
-        OutlinedTextField(
-            value = uiState.apiKey,
-            onValueChange = onApiKeyChange,
-            label = {
-                Text(stringResource(R.string.api_key))
-            },
-            singleLine = true,
-            isError = showValidationError && uiState.apiKey.isBlank(),
-            supportingText = {
-                if (showValidationError && uiState.apiKey.isBlank()) {
-                    Text(stringResource(R.string.api_key_required))
+        // API Key (hidden for the on-device provider, which needs no credentials)
+        if (!uiState.isConfigurationless) {
+            OutlinedTextField(
+                value = uiState.apiKey,
+                onValueChange = onApiKeyChange,
+                label = {
+                    Text(stringResource(R.string.api_key))
+                },
+                singleLine = true,
+                isError = showValidationError && uiState.apiKey.isBlank(),
+                supportingText = {
+                    if (showValidationError && uiState.apiKey.isBlank()) {
+                        Text(stringResource(R.string.api_key_required))
+                    }
+                },
+                visualTransformation = VisualTransformationApiKey(),
+                keyboardOptions =
+                    KeyboardOptions(
+                        keyboardType = KeyboardType.Ascii,
+                        imeAction = ImeAction.Next,
+                    ),
+                keyboardActions =
+                    androidx.compose.foundation.text.KeyboardActions(
+                        onNext = {
+                            focusManager.moveFocus(FocusDirection.Down)
+                        },
+                    ),
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+
+        // Base URL (hidden for the on-device provider)
+        if (!uiState.isConfigurationless) {
+            // Base URL
+            val baseUrlPlaceholder =
+                when (uiState.providerType) {
+                    AIProvider.OPENAI_COMPATIBLE -> "https://api.openai.com/v1"
+                    AIProvider.ANTHROPIC -> "https://api.anthropic.com"
+                    AIProvider.DEEPL -> "https://api.deepl.com"
+                    AIProvider.ON_DEVICE -> ""
                 }
-            },
-            visualTransformation = VisualTransformationApiKey(),
-            keyboardOptions =
-                KeyboardOptions(
-                    keyboardType = KeyboardType.Ascii,
-                    imeAction = ImeAction.Next,
-                ),
-            keyboardActions =
-                androidx.compose.foundation.text.KeyboardActions(
-                    onNext = {
-                        focusManager.moveFocus(FocusDirection.Down)
-                    },
-                ),
-            modifier = Modifier.fillMaxWidth(),
-        )
 
-        // Base URL
-        val baseUrlPlaceholder =
-            when (uiState.providerType) {
-                AIProvider.OPENAI_COMPATIBLE -> "https://api.openai.com/v1"
-                AIProvider.ANTHROPIC -> "https://api.anthropic.com"
-                AIProvider.DEEPL -> "https://api.deepl.com"
-            }
+            OutlinedTextField(
+                value = uiState.baseUrl,
+                onValueChange = onBaseUrlChange,
+                label = {
+                    Text(stringResource(R.string.url))
+                },
+                placeholder = {
+                    Text(baseUrlPlaceholder)
+                },
+                singleLine = true,
+                keyboardOptions =
+                    KeyboardOptions(
+                        keyboardType = KeyboardType.Uri,
+                        imeAction = ImeAction.Next,
+                    ),
+                keyboardActions =
+                    androidx.compose.foundation.text.KeyboardActions(
+                        onNext = {
+                            focusManager.moveFocus(FocusDirection.Down)
+                        },
+                    ),
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
 
-        OutlinedTextField(
-            value = uiState.baseUrl,
-            onValueChange = onBaseUrlChange,
-            label = {
-                Text(stringResource(R.string.url))
-            },
-            placeholder = {
-                Text(baseUrlPlaceholder)
-            },
-            singleLine = true,
-            keyboardOptions =
-                KeyboardOptions(
-                    keyboardType = KeyboardType.Uri,
-                    imeAction = ImeAction.Next,
-                ),
-            keyboardActions =
-                androidx.compose.foundation.text.KeyboardActions(
-                    onNext = {
-                        focusManager.moveFocus(FocusDirection.Down)
-                    },
-                ),
-            modifier = Modifier.fillMaxWidth(),
-        )
-
-        // Model ID and Max Tokens do not apply to DeepL (translation-only provider)
-        if (uiState.providerType != AIProvider.DEEPL) {
+        // Model ID and Max Tokens do not apply to translation-only providers
+        if (uiState.providerType != AIProvider.DEEPL && uiState.providerType != AIProvider.ON_DEVICE) {
             // Model ID
             OutlinedTextField(
                 value = uiState.modelId,
@@ -355,6 +363,7 @@ fun ProviderEditForm(
                             AIProvider.OPENAI_COMPATIBLE -> "gpt-4o"
                             AIProvider.ANTHROPIC -> "claude-3-5-sonnet-20241022"
                             AIProvider.DEEPL -> ""
+                            AIProvider.ON_DEVICE -> ""
                         },
                     )
                 },

@@ -65,6 +65,10 @@ class AIApi(
             is AISettings.DeepL -> {
                 // DeepL verification happens in the client (no models endpoint)
             }
+            is AISettings.OnDevice -> {
+                // On-device translation has no models endpoint
+                return AIClient.ModelsResult.Success(ids = emptyList())
+            }
         }
         return try {
             AIClient
@@ -98,6 +102,10 @@ class AIApi(
                     is AISettings.DeepL -> {
                         val updatedSettings = settings.deepLSettings.copy(timeoutSeconds = summaryTimeout)
                         AISettings.DeepL(updatedSettings)
+                    }
+                    is AISettings.OnDevice -> {
+                        val updatedSettings = settings.onDeviceSettings.copy(timeoutSeconds = summaryTimeout)
+                        AISettings.OnDevice(updatedSettings)
                     }
                 }
 
@@ -148,6 +156,10 @@ class AIApi(
                     is AISettings.DeepL -> {
                         val updatedSettings = settings.deepLSettings.copy(timeoutSeconds = translationTimeout)
                         AISettings.DeepL(updatedSettings)
+                    }
+                    is AISettings.OnDevice -> {
+                        val updatedSettings = settings.onDeviceSettings.copy(timeoutSeconds = translationTimeout)
+                        AISettings.OnDevice(updatedSettings)
                     }
                 }
 

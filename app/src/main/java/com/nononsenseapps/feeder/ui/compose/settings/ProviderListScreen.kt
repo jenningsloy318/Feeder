@@ -297,6 +297,7 @@ fun ProviderItemContent(
                                 com.nononsenseapps.feeder.ai.provider.AIProvider.OPENAI_COMPATIBLE -> R.string.ai_provider_openai_compatible
                                 com.nononsenseapps.feeder.ai.provider.AIProvider.ANTHROPIC -> R.string.ai_provider_anthropic_compatible
                                 com.nononsenseapps.feeder.ai.provider.AIProvider.DEEPL -> R.string.ai_provider_deepl
+                                com.nononsenseapps.feeder.ai.provider.AIProvider.ON_DEVICE -> R.string.ai_provider_on_device
                             },
                     ),
                 style = MaterialTheme.typography.bodyMedium,

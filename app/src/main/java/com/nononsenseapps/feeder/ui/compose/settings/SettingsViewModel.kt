@@ -219,6 +219,18 @@ class SettingsViewModel(
                             )
                         }
                     }
+                    is com.nononsenseapps.feeder.ai.model.AISettings.OnDevice -> {
+                        // On-device settings live in the active provider config
+                        val activeProvider = repository.providers.value.firstOrNull { it.isActive }
+                        if (activeProvider != null) {
+                            repository.updateProvider(
+                                activeProvider.copy(
+                                    onDeviceSettings = event.settings.onDeviceSettings,
+                                    updatedAt = System.currentTimeMillis(),
+                                ),
+                            )
+                        }
+                    }
                 }
             is AISettingsEvent.SwitchEditMode -> {
                 val current = _viewState.value.openAIState

@@ -801,6 +801,7 @@ class SettingsStore(
                 AIProvider.OPENAI_COMPATIBLE -> AISettings.OpenAI(_openAISettings.value)
                 AIProvider.ANTHROPIC -> AISettings.Anthropic(_anthropicSettings.value)
                 AIProvider.DEEPL -> AISettings.DeepL(deepLSettingsFromPrefs())
+                AIProvider.ON_DEVICE -> AISettings.OnDevice()
             }
         }
 
@@ -822,6 +823,7 @@ class SettingsStore(
             AIProvider.OPENAI_COMPATIBLE -> AISettings.OpenAI(_openAISettings.value)
             AIProvider.ANTHROPIC -> AISettings.Anthropic(_anthropicSettings.value)
             AIProvider.DEEPL -> AISettings.DeepL(deepLSettingsFromPrefs())
+            AIProvider.ON_DEVICE -> AISettings.OnDevice()
         }
 
     /**

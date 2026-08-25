@@ -111,6 +111,7 @@ class OpmlParserTest : DIAware {
                         UserSettings.SETTING_BLOCKLIST_APPLY_TO_SUMMARIES -> "true"
                         UserSettings.SETTING_ENABLE_TRANSLATION -> "true"
                         UserSettings.SETTING_TRANSLATE_ARTICLE_PREVIEWS_BY_DEFAULT -> "true"
+                        UserSettings.SETTING_PREFERRED_TRANSLATION_LANGUAGE -> "French"
                         UserSettings.SETTING_TRANSLATE_ARTICLES_BY_DEFAULT -> "true"
                         UserSettings.SETTING_BLOCKLIST_APPLY_TO_LINKS -> "true"
                         UserSettings.SETTINGS_FORCE_SINGLE_COLUMN -> "true"
@@ -167,6 +168,7 @@ class OpmlParserTest : DIAware {
                 settingsStore.setApplyBlocklistToSummaries(true)
                 settingsStore.setEnableTranslation(true)
                 settingsStore.setTranslateArticlePreviewsByDefault(true)
+                settingsStore.setPreferredTranslationLanguage("French")
                 settingsStore.setTranslateArticlesByDefault(true)
                 settingsStore.setApplyBlocklistToLinks(true)
                 settingsStore.setForceSingleColumn(true)

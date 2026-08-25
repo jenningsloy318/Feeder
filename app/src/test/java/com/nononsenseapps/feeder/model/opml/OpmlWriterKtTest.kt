@@ -164,6 +164,7 @@ class OpmlWriterKtTest {
               <feeder:setting key="pref_blocklist_apply_to_links" value="true"/>
               <feeder:setting key="pref_enable_translation" value="true"/>
               <feeder:setting key="pref_translate_feed_cards_by_default" value="true"/>
+              <feeder:setting key="pref_openai_translation_language" value="French"/>
               <feeder:setting key="pref_translate_articles_by_default" value="true"/>
               <feeder:setting key="pref_force_single_column" value="true"/>
               <feeder:blocked pattern="foo"/>
@@ -227,6 +228,7 @@ class OpmlWriterKtTest {
                         UserSettings.SETTING_BLOCKLIST_APPLY_TO_SUMMARIES -> "true"
                         UserSettings.SETTING_ENABLE_TRANSLATION -> "true"
                         UserSettings.SETTING_TRANSLATE_ARTICLE_PREVIEWS_BY_DEFAULT -> "true"
+                        UserSettings.SETTING_PREFERRED_TRANSLATION_LANGUAGE -> "French"
                         UserSettings.SETTING_TRANSLATE_ARTICLES_BY_DEFAULT -> "true"
                         UserSettings.SETTING_BLOCKLIST_APPLY_TO_LINKS -> "true"
                         UserSettings.SETTINGS_FORCE_SINGLE_COLUMN -> "true"

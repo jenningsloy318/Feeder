@@ -1,6 +1,9 @@
 # Requirements: Port Upstream Translation Features onto the Multi-Provider AI Architecture
 
-Status: Planned
+Status: Implemented (2026-08-25) — DeepL provider (588a43d9), feed-card translation (43c73164),
+Bergamot on-device translation (cca3fcca), migration + OPML wiring (this phase).
+Acceptance criteria 1, 2, 6, 7 are covered by automated tests; 3, 4, 5 need manual
+verification on a device.
 Source branch: `ai-features` (after merge commit `15d8864c`, which merged upstream `master` up to `3023e912`)
 Scope: Phase B of the master→ai-features merge strategy. Phase A (merge, keep our architecture, drop upstream translation stack) is complete.
 

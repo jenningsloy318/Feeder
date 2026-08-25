@@ -622,6 +622,7 @@ class SettingsStore(
     init {
         // Load providers on initialization
         _providers.value = loadProviders()
+        migrateUpstreamTranslationSettings()
     }
 
     private fun loadProviders(): List<ProviderConfig> {
@@ -739,6 +740,56 @@ class SettingsStore(
         message: String,
         val duplicateName: String,
     ) : Exception(message)
+
+    /**
+     * One-time migration of upstream (2.21+) translation settings onto the
+     * multi-provider architecture. Guarded by a pref so it runs at most once.
+     */
+    private fun migrateUpstreamTranslationSettings() {
+        if (sp.getBoolean(PREF_UPSTREAM_TRANSLATION_MIGRATED, false)) {
+            return
+        }
+        sp.edit().putBoolean(PREF_UPSTREAM_TRANSLATION_MIGRATED, true).apply()
+
+        // 1. DeepL credentials: create a DeepL provider entry when upstream
+        //    stored DeepL credentials and no DeepL provider exists yet.
+        val legacyKey = sp.getString(PREF_TRANSLATION_API_KEY, null).orEmpty()
+        val legacyUrl = sp.getString(PREF_TRANSLATION_API_URL, null).orEmpty()
+        buildMigratedDeepLProvider(
+            legacyKey = legacyKey,
+            legacyUrl = legacyUrl,
+            timeoutSeconds = sp.getInt(PREF_TRANSLATION_API_REQUEST_TIMEOUT_SECONDS, 90),
+            providers = _providers.value,
+        )?.let { deepLProvider ->
+            _providers.value = _providers.value + deepLProvider
+            saveProviders(_providers.value)
+        }
+
+        // 2. Preferred translation language: map the upstream name or code
+        //    onto the translation language enum once.
+        if (!sp.contains(PREF_TRANSLATION_LANGUAGE)) {
+            val legacyLanguage = sp.getString(PREF_PREFERRED_TRANSLATION_LANGUAGE, null)
+            if (!legacyLanguage.isNullOrBlank()) {
+                setTranslationLanguage(legacyLanguage.toMigrationTranslationLanguage())
+            }
+        }
+
+        // 3. Master switches: upstream translate-by-default usage implies
+        //    translation was in active use, so enable the master switches.
+        val hadUpstreamAutoTranslate =
+            sp.getBoolean(PREF_TRANSLATE_ARTICLE_PREVIEWS_BY_DEFAULT, false) ||
+                sp.getBoolean(PREF_TRANSLATE_ARTICLES_BY_DEFAULT, false)
+        if (hadUpstreamAutoTranslate) {
+            if (!sp.contains(PREF_TRANSLATION_ENABLED)) {
+                setTranslationEnabled(true)
+            }
+            if (!sp.contains(PREF_ENABLE_TRANSLATION)) {
+                setEnableTranslation(true)
+            }
+        }
+    }
+
+    private fun String.toMigrationTranslationLanguage(): TranslationLanguage = toUpstreamPreferredLanguage()
 
     fun addProvider(provider: ProviderConfig) {
         // Check for duplicate names
@@ -884,6 +935,14 @@ class SettingsStore(
     fun setTranslationLanguage(value: TranslationLanguage) {
         _translationLanguage.value = value
         sp.edit().putString(PREF_TRANSLATION_LANGUAGE, value.code).apply()
+    }
+
+    /**
+     * Import a preferred translation language from an upstream export:
+     * accepts upstream language names ("French") or codes ("sv").
+     */
+    fun setPreferredTranslationLanguage(value: String) {
+        setTranslationLanguage(value.toMigrationTranslationLanguage())
     }
 
     // Translation enabled setting
@@ -1092,6 +1151,7 @@ const val PREF_TRANSLATION_API_REQUEST_TIMEOUT_SECONDS = "pref_translation_api_r
 // Keep the legacy persisted key name for preference and OPML compatibility.
 const val PREF_TRANSLATE_ARTICLE_PREVIEWS_BY_DEFAULT = "pref_translate_feed_cards_by_default"
 const val PREF_TRANSLATE_ARTICLES_BY_DEFAULT = "pref_translate_articles_by_default"
+const val PREF_UPSTREAM_TRANSLATION_MIGRATED = "pref_upstream_translation_settings_migrated"
 
 /**
  * Anthropic integration settings
@@ -1213,6 +1273,7 @@ enum class UserSettings(
     // Translation settings
     SETTING_ENABLE_TRANSLATION(key = PREF_ENABLE_TRANSLATION),
     SETTING_TRANSLATE_ARTICLE_PREVIEWS_BY_DEFAULT(key = PREF_TRANSLATE_ARTICLE_PREVIEWS_BY_DEFAULT),
+    SETTING_PREFERRED_TRANSLATION_LANGUAGE(key = PREF_PREFERRED_TRANSLATION_LANGUAGE),
     SETTING_TRANSLATE_ARTICLES_BY_DEFAULT(key = PREF_TRANSLATE_ARTICLES_BY_DEFAULT),
     SETTINGS_FORCE_SINGLE_COLUMN(key = PREF_FORCE_SINGLE_COLUMN),
     ;
@@ -1370,3 +1431,52 @@ data class PrefsFeedListFilter(
 }
 
 val defaultFont = FontSelection.RobotoFlex
+
+/**
+ * Build a DeepL provider entry from upstream (2.21+) translation-API prefs.
+ *
+ * Returns null when the upstream credentials are absent or not DeepL, or
+ * when a DeepL provider already exists.
+ */
+internal fun buildMigratedDeepLProvider(
+    legacyKey: String,
+    legacyUrl: String,
+    timeoutSeconds: Int,
+    providers: List<ProviderConfig>,
+): ProviderConfig? {
+    val isLegacyDeepL =
+        legacyKey.isNotEmpty() &&
+            (legacyUrl.contains("deepl.com", ignoreCase = true) || legacyKey.endsWith(":fx"))
+    if (!isLegacyDeepL || providers.any { it.providerType == AIProvider.DEEPL }) {
+        return null
+    }
+
+    val name = if (providers.any { it.name == "DeepL" }) "DeepL (migrated)" else "DeepL"
+    return ProviderConfig(
+        id = ProviderConfig.generateId(),
+        name = name,
+        providerType = AIProvider.DEEPL,
+        deepLSettings =
+            DeepLSettings(
+                key = legacyKey,
+                baseUrl = legacyUrl,
+                timeoutSeconds = timeoutSeconds.coerceIn(30, 600),
+            ),
+        isActive = providers.none { it.isActive },
+        createdAt = System.currentTimeMillis(),
+        updatedAt = System.currentTimeMillis(),
+    )
+}
+
+/**
+ * Map an upstream preferred translation language (a language name like
+ * "French" or a code like "sv") onto the TranslationLanguage enum.
+ */
+internal fun String.toUpstreamPreferredLanguage(): TranslationLanguage {
+    TranslationLanguage.fromCode(this).let {
+        if (it != TranslationLanguage.DEVICE_DEFAULT) return it
+    }
+    return TranslationLanguage.entries.firstOrNull {
+        it.languageName.equals(this, ignoreCase = true)
+    } ?: TranslationLanguage.DEVICE_DEFAULT
+}
